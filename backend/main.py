@@ -2672,7 +2672,8 @@ async def obtener_todos_reportes_admin(
     mes: str = None,
     anio: int = None,
     territorio: str = None,
-    usuario_id: int = None
+    usuario_id: int = None,
+    facilitador_admin_id: int = None
 ):
     """
     Obtener todos los reportes de todos los usuarios (para admin-pwa)
@@ -2724,6 +2725,29 @@ async def obtener_todos_reportes_admin(
         if usuario_id:
             query += " AND r.usuario_id = %s"
             params.append(usuario_id)
+
+        if facilitador_admin_id:
+            # Obtener usuario_id del facilitador en admin_users
+            cursor.execute(
+                "SELECT usuario_id FROM admin_users WHERE id = %s AND activo = TRUE",
+                (facilitador_admin_id,)
+            )
+            fac_row = cursor.fetchone()
+            if fac_row and fac_row[0]:
+                cursor.execute(
+                    "SELECT tecnico_usuario_id FROM facilitador_tecnico_asignaciones WHERE facilitador_usuario_id = %s AND activo = TRUE",
+                    (fac_row[0],)
+                )
+                tecnicos = [r[0] for r in cursor.fetchall()]
+                if tecnicos:
+                    placeholders = ','.join(['%s'] * len(tecnicos))
+                    query += f" AND r.usuario_id IN ({placeholders})"
+                    params.extend(tecnicos)
+                else:
+                    # Facilitador sin técnicos asignados → ningún reporte
+                    query += " AND 1=0"
+            else:
+                query += " AND 1=0"
         
         # Ordenar por fecha más reciente
         query += " ORDER BY r.fecha_generacion DESC"
@@ -3165,12 +3189,45 @@ async def descargar_reportes_zip(
         raise HTTPException(status_code=500, detail=f"Error generando ZIP: {str(e)}")
 
 @app.get("/reportes/admin/estadisticas")
-async def obtener_estadisticas_reportes_admin(territorio: str = None):
+async def obtener_estadisticas_reportes_admin(territorio: str = None, facilitador_admin_id: int = None):
     """
     Obtener estadísticas de reportes para el dashboard admin
     Opcionalmente filtrar por territorio para admins territoriales
     """
     try:
+        # Resolver filtro de IDs de técnicos si es facilitador
+        tecnicos_ids = None
+        if facilitador_admin_id:
+            cursor.execute(
+                "SELECT usuario_id FROM admin_users WHERE id = %s AND activo = TRUE",
+                (facilitador_admin_id,)
+            )
+            fac_row = cursor.fetchone()
+            if fac_row and fac_row[0]:
+                cursor.execute(
+                    "SELECT tecnico_usuario_id FROM facilitador_tecnico_asignaciones WHERE facilitador_usuario_id = %s AND activo = TRUE",
+                    (fac_row[0],)
+                )
+                tecnicos_ids = [r[0] for r in cursor.fetchall()] or [-1]
+            else:
+                tecnicos_ids = [-1]
+
+        def build_filter(extra_where="", extra_params=None):
+            """Construye WHERE + params para el filtro activo (territorio o facilitador)"""
+            wheres = []
+            p = list(extra_params or [])
+            if territorio:
+                wheres.append("u.territorio = %s")
+                p.append(territorio)
+            if tecnicos_ids is not None:
+                placeholders = ','.join(['%s'] * len(tecnicos_ids))
+                wheres.append(f"r.usuario_id IN ({placeholders})")
+                p.extend(tecnicos_ids)
+            if extra_where:
+                wheres.append(extra_where)
+            clause = ("WHERE " + " AND ".join(wheres)) if wheres else ""
+            return clause, p
+
         territorio_filter = ""
         territorio_param = None
         
@@ -3180,87 +3237,43 @@ async def obtener_estadisticas_reportes_admin(territorio: str = None):
             territorio_param = territorio
         
         print(f"📊 [ADMIN] Obteniendo estadísticas de reportes...")
-        
-        # Total de reportes (con filtro de territorio si aplica)
-        if territorio:
-            cursor.execute("""
-                SELECT COUNT(*) FROM reportes_generados r
-                LEFT JOIN usuarios u ON r.usuario_id = u.id
-                WHERE u.territorio = %s
-            """, (territorio,))
-        else:
-            cursor.execute("SELECT COUNT(*) FROM reportes_generados")
+
+        base_join = "FROM reportes_generados r LEFT JOIN usuarios u ON r.usuario_id = u.id"
+
+        # Total de reportes
+        clause, p = build_filter()
+        cursor.execute(f"SELECT COUNT(*) {base_join} {clause}", p)
         total_reportes = cursor.fetchone()[0]
         
         # Reportes firmados
-        if territorio:
-            cursor.execute("""
-                SELECT COUNT(*) FROM reportes_generados r
-                LEFT JOIN usuarios u ON r.usuario_id = u.id
-                WHERE COALESCE(r.firmado_supervisor, false) = true AND u.territorio = %s
-            """, (territorio,))
-        else:
-            cursor.execute("SELECT COUNT(*) FROM reportes_generados WHERE COALESCE(firmado_supervisor, false) = true")
+        clause, p = build_filter("COALESCE(r.firmado_supervisor, false) = true")
+        cursor.execute(f"SELECT COUNT(*) {base_join} {clause}", p)
         reportes_firmados = cursor.fetchone()[0]
         
         # Reportes pendientes (sin firmar)
-        if territorio:
-            cursor.execute("""
-                SELECT COUNT(*) FROM reportes_generados r
-                LEFT JOIN usuarios u ON r.usuario_id = u.id
-                WHERE COALESCE(r.firmado_supervisor, false) = false AND u.territorio = %s
-            """, (territorio,))
-        else:
-            cursor.execute("SELECT COUNT(*) FROM reportes_generados WHERE COALESCE(firmado_supervisor, false) = false")
+        clause, p = build_filter("COALESCE(r.firmado_supervisor, false) = false")
+        cursor.execute(f"SELECT COUNT(*) {base_join} {clause}", p)
         reportes_pendientes = cursor.fetchone()[0]
         
         # Reportes este mes
-        if territorio:
-            cursor.execute("""
-                SELECT COUNT(*) FROM reportes_generados r
-                LEFT JOIN usuarios u ON r.usuario_id = u.id
-                WHERE EXTRACT(MONTH FROM r.fecha_generacion) = EXTRACT(MONTH FROM CURRENT_DATE)
-                AND EXTRACT(YEAR FROM r.fecha_generacion) = EXTRACT(YEAR FROM CURRENT_DATE)
-                AND u.territorio = %s
-            """, (territorio,))
-        else:
-            cursor.execute("""
-                SELECT COUNT(*) FROM reportes_generados 
-                WHERE EXTRACT(MONTH FROM fecha_generacion) = EXTRACT(MONTH FROM CURRENT_DATE)
-                AND EXTRACT(YEAR FROM fecha_generacion) = EXTRACT(YEAR FROM CURRENT_DATE)
-            """)
+        clause, p = build_filter(
+            "EXTRACT(MONTH FROM r.fecha_generacion) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(YEAR FROM r.fecha_generacion) = EXTRACT(YEAR FROM CURRENT_DATE)"
+        )
+        cursor.execute(f"SELECT COUNT(*) {base_join} {clause}", p)
         reportes_mes = cursor.fetchone()[0]
         
         # Reportes por tipo
-        if territorio:
-            cursor.execute("""
-                SELECT r.tipo, COUNT(*) 
-                FROM reportes_generados r
-                LEFT JOIN usuarios u ON r.usuario_id = u.id
-                WHERE u.territorio = %s
-                GROUP BY r.tipo
-            """, (territorio,))
-        else:
-            cursor.execute("""
-                SELECT tipo, COUNT(*) 
-                FROM reportes_generados 
-                GROUP BY tipo
-            """)
+        clause, p = build_filter()
+        cursor.execute(f"SELECT r.tipo, COUNT(*) {base_join} {clause} GROUP BY r.tipo", p)
         por_tipo = {r[0]: r[1] for r in cursor.fetchall()}
         
         # Usuarios con reportes
-        if territorio:
-            cursor.execute("""
-                SELECT COUNT(DISTINCT r.usuario_id) FROM reportes_generados r
-                LEFT JOIN usuarios u ON r.usuario_id = u.id
-                WHERE u.territorio = %s
-            """, (territorio,))
-        else:
-            cursor.execute("SELECT COUNT(DISTINCT usuario_id) FROM reportes_generados")
+        clause, p = build_filter()
+        cursor.execute(f"SELECT COUNT(DISTINCT r.usuario_id) {base_join} {clause}", p)
         usuarios_con_reportes = cursor.fetchone()[0]
         
-        # Reportes por territorio (solo si no hay filtro)
-        if not territorio:
+        # Reportes por territorio (solo si no hay filtro de territorio ni facilitador)
+        if not territorio and tecnicos_ids is None:
             cursor.execute("""
                 SELECT u.territorio, COUNT(r.id)
                 FROM reportes_generados r
@@ -3271,31 +3284,14 @@ async def obtener_estadisticas_reportes_admin(territorio: str = None):
             """)
             por_territorio = {r[0]: r[1] for r in cursor.fetchall()}
         else:
-            por_territorio = {territorio: total_reportes}
-        
+            por_territorio = {territorio: total_reportes} if territorio else {}
+
         # Reportes por mes (últimos 6 meses)
-        if territorio:
-            cursor.execute("""
-                SELECT 
-                    TO_CHAR(r.fecha_generacion, 'YYYY-MM') as mes,
-                    COUNT(*)
-                FROM reportes_generados r
-                LEFT JOIN usuarios u ON r.usuario_id = u.id
-                WHERE r.fecha_generacion >= CURRENT_DATE - INTERVAL '6 months'
-                AND u.territorio = %s
-                GROUP BY TO_CHAR(r.fecha_generacion, 'YYYY-MM')
-                ORDER BY mes DESC
-            """, (territorio,))
-        else:
-            cursor.execute("""
-                SELECT 
-                    TO_CHAR(fecha_generacion, 'YYYY-MM') as mes,
-                    COUNT(*)
-                FROM reportes_generados
-                WHERE fecha_generacion >= CURRENT_DATE - INTERVAL '6 months'
-                GROUP BY TO_CHAR(fecha_generacion, 'YYYY-MM')
-                ORDER BY mes DESC
-            """)
+        clause, p = build_filter("r.fecha_generacion >= CURRENT_DATE - INTERVAL '6 months'")
+        cursor.execute(
+            f"SELECT TO_CHAR(r.fecha_generacion, 'YYYY-MM') as mes, COUNT(*) {base_join} {clause} GROUP BY TO_CHAR(r.fecha_generacion, 'YYYY-MM') ORDER BY mes DESC",
+            p
+        )
         por_mes = {r[0]: r[1] for r in cursor.fetchall()}
         
         print(f"✅ [ADMIN] Estadísticas obtenidas - Total: {total_reportes}, Firmados: {reportes_firmados}, Pendientes: {reportes_pendientes}, Usuarios: {usuarios_con_reportes}" + (f" (Territorio: {territorio})" if territorio else ""))
@@ -4364,7 +4360,7 @@ async def check_user_session(username: str):
         print(f"🔍 Verificando sesión completa de usuario: {username}")
         
         cursor.execute("""
-            SELECT id, rol, permisos, activo, es_territorial, territorio 
+            SELECT id, rol, permisos, activo, es_territorial, territorio, cargo, usuario_id
             FROM admin_users 
             WHERE username = %s
         """, (username,))
@@ -4383,6 +4379,8 @@ async def check_user_session(username: str):
         activo = row[3] if row[3] is not None else True
         es_territorial = row[4] if row[4] is not None else False
         territorio = row[5]
+        cargo = row[6] or ''
+        usuario_id_vinculado = row[7]
         
         # Parsear permisos
         if permisos_str:
@@ -4401,7 +4399,9 @@ async def check_user_session(username: str):
             "rol": user_rol,
             "permisos": permisos,
             "es_territorial": es_territorial,
-            "territorio": territorio
+            "territorio": territorio,
+            "cargo": cargo,
+            "usuario_id_vinculado": usuario_id_vinculado
         }
         
     except Exception as e:

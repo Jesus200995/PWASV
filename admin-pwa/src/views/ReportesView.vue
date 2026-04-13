@@ -260,6 +260,17 @@
           <span>Reportes de {{ territorioUsuario }}</span>
         </div>
 
+        <!-- Banner para facilitadores (solo sus técnicos) -->
+        <div v-if="esFacilitador" class="apple-territorio-banner" style="background: linear-gradient(135deg,#f0fdf4,#dcfce7); border-color: #86efac; color: #166534;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
+            <circle cx="9" cy="7" r="4" stroke-width="2"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke-width="2"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"/>
+          </svg>
+          <span>Mostrando reportes de tus técnicos asignados</span>
+        </div>
+
         <!-- Barra de acciones para firma masiva Apple Style -->
         <transition name="apple-slide">
           <div v-if="reportesSeleccionados.length > 0" class="apple-firma-bar">
@@ -1091,6 +1102,10 @@ const router = useRouter()
 // Obtener territorio del usuario admin actual (si es territorial)
 const territorioUsuario = ref(authService.getTerritorioFilter())
 
+// Detectar si el usuario es FACILITADOR y obtener su ID de admin
+const esFacilitador = ref(authService.isFacilitador())
+const facilitadorAdminId = ref(authService.getFacilitadorAdminId())
+
 // Función para obtener el color del territorio
 const obtenerColorTerritorio = (territorio) => {
   if (!territorio) return 'gray'
@@ -1487,8 +1502,12 @@ async function cargarReportes() {
     if (filtros.value.mes) params.mes = filtros.value.mes
     if (filtros.value.anio) params.anio = filtros.value.anio
     
-    // Si el usuario es territorial, filtrar automáticamente por su territorio
-    if (territorioUsuario.value) {
+    // Si el usuario es facilitador, filtrar solo sus técnicos asignados
+    if (esFacilitador.value && facilitadorAdminId.value) {
+      params.facilitador_admin_id = facilitadorAdminId.value
+      console.log(`👷 Filtrando reportes del facilitador ID: ${facilitadorAdminId.value}`)
+    } else if (territorioUsuario.value) {
+      // Si es territorial, filtrar por territorio
       params.territorio = territorioUsuario.value
       console.log(`🌎 Filtrando reportes por territorio: ${territorioUsuario.value}`)
     } else if (filtros.value.territorio) {
@@ -1514,6 +1533,22 @@ async function cargarReportes() {
 
 async function cargarEstadisticas() {
   try {
+    // Si es facilitador, filtrar por sus técnicos asignados
+    if (esFacilitador.value && facilitadorAdminId.value) {
+      const response = await reportesService.obtenerEstadisticas(null, facilitadorAdminId.value)
+      if (response.success) {
+        estadisticas.value = {
+          totalReportes: response.estadisticas.total_reportes || 0,
+          reportesFirmados: response.estadisticas.reportes_firmados || 0,
+          reportesPendientes: response.estadisticas.reportes_pendientes || 0,
+          reportesMes: response.estadisticas.reportes_mes_actual || 0,
+          porTipo: response.estadisticas.por_tipo || {},
+          usuariosConReportes: response.estadisticas.usuarios_con_reportes || 0,
+          porTerritorio: response.estadisticas.por_territorio || {}
+        }
+      }
+      return
+    }
     // Pasar territorio si el usuario es territorial
     const territorio = territorioUsuario.value || null
     const response = await reportesService.obtenerEstadisticas(territorio)
@@ -2082,9 +2117,9 @@ function logout() {
 async function actualizarEstadisticasEnVivo() {
   try {
     // Actualizar estadísticas de la BD sin mostrar loading
-    // Pasar territorio si el usuario es territorial
     const territorio = territorioUsuario.value || null
-    const response = await reportesService.obtenerEstadisticas(territorio)
+    const facId = (esFacilitador.value && facilitadorAdminId.value) ? facilitadorAdminId.value : null
+    const response = await reportesService.obtenerEstadisticas(facId ? null : territorio, facId)
     if (response.success) {
       estadisticas.value = {
         totalReportes: response.estadisticas.total_reportes || 0,
@@ -2099,7 +2134,9 @@ async function actualizarEstadisticasEnVivo() {
     
     // También actualizar lista de reportes silenciosamente
     const params = { limite: 1000 }
-    if (territorioUsuario.value) {
+    if (facId) {
+      params.facilitador_admin_id = facId
+    } else if (territorioUsuario.value) {
       params.territorio = territorioUsuario.value
     }
     const reportesResp = await reportesService.obtenerTodosReportes(params)

@@ -25,6 +25,7 @@ const reportesService = {
       if (filtros.anio) params.append('anio', filtros.anio)
       if (filtros.territorio) params.append('territorio', filtros.territorio)
       if (filtros.usuario_id) params.append('usuario_id', filtros.usuario_id)
+      if (filtros.facilitador_admin_id) params.append('facilitador_admin_id', filtros.facilitador_admin_id)
       
       const url = `${API_URL}/reportes/admin/todos?${params.toString()}`
       console.log('📊 [ReportesService] Obteniendo reportes:', url)
@@ -49,13 +50,14 @@ const reportesService = {
    * Obtener estadísticas de reportes
    * @param {string} territorio - Territorio para filtrar (opcional)
    */
-  async obtenerEstadisticas(territorio = null) {
+  async obtenerEstadisticas(territorio = null, facilitadorAdminId = null) {
     try {
-      let url = `${API_URL}/reportes/admin/estadisticas`
-      if (territorio) {
-        url += `?territorio=${encodeURIComponent(territorio)}`
-      }
-      console.log('📊 [ReportesService] Obteniendo estadísticas...' + (territorio ? ` (Territorio: ${territorio})` : ''))
+      const params = new URLSearchParams()
+      if (territorio) params.append('territorio', territorio)
+      if (facilitadorAdminId) params.append('facilitador_admin_id', facilitadorAdminId)
+      const qs = params.toString()
+      const url = `${API_URL}/reportes/admin/estadisticas${qs ? '?' + qs : ''}`
+      console.log('📊 [ReportesService] Obteniendo estadísticas...' + (territorio ? ` (Territorio: ${territorio})` : '') + (facilitadorAdminId ? ` (Facilitador: ${facilitadorAdminId})` : ''))
       
       const response = await fetch(url)
       

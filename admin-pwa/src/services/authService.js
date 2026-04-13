@@ -273,6 +273,28 @@ class AuthService {
   }
 
   /**
+   * Verificar si el usuario actual es un FACILITADOR
+   */
+  isFacilitador() {
+    if (!this.user) {
+      this.user = this.getUserFromStorage()
+    }
+    return (this.user?.cargo || '').toUpperCase() === 'FACILITADOR'
+  }
+
+  /**
+   * Obtener el ID del admin facilitador (id en admin_users)
+   * @returns {number|null}
+   */
+  getFacilitadorAdminId() {
+    if (!this.isFacilitador()) return null
+    if (!this.user) {
+      this.user = this.getUserFromStorage()
+    }
+    return this.user?.id || null
+  }
+
+  /**
    * Obtener token de autenticación
    */
   getToken() {
@@ -444,7 +466,8 @@ class AuthService {
           permisos: sessionData.permisos || this.user.permisos,
           activo: sessionData.active,
           es_territorial: sessionData.es_territorial !== undefined ? sessionData.es_territorial : this.user.es_territorial,
-          territorio: sessionData.territorio !== undefined ? sessionData.territorio : this.user.territorio
+          territorio: sessionData.territorio !== undefined ? sessionData.territorio : this.user.territorio,
+          cargo: sessionData.cargo !== undefined ? sessionData.cargo : this.user.cargo
         }
         
         localStorage.setItem('admin_user_data', JSON.stringify(this.user))

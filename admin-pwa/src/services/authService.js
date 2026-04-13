@@ -382,9 +382,15 @@ class AuthService {
    * Realizar verificación de sesión
    */
   async performSessionCheck() {
+    // Salir si no hay sesión activa
+    if (!this.user || !this.token) return
+
     const sessionData = await this.checkUserSession()
     
     if (!sessionData) return
+
+    // Guard: puede que el logout haya ocurrido mientras esperábamos la respuesta
+    if (!this.user) return
     
     // Si el usuario fue desactivado, cerrar sesión inmediatamente
     if (!sessionData.active) {

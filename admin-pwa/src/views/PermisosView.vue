@@ -1200,6 +1200,23 @@
                     </div>
                   </div>
                 </label>
+
+                <!-- Firmas (Facilitadores Comunitarios) -->
+                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.firmas }">
+                  <input type="checkbox" v-model="formularioUsuario.permisos.firmas" />
+                  <div class="permiso-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 20h9"/>
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                  </div>
+                  <span class="permiso-card-name">Firmas</span>
+                  <div class="permiso-toggle">
+                    <div class="toggle-track">
+                      <div class="toggle-thumb"></div>
+                    </div>
+                  </div>
+                </label>
               </div>
 
               <!-- Botones rápidos de selección -->
@@ -1425,7 +1442,8 @@ export default {
           reportes: false,
           manuales: false,
           manuales_crear: false,
-          estadisticas: false
+          estadisticas: false,
+          firmas: false
         }
       },
       
@@ -1484,7 +1502,8 @@ export default {
         reportes: false,
         manuales: false,
         manuales_crear: false,
-        estadisticas: false
+        estadisticas: false,
+        firmas: false
       },
       
       // Modal eliminar
@@ -1760,6 +1779,11 @@ export default {
       // Asegurar que el nuevo permiso existe en el objeto
       if (permisosUsuario.manuales_crear === undefined) {
         permisosUsuario.manuales_crear = false
+      }
+
+      // Asegurar que el permiso de firmas existe
+      if (permisosUsuario.firmas === undefined) {
+        permisosUsuario.firmas = false
       }
       
       this.formularioUsuario = {

@@ -3604,7 +3604,7 @@ const imgGridWidth = 55;
       }
       
       // Obtener facilitador asignado (para técnicos de campo)
-      const cargoUpper = (usuario.cargo || '').toUpperCase();
+      const cargoUpper = (usuario.cargo || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       if (cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO') {
         try {
           console.log('🔍 Buscando facilitador asignado...');

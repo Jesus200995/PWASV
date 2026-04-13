@@ -99,7 +99,7 @@
                 </svg>
               </span>
               <div class="flex-1">
-                <p class="label-info">Supervisor</p>
+                <p class="label-info">{{ esTecnicoActual ? 'Facilitador' : 'Supervisor' }}</p>
                 <p class="value-info value-supervisor">{{ (user.supervisor && user.supervisor.trim()) || 'No asignado' }}</p>
               </div>
             </div>
@@ -578,7 +578,7 @@
                   <!-- Supervisor -->
                   <div class="form-field">
                     <label class="field-label">
-                      Supervisor
+                      {{ esTecnico ? 'Facilitador' : 'Supervisor' }}
                       <span v-if="esTecnico && !buscandoSupervisor" class="field-badge badge-success">Automático</span>
                       <span v-if="buscandoSupervisor" class="field-badge badge-warning">Buscando...</span>
                     </label>
@@ -590,7 +590,7 @@
                         v-model="editForm.supervisor"
                         type="text"
                         :readonly="esTecnico"
-                        :placeholder="esTecnico ? 'Se asigna según territorio' : 'Nombre de tu supervisor'"
+                        :placeholder="esTecnico ? 'Se asigna automáticamente' : 'Nombre de tu supervisor'"
                         @input="!esTecnico && (editForm.supervisor = editForm.supervisor.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))"
                       />
                       <div v-if="esTecnico && !buscandoSupervisor" class="input-lock">
@@ -611,7 +611,7 @@
                         <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
                         <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                       </svg>
-                      El supervisor territorial se asigna automáticamente
+                      El facilitador se asigna automáticamente
                     </span>
                   </div>
                 </div>
@@ -894,7 +894,13 @@ const territoriosSembrandoVida = [
 
 // Computed para saber si el usuario es técnico (su supervisor es automático)
 const esTecnico = computed(() => {
-  const cargo = (editForm.value.cargo || '').toUpperCase()
+  const cargo = (editForm.value.cargo || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  return cargo === 'TECNICO SOCIAL' || cargo === 'TECNICO PRODUCTIVO'
+})
+
+// Para mostrar en la vista de perfil (basado en user.value, no en editForm)
+const esTecnicoActual = computed(() => {
+  const cargo = (user.value.cargo || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   return cargo === 'TECNICO SOCIAL' || cargo === 'TECNICO PRODUCTIVO'
 })
 
@@ -1076,6 +1082,25 @@ const loadUserData = async () => {
       
       // Actualizar también el localStorage con los datos completos
       localStorage.setItem('user', JSON.stringify(user.value))
+      
+      // Para técnicos, obtener el facilitador asignado y mostrarlo en lugar del supervisor territorial
+      const cargoActual = (user.value.cargo || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      if (cargoActual === 'TECNICO SOCIAL' || cargoActual === 'TECNICO PRODUCTIVO') {
+        try {
+          const respFacilitador = await apiService.obtenerFacilitadorAsignado(user.value.id)
+          if (respFacilitador.success && respFacilitador.facilitador_nombre) {
+            user.value.supervisor = respFacilitador.facilitador_nombre
+            const storedUserFac = JSON.parse(localStorage.getItem('user'))
+            if (storedUserFac) {
+              storedUserFac.supervisor = respFacilitador.facilitador_nombre
+              localStorage.setItem('user', JSON.stringify(storedUserFac))
+            }
+            console.log(`✅ Facilitador asignado en perfil: ${respFacilitador.facilitador_nombre}`)
+          }
+        } catch (err) {
+          console.warn('⚠️ No se pudo obtener facilitador asignado:', err.message)
+        }
+      }
       
       console.log('✅ Datos del usuario actualizados desde el backend')
     }

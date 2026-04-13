@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import authService from '../services/authService'
-import FirmasView from '../views/FirmasView.vue'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import UsuariosView from '../views/UsuariosView.vue'
@@ -105,12 +104,6 @@ const routes = [
     meta: { requiresAuth: true, requiredPermission: 'permisos' }
   },
   {
-    path: '/firmas',
-    name: 'Firmas',
-    component: FirmasView,
-    meta: { requiresAuth: true, requiredPermission: 'firmas' }
-  },
-  {
     path: '/visor-map',
     name: 'VisorMap',
     component: VisorMapView,
@@ -179,9 +172,8 @@ router.beforeEach(async (to, from, next) => {
 
 // Función auxiliar para encontrar una ruta accesible
 function encontrarRutaAccesible() {
-  const rutasPorPrioridad = ['firmas', 'visor', 'asistencia', 'registros', 'historiales', 'notificaciones', 'manuales', 'usuarios', 'permisos', 'configuracion', 'reportes']
+  const rutasPorPrioridad = ['reportes', 'visor', 'asistencia', 'registros', 'historiales', 'notificaciones', 'manuales', 'usuarios', 'permisos', 'configuracion']
   const rutasMap = {
-    'firmas': '/firmas',
     'visor': '/visor-map',
     'asistencia': '/asistencia',
     'registros': '/registros',

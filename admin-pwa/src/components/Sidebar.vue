@@ -206,20 +206,6 @@
     <!-- Navegación principal -->
     <nav class="sidebar-nav">
       <ul>
-        <!-- Firmas (Facilitadores Comunitarios) -->
-        <li class="nav-item" :class="{ active: $route.name === 'Firmas' }" v-if="tienePermiso('firmas')">
-          <router-link to="/firmas" class="nav-link">
-            <div class="nav-icon-container">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 20h9"/>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-              </svg>
-            </div>
-            <span class="nav-text">Firmas</span>
-          </router-link>
-          <div class="nav-indicator"></div>
-        </li>
-
         <!-- Visor de seguimiento -->
         <li class="nav-item" :class="{ active: $route.name === 'VisorMap' }" v-if="tienePermiso('visor')">
           <router-link to="/visor-map" class="nav-link">

@@ -5377,6 +5377,80 @@ async def eliminar_todos_registros():
         print(f"❌ Error general al eliminar registros: {e}")
         raise HTTPException(status_code=500, detail=f"Error al eliminar registros: {str(e)}")
 
+# ================== ENDPOINTS INDIVIDUALES DE ASISTENCIAS ==================
+
+@app.put("/admin/asistencias/{asistencia_id}")
+async def editar_asistencia(asistencia_id: int, body: dict):
+    """Edita los campos de una asistencia individual (fecha, hora_entrada, hora_salida, descripcion_entrada, descripcion_salida)"""
+    try:
+        if not verificar_conexion_db():
+            raise HTTPException(status_code=503, detail="Servicio de base de datos no disponible")
+
+        # Campos permitidos de editar
+        campos_permitidos = {
+            "fecha", "hora_entrada", "hora_salida",
+            "descripcion_entrada", "descripcion_salida",
+            "latitud_entrada", "longitud_entrada",
+            "latitud_salida", "longitud_salida"
+        }
+
+        updates = {k: v for k, v in body.items() if k in campos_permitidos}
+        if not updates:
+            raise HTTPException(status_code=400, detail="No hay campos válidos para actualizar")
+
+        set_clause = ", ".join([f"{k} = %s" for k in updates.keys()])
+        valores = list(updates.values())
+        valores.append(asistencia_id)
+
+        cursor.execute(
+            f"UPDATE asistencias SET {set_clause} WHERE id = %s RETURNING id",
+            tuple(valores)
+        )
+        resultado = cursor.fetchone()
+        conn.commit()
+
+        if not resultado:
+            raise HTTPException(status_code=404, detail="Asistencia no encontrada")
+
+        print(f"✅ Asistencia {asistencia_id} actualizada: {list(updates.keys())}")
+        return {"status": "success", "message": "Asistencia actualizada correctamente", "id": asistencia_id}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error al editar asistencia {asistencia_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al editar asistencia: {str(e)}")
+
+
+@app.delete("/admin/asistencias/{asistencia_id}")
+async def eliminar_asistencia(asistencia_id: int):
+    """Elimina una asistencia individual por su ID"""
+    try:
+        if not verificar_conexion_db():
+            raise HTTPException(status_code=503, detail="Servicio de base de datos no disponible")
+
+        # Obtener info de la asistencia para devolver en respuesta
+        cursor.execute("SELECT id, usuario_id, fecha FROM asistencias WHERE id = %s", (asistencia_id,))
+        asistencia = cursor.fetchone()
+
+        if not asistencia:
+            raise HTTPException(status_code=404, detail="Asistencia no encontrada")
+
+        cursor.execute("DELETE FROM asistencias WHERE id = %s", (asistencia_id,))
+        conn.commit()
+
+        print(f"🗑️ Asistencia {asistencia_id} eliminada (usuario: {asistencia[1]}, fecha: {asistencia[2]})")
+        return {"status": "success", "message": "Asistencia eliminada correctamente", "id": asistencia_id}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Error al eliminar asistencia {asistencia_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al eliminar asistencia: {str(e)}")
+
+
 @app.delete("/admin/asistencias/all")
 async def eliminar_todas_asistencias():
     """Elimina TODAS las asistencias de la base de datos. ¡USO EXTREMO!"""

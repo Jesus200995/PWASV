@@ -281,6 +281,7 @@
                   <th>Ubicación</th>
                   <th>Fotos</th>
                   <th>Estado</th>
+                  <th class="col-acciones">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -355,6 +356,33 @@
                     <span :class="['apple-status-badge', obtenerEstadoClase(asistencia)]">
                       {{ obtenerEstadoTexto(asistencia) }}
                     </span>
+                  </td>
+                  <!-- COLUMNA ACCIONES -->
+                  <td class="col-acciones">
+                    <div class="apple-actions-cell">
+                      <button
+                        @click="abrirModalEditar(asistencia)"
+                        class="apple-action-btn edit"
+                        title="Editar asistencia"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                      <button
+                        @click="abrirModalEliminar(asistencia)"
+                        class="apple-action-btn delete"
+                        title="Eliminar asistencia"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                          <path d="M10 11v6M14 11v6"/>
+                          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -435,6 +463,198 @@
       :tipo="tipoMapa"
       @cerrar="cerrarMapaModal"
     />
+
+    <!-- ================== MODAL EDITAR ASISTENCIA ================== -->
+    <Teleport to="body">
+      <Transition name="apple-modal-fade">
+        <div v-if="modalEditarVisible" class="apple-modal-overlay" @click.self="cerrarModalEditar">
+          <div class="apple-edit-modal" @click.stop>
+            <!-- Header del modal -->
+            <div class="apple-edit-modal-header">
+              <div class="apple-edit-modal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </div>
+              <div class="apple-edit-modal-title-group">
+                <h2 class="apple-edit-modal-title">Editar Asistencia</h2>
+                <p class="apple-edit-modal-subtitle">{{ editandoAsistencia?.nombre_usuario }}</p>
+              </div>
+              <button @click="cerrarModalEditar" class="apple-edit-modal-close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Body del modal -->
+            <div class="apple-edit-modal-body">
+              <!-- Fecha -->
+              <div class="apple-edit-field">
+                <label class="apple-edit-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  Fecha
+                </label>
+                <input
+                  type="date"
+                  v-model="editForm.fecha"
+                  class="apple-edit-input"
+                >
+              </div>
+
+              <!-- Hora Entrada -->
+              <div class="apple-edit-field">
+                <label class="apple-edit-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2" stroke-linecap="round"/>
+                  </svg>
+                  Hora de Entrada
+                </label>
+                <input
+                  type="time"
+                  v-model="editForm.hora_entrada"
+                  class="apple-edit-input"
+                  step="1"
+                >
+              </div>
+
+              <!-- Hora Salida -->
+              <div class="apple-edit-field">
+                <label class="apple-edit-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2" stroke-linecap="round"/>
+                  </svg>
+                  Hora de Salida
+                </label>
+                <input
+                  type="time"
+                  v-model="editForm.hora_salida"
+                  class="apple-edit-input"
+                  step="1"
+                >
+              </div>
+
+              <!-- Descripción Entrada -->
+              <div class="apple-edit-field">
+                <label class="apple-edit-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Descripción de Entrada
+                </label>
+                <textarea
+                  v-model="editForm.descripcion_entrada"
+                  class="apple-edit-textarea"
+                  rows="2"
+                  placeholder="Sin descripción..."
+                ></textarea>
+              </div>
+
+              <!-- Descripción Salida -->
+              <div class="apple-edit-field">
+                <label class="apple-edit-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Descripción de Salida
+                </label>
+                <textarea
+                  v-model="editForm.descripcion_salida"
+                  class="apple-edit-textarea"
+                  rows="2"
+                  placeholder="Sin descripción..."
+                ></textarea>
+              </div>
+
+              <!-- Error -->
+              <div v-if="editError" class="apple-edit-error">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12" stroke-linecap="round"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16" stroke-linecap="round"/>
+                </svg>
+                {{ editError }}
+              </div>
+            </div>
+
+            <!-- Footer del modal -->
+            <div class="apple-edit-modal-footer">
+              <button @click="cerrarModalEditar" class="apple-edit-btn cancel">
+                Cancelar
+              </button>
+              <button @click="guardarEdicion" class="apple-edit-btn save" :disabled="guardandoEdicion">
+                <svg v-if="guardandoEdicion" class="apple-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                  <polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {{ guardandoEdicion ? 'Guardando...' : 'Guardar cambios' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- ================== MODAL CONFIRMAR ELIMINAR ================== -->
+    <Teleport to="body">
+      <Transition name="apple-modal-fade">
+        <div v-if="modalEliminarVisible" class="apple-modal-overlay" @click.self="cerrarModalEliminar">
+          <div class="apple-delete-modal" @click.stop>
+            <!-- Icono de advertencia -->
+            <div class="apple-delete-modal-icon-wrap">
+              <div class="apple-delete-modal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+              </div>
+            </div>
+
+            <h2 class="apple-delete-modal-title">Eliminar Asistencia</h2>
+            <p class="apple-delete-modal-desc">
+              ¿Estás seguro de que deseas eliminar la asistencia de
+              <strong>{{ eliminandoAsistencia?.nombre_usuario }}</strong>
+              del <strong>{{ eliminandoAsistencia ? formatearFecha(eliminandoAsistencia.fecha) : '' }}</strong>?
+            </p>
+            <p class="apple-delete-modal-warning">Esta acción no se puede deshacer.</p>
+
+            <div v-if="deleteError" class="apple-edit-error" style="margin-bottom:16px">
+              {{ deleteError }}
+            </div>
+
+            <div class="apple-delete-modal-footer">
+              <button @click="cerrarModalEliminar" class="apple-edit-btn cancel">
+                Cancelar
+              </button>
+              <button @click="confirmarEliminar" class="apple-edit-btn danger" :disabled="eliminando">
+                <svg v-if="eliminando" class="apple-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                  <polyline points="3 6 5 6 21 6" stroke-linecap="round"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {{ eliminando ? 'Eliminando...' : 'Sí, eliminar' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- DROPDOWN DE BÚSQUEDA - TELEPORT AL BODY -->
     <Teleport to="body">
@@ -585,7 +805,24 @@ export default {
       hayMasRegistros: true,
       // Dropdown de búsqueda Apple
       mostrarDropdown: false,
-      dropdownPosition: { top: 0, left: 0, width: 0 }
+      dropdownPosition: { top: 0, left: 0, width: 0 },
+      // Modal Editar Asistencia
+      modalEditarVisible: false,
+      editandoAsistencia: null,
+      editForm: {
+        fecha: '',
+        hora_entrada: '',
+        hora_salida: '',
+        descripcion_entrada: '',
+        descripcion_salida: ''
+      },
+      guardandoEdicion: false,
+      editError: null,
+      // Modal Eliminar Asistencia
+      modalEliminarVisible: false,
+      eliminandoAsistencia: null,
+      eliminando: false,
+      deleteError: null
     }
   },
   computed: {
@@ -1181,7 +1418,164 @@ export default {
       this.tipoMapa = 'entrada'
       document.body.style.overflow = 'auto'
     },
-    
+
+    // ============ EDITAR ASISTENCIA ============
+    abrirModalEditar(asistencia) {
+      this.editandoAsistencia = asistencia
+      this.editError = null
+
+      // Extraer solo la parte de tiempo HH:MM:SS de las horas
+      const extraerHora = (horaStr) => {
+        if (!horaStr) return ''
+        // Si viene como timestamp completo, extraer la parte de tiempo
+        if (horaStr.includes('T')) {
+          return horaStr.split('T')[1].substring(0, 5)
+        }
+        // Si viene como HH:MM:SS, tomar solo HH:MM
+        return horaStr.substring(0, 5)
+      }
+
+      this.editForm = {
+        fecha: asistencia.fecha || '',
+        hora_entrada: extraerHora(asistencia.hora_entrada),
+        hora_salida: extraerHora(asistencia.hora_salida),
+        descripcion_entrada: asistencia.descripcion_entrada || '',
+        descripcion_salida: asistencia.descripcion_salida || ''
+      }
+      this.modalEditarVisible = true
+      document.body.style.overflow = 'hidden'
+    },
+
+    cerrarModalEditar() {
+      this.modalEditarVisible = false
+      this.editandoAsistencia = null
+      this.editError = null
+      document.body.style.overflow = 'auto'
+    },
+
+    async guardarEdicion() {
+      if (!this.editandoAsistencia) return
+      this.guardandoEdicion = true
+      this.editError = null
+
+      try {
+        const token = localStorage.getItem('admin_token')
+
+        // Construir el cuerpo con solo los campos con valor
+        const body = {}
+        if (this.editForm.fecha) body.fecha = this.editForm.fecha
+        if (this.editForm.hora_entrada) {
+          // Convertir HH:MM a timestamp combinado con la fecha
+          body.hora_entrada = `${this.editForm.fecha || this.editandoAsistencia.fecha}T${this.editForm.hora_entrada}:00`
+        } else {
+          body.hora_entrada = null
+        }
+        if (this.editForm.hora_salida) {
+          body.hora_salida = `${this.editForm.fecha || this.editandoAsistencia.fecha}T${this.editForm.hora_salida}:00`
+        } else {
+          body.hora_salida = null
+        }
+        body.descripcion_entrada = this.editForm.descripcion_entrada || null
+        body.descripcion_salida = this.editForm.descripcion_salida || null
+
+        const response = await fetch(`${API_URL}/admin/asistencias/${this.editandoAsistencia.id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.detail || 'Error al guardar')
+        }
+
+        // Actualizar la asistencia localmente
+        const idx = this.asistencias.findIndex(a => a.id === this.editandoAsistencia.id)
+        if (idx !== -1) {
+          this.asistencias[idx] = {
+            ...this.asistencias[idx],
+            fecha: this.editForm.fecha || this.asistencias[idx].fecha,
+            hora_entrada: this.editForm.hora_entrada
+              ? `${this.editForm.fecha}T${this.editForm.hora_entrada}:00`
+              : null,
+            hora_salida: this.editForm.hora_salida
+              ? `${this.editForm.fecha}T${this.editForm.hora_salida}:00`
+              : null,
+            descripcion_entrada: this.editForm.descripcion_entrada || null,
+            descripcion_salida: this.editForm.descripcion_salida || null
+          }
+          // Actualizar también en filtradas
+          const idxF = this.asistenciasFiltradas.findIndex(a => a.id === this.editandoAsistencia.id)
+          if (idxF !== -1) {
+            this.asistenciasFiltradas[idxF] = { ...this.asistencias[idx] }
+          }
+        }
+
+        this.cerrarModalEditar()
+      } catch (err) {
+        this.editError = err.message || 'Error al guardar los cambios'
+      } finally {
+        this.guardandoEdicion = false
+      }
+    },
+
+    // ============ ELIMINAR ASISTENCIA ============
+    abrirModalEliminar(asistencia) {
+      this.eliminandoAsistencia = asistencia
+      this.deleteError = null
+      this.modalEliminarVisible = true
+      document.body.style.overflow = 'hidden'
+    },
+
+    cerrarModalEliminar() {
+      this.modalEliminarVisible = false
+      this.eliminandoAsistencia = null
+      this.deleteError = null
+      document.body.style.overflow = 'auto'
+    },
+
+    async confirmarEliminar() {
+      if (!this.eliminandoAsistencia) return
+      this.eliminando = true
+      this.deleteError = null
+
+      try {
+        const token = localStorage.getItem('admin_token')
+
+        const response = await fetch(`${API_URL}/admin/asistencias/${this.eliminandoAsistencia.id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.detail || 'Error al eliminar')
+        }
+
+        // Eliminar localmente de ambos arrays
+        const id = this.eliminandoAsistencia.id
+        this.asistencias = this.asistencias.filter(a => a.id !== id)
+        this.asistenciasFiltradas = this.asistenciasFiltradas.filter(a => a.id !== id)
+        this.asistenciasOriginales = this.asistenciasOriginales.filter(a => a.id !== id)
+
+        // Ajustar página si queda vacía
+        if (this.asistenciasPaginadas.length === 0 && this.paginaActual > 1) {
+          this.paginaActual--
+        }
+
+        this.cerrarModalEliminar()
+      } catch (err) {
+        this.deleteError = err.message || 'Error al eliminar la asistencia'
+      } finally {
+        this.eliminando = false
+      }
+    },
+
     logout() {
       // Limpiar caché al cerrar sesión
       AsistenciasService.limpiarCache()
@@ -2797,5 +3191,356 @@ export default {
     width: 12px;
     height: 12px;
   }
+}
+
+/* ==================== ACTIONS COLUMN ==================== */
+.col-acciones {
+  width: 90px;
+  text-align: center;
+}
+
+.apple-actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Botón base de acción */
+.apple-action-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.18s ease,
+              background 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.apple-action-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.15);
+  opacity: 0;
+  transition: opacity 0.15s;
+  border-radius: inherit;
+}
+.apple-action-btn:hover::before { opacity: 1; }
+
+.apple-action-btn svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* Editar — azul */
+.apple-action-btn.edit {
+  background: linear-gradient(145deg, #3b82f6, #2563eb);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+  color: #fff;
+}
+.apple-action-btn.edit svg { stroke: #fff; }
+.apple-action-btn.edit:hover {
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.5);
+  background: linear-gradient(145deg, #60a5fa, #3b82f6);
+}
+.apple-action-btn.edit:active { transform: scale(0.95); }
+
+/* Eliminar — rojo */
+.apple-action-btn.delete {
+  background: linear-gradient(145deg, #f87171, #dc2626);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  color: #fff;
+}
+.apple-action-btn.delete svg { stroke: #fff; }
+.apple-action-btn.delete:hover {
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.5);
+  background: linear-gradient(145deg, #fca5a5, #ef4444);
+}
+.apple-action-btn.delete:active { transform: scale(0.95); }
+
+/* ==================== MODAL BASE COMPARTIDO ==================== */
+.apple-edit-modal,
+.apple-delete-modal {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 28px;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  width: 100%;
+  max-width: 480px;
+  margin: 16px;
+  overflow: hidden;
+  animation: apple-modal-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes apple-modal-pop {
+  from { opacity: 0; transform: scale(0.88) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Header del modal editar */
+.apple-edit-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.apple-edit-modal-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(145deg, #3b82f6, #2563eb);
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+.apple-edit-modal-icon svg {
+  width: 22px; height: 22px; stroke: #fff;
+}
+
+.apple-edit-modal-title-group { flex: 1; }
+.apple-edit-modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 2px;
+  letter-spacing: -0.3px;
+}
+.apple-edit-modal-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 500;
+}
+
+.apple-edit-modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.06);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+.apple-edit-modal-close:hover {
+  background: rgba(0,0,0,0.12);
+  transform: scale(1.08);
+}
+.apple-edit-modal-close svg {
+  width: 14px; height: 14px; stroke: #374151;
+}
+
+/* Body formulario */
+.apple-edit-modal-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.apple-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.apple-edit-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.apple-edit-label svg {
+  width: 13px; height: 13px; stroke: #6b7280; flex-shrink: 0;
+}
+
+.apple-edit-input,
+.apple-edit-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1a1a2e;
+  background: rgba(255,255,255,0.8);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+.apple-edit-input:focus,
+.apple-edit-textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  background: #fff;
+}
+.apple-edit-textarea { resize: vertical; min-height: 56px; }
+
+.apple-edit-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #dc2626;
+  font-weight: 500;
+}
+.apple-edit-error svg { width: 15px; height: 15px; stroke: #dc2626; flex-shrink: 0; }
+
+/* Footer del modal */
+.apple-edit-modal-footer,
+.apple-delete-modal-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px 22px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  justify-content: flex-end;
+}
+
+.apple-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s, background 0.15s, opacity 0.15s;
+}
+.apple-edit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.apple-edit-btn.cancel {
+  background: rgba(0, 0, 0, 0.06);
+  color: #374151;
+}
+.apple-edit-btn.cancel:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.apple-edit-btn.save {
+  background: linear-gradient(145deg, #3b82f6, #2563eb);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+.apple-edit-btn.save:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
+}
+
+.apple-edit-btn.danger {
+  background: linear-gradient(145deg, #f87171, #dc2626);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+}
+.apple-edit-btn.danger:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.5);
+}
+
+/* ==================== MODAL ELIMINAR ==================== */
+.apple-delete-modal {
+  max-width: 400px;
+  text-align: center;
+  padding: 32px 28px 24px;
+}
+
+.apple-delete-modal-icon-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.apple-delete-modal-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(145deg, #fecaca, #fee2e2);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.2);
+}
+.apple-delete-modal-icon svg {
+  width: 28px; height: 28px; stroke: #dc2626;
+}
+
+.apple-delete-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 10px;
+  letter-spacing: -0.4px;
+}
+.apple-delete-modal-desc {
+  font-size: 14px;
+  color: #4b5563;
+  margin: 0 0 6px;
+  line-height: 1.6;
+}
+.apple-delete-modal-warning {
+  font-size: 12px;
+  color: #dc2626;
+  font-weight: 600;
+  margin: 0 0 20px;
+}
+.apple-delete-modal-footer {
+  border: none;
+  padding: 0;
+  justify-content: center;
+}
+
+@media (max-width: 540px) {
+  .apple-edit-modal,
+  .apple-delete-modal {
+    border-radius: 20px;
+    margin: 12px;
+  }
+  .apple-edit-modal-header { padding: 18px 18px 14px; }
+  .apple-edit-modal-body { padding: 16px 18px; }
+  .apple-edit-modal-footer { padding: 14px 18px 18px; }
+  .apple-delete-modal { padding: 24px 20px 20px; }
+  .col-acciones { width: 76px; }
+  .apple-action-btn { width: 30px; height: 30px; border-radius: 8px; }
+  .apple-action-btn svg { width: 13px; height: 13px; }
+  .apple-actions-cell { gap: 4px; }
 }
 </style>

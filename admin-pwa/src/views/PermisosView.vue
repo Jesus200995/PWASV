@@ -898,22 +898,49 @@
                   </div>
                 </div>
 
-                <!-- Asistencia -->
-                <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.asistencia }">
-                  <input type="checkbox" v-model="formularioUsuario.permisos.asistencia" />
-                  <div class="permiso-card-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                      <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
-                  </div>
-                  <span class="permiso-card-name">Asistencia</span>
-                  <div class="permiso-toggle">
-                    <div class="toggle-track">
-                      <div class="toggle-thumb"></div>
+                <!-- Asistencia (con sub-permiso) -->
+                <div class="permiso-card-wrapper" :class="{ 'expanded': formularioUsuario.permisos.asistencia }">
+                  <label class="permiso-card" :class="{ 'active': formularioUsuario.permisos.asistencia }">
+                    <input type="checkbox" v-model="formularioUsuario.permisos.asistencia" @change="onAsistenciaChange" />
+                    <div class="permiso-card-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                      </svg>
                     </div>
+                    <span class="permiso-card-name">Asistencia</span>
+                    <div class="permiso-toggle">
+                      <div class="toggle-track">
+                        <div class="toggle-thumb"></div>
+                      </div>
+                    </div>
+                  </label>
+
+                  <!-- Sub-permiso: Acciones de Asistencia -->
+                  <div v-if="formularioUsuario.permisos.asistencia" class="sub-permiso-container">
+                    <label class="sub-permiso-item" :class="{ 'active': formularioUsuario.permisos.asistencia_acciones }">
+                      <input type="checkbox" v-model="formularioUsuario.permisos.asistencia_acciones" />
+                      <div class="sub-permiso-icons">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 4px;">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                          <line x1="10" y1="11" x2="10" y2="17"/>
+                          <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                      </div>
+                      <span class="sub-permiso-text">Permitir editar y eliminar</span>
+                      <div class="sub-toggle">
+                        <div class="sub-toggle-track">
+                          <div class="sub-toggle-thumb"></div>
+                        </div>
+                      </div>
+                    </label>
                   </div>
-                </label>
+                </div>
 
                 <!-- Registros (con sub-permiso integrado) -->
                 <div class="permiso-card-wrapper" :class="{ 'expanded': formularioUsuario.permisos.registros }">
@@ -1410,6 +1437,7 @@ export default {
           visor: false,
           visor_filtrador_territorio: false,
           asistencia: false,
+          asistencia_acciones: false,
           registros: false,
           registros_acciones: false,
           registros_notificar: false,
@@ -1469,6 +1497,7 @@ export default {
         visor: false,
         visor_filtrador_territorio: false,
         asistencia: false,
+        asistencia_acciones: false,
         registros: false,
         registros_acciones: false,
         registros_notificar: false,
@@ -1651,6 +1680,13 @@ export default {
       }
     },
 
+    // Handler cuando se cambia el permiso de asistencia
+    onAsistenciaChange() {
+      if (!this.formularioUsuario.permisos.asistencia) {
+        this.formularioUsuario.permisos.asistencia_acciones = false
+      }
+    },
+
     // Handler cuando se cambia el permiso de registros
     onRegistrosChange() {
       // Si se desactiva registros, también desactivar los subpermisos
@@ -1748,6 +1784,11 @@ export default {
       // Asegurar que el nuevo permiso de activar/desactivar usuarios existe
       if (permisosUsuario.usuarios_estado === undefined) {
         permisosUsuario.usuarios_estado = false
+      }
+
+      // Migración: asistencia_acciones
+      if (permisosUsuario.asistencia_acciones === undefined) {
+        permisosUsuario.asistencia_acciones = false
       }
       
       // MIGRACIÓN: Si el usuario ya tiene manuales activo pero no tiene el sub-permiso definido,

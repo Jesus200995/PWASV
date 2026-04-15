@@ -281,7 +281,7 @@
                   <th>Ubicación</th>
                   <th>Fotos</th>
                   <th>Estado</th>
-                  <th class="col-acciones">Acciones</th>
+                  <th v-if="puedeEditarAsistencias" class="col-acciones">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -358,7 +358,7 @@
                     </span>
                   </td>
                   <!-- COLUMNA ACCIONES -->
-                  <td class="col-acciones">
+                  <td v-if="puedeEditarAsistencias" class="col-acciones">
                     <div class="apple-actions-cell">
                       <button
                         @click="abrirModalEditar(asistencia)"
@@ -830,7 +830,10 @@ export default {
       modalEliminarVisible: false,
       eliminandoAsistencia: null,
       eliminando: false,
-      deleteError: null
+      deleteError: null,
+      // Permisos reactivos del usuario actual
+      userPermisos: {},
+      userRol: ''
     }
   },
   computed: {
@@ -900,9 +903,25 @@ export default {
       }
       
       return paginas
+    },
+    // Permiso para editar/eliminar asistencias - REACTIVO
+    puedeEditarAsistencias() {
+      if (this.userRol === 'admin' || authService.isAdmin()) return true
+      return this.userPermisos?.asistencia_acciones === true
     }
   },
   async mounted() {
+    // Inicializar permisos reactivos
+    const currentUser = authService.getCurrentUser()
+    this.userPermisos = currentUser?.permisos || {}
+    this.userRol = currentUser?.rol || ''
+    // Escuchar cambios de permisos en tiempo real
+    this._onSessionUpdated = (event) => {
+      const userData = event.detail
+      this.userPermisos = userData.permisos || {}
+      this.userRol = userData.rol || ''
+    }
+    window.addEventListener('user-session-updated', this._onSessionUpdated)
     // Precargar datos en segundo plano para performance Apple-style
     AsistenciasService.precargarDatos()
     await this.cargarAsistencias()
@@ -1597,6 +1616,9 @@ export default {
   beforeUnmount() {
     // Limpiar al desmontar el componente
     AsistenciasService.limpiarCache()
+    if (this._onSessionUpdated) {
+      window.removeEventListener('user-session-updated', this._onSessionUpdated)
+    }
   }
 }
 </script>

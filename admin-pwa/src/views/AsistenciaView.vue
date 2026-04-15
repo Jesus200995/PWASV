@@ -522,7 +522,6 @@
                   type="time"
                   v-model="editForm.hora_entrada"
                   class="apple-edit-input"
-                  step="1"
                 >
               </div>
 
@@ -539,8 +538,12 @@
                   type="time"
                   v-model="editForm.hora_salida"
                   class="apple-edit-input"
-                  step="1"
+                  :disabled="!editandoAsistencia || !editandoAsistencia.hora_salida"
+                  :class="{ 'apple-edit-input--disabled': !editandoAsistencia || !editandoAsistencia.hora_salida }"
                 >
+                <p v-if="!editandoAsistencia || !editandoAsistencia.hora_salida" class="apple-edit-field-note">
+                  El usuario aún no ha registrado su salida
+                </p>
               </div>
 
               <!-- Descripción Entrada -->
@@ -1464,14 +1467,16 @@ export default {
         // Construir el cuerpo con solo los campos con valor
         const body = {}
         if (this.editForm.fecha) body.fecha = this.editForm.fecha
+        // Normalizar hora a HH:MM para evitar formato inválido HH:MM:SS:00
+        const normHora = (h) => h ? h.substring(0, 5) : null
+        const fecha = this.editForm.fecha || this.editandoAsistencia.fecha
         if (this.editForm.hora_entrada) {
-          // Convertir HH:MM a timestamp combinado con la fecha
-          body.hora_entrada = `${this.editForm.fecha || this.editandoAsistencia.fecha}T${this.editForm.hora_entrada}:00`
+          body.hora_entrada = `${fecha}T${normHora(this.editForm.hora_entrada)}:00`
         } else {
           body.hora_entrada = null
         }
-        if (this.editForm.hora_salida) {
-          body.hora_salida = `${this.editForm.fecha || this.editandoAsistencia.fecha}T${this.editForm.hora_salida}:00`
+        if (this.editForm.hora_salida && this.editandoAsistencia.hora_salida) {
+          body.hora_salida = `${fecha}T${normHora(this.editForm.hora_salida)}:00`
         } else {
           body.hora_salida = null
         }
@@ -1500,10 +1505,10 @@ export default {
             ...this.asistencias[idx],
             fecha: this.editForm.fecha || this.asistencias[idx].fecha,
             hora_entrada: this.editForm.hora_entrada
-              ? `${this.editForm.fecha}T${this.editForm.hora_entrada}:00`
+              ? `${this.editForm.fecha}T${this.editForm.hora_entrada.substring(0,5)}:00`
               : null,
-            hora_salida: this.editForm.hora_salida
-              ? `${this.editForm.fecha}T${this.editForm.hora_salida}:00`
+            hora_salida: (this.editForm.hora_salida && this.editandoAsistencia.hora_salida)
+              ? `${this.editForm.fecha}T${this.editForm.hora_salida.substring(0,5)}:00`
               : null,
             descripcion_entrada: this.editForm.descripcion_entrada || null,
             descripcion_salida: this.editForm.descripcion_salida || null
@@ -3403,6 +3408,20 @@ export default {
   background: #fff;
 }
 .apple-edit-textarea { resize: vertical; min-height: 56px; }
+
+.apple-edit-input--disabled,
+.apple-edit-input:disabled {
+  background: rgba(0,0,0,0.05);
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: rgba(0,0,0,0.06);
+}
+.apple-edit-field-note {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #9ca3af;
+  font-style: italic;
+}
 
 .apple-edit-error {
   display: flex;

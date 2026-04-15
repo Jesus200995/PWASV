@@ -575,7 +575,12 @@
                   class="apple-edit-textarea"
                   rows="2"
                   placeholder="Sin descripción..."
+                  :disabled="!editandoAsistencia || !editandoAsistencia.hora_salida"
+                  :class="{ 'apple-edit-input--disabled': !editandoAsistencia || !editandoAsistencia.hora_salida }"
                 ></textarea>
+                <p v-if="!editandoAsistencia || !editandoAsistencia.hora_salida" class="apple-edit-field-note">
+                  El usuario aún no ha registrado su salida
+                </p>
               </div>
 
               <!-- Error -->

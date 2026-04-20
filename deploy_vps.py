@@ -18,6 +18,7 @@ def run(cmd, label=''):
     return out
 
 # 1. Backend
+run('cd /var/www/PWASV && git clean -fd 2>&1 | head -5', 'git clean untracked')
 run('cd /var/www/PWASV/backend && git pull origin main 2>&1', 'git pull backend')
 run('cd /var/www/PWASV/backend && source venv/bin/activate && pip install -r requirements.txt 2>&1 | tail -5', 'pip install')
 run('systemctl restart apipwa && sleep 3 && systemctl is-active apipwa', 'restart backend')

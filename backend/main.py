@@ -6026,8 +6026,13 @@ async def listar_notificaciones(limit: int = 50, offset: int = 0, tipo: str = 't
                 CASE 
                     WHEN n.enviada_a_todos THEN 'Todos los usuarios'
                     ELSE (
-                        SELECT COUNT(*)::text || ' usuarios seleccionados'
+                        SELECT 
+                            CASE 
+                                WHEN COUNT(*) = 1 THEN MAX(u.nombre_completo) || '|' || MAX(u.correo)
+                                ELSE COUNT(*)::text || ' usuarios seleccionados'
+                            END
                         FROM notificacion_usuarios nu 
+                        LEFT JOIN usuarios u ON nu.usuario_id = u.id
                         WHERE nu.notificacion_id = n.id
                     )
                 END as destinatarios_texto

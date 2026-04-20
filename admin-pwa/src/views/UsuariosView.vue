@@ -390,13 +390,18 @@
             </table>
           </div>
 
-          <!-- ================== PAGINATION APPLE STYLE ================== -->
+          <!-- ================== PAGINATION APPLE STYLE (MODERN) ================== -->
           <div v-if="totalPaginas > 1" class="apple-pagination">
+            <div class="apple-pagination-info">
+              Mostrando <span>{{ ((paginaActual - 1) * usuariosPorPagina) + 1 }}</span> a <span>{{ Math.min(paginaActual * usuariosPorPagina, usuariosFiltrados.length) }}</span> de <span>{{ usuariosFiltrados.length }}</span> usuarios
+            </div>
+
             <div class="apple-pagination-controls">
               <button 
                 @click="irAPagina(paginaActual - 1)" 
                 :disabled="paginaActual === 1"
                 class="apple-pagination-btn"
+                title="Página anterior"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <polyline points="15 18 9 12 15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -418,6 +423,7 @@
                 @click="irAPagina(paginaActual + 1)" 
                 :disabled="paginaActual === totalPaginas"
                 class="apple-pagination-btn"
+                title="Página siguiente"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <polyline points="9 18 15 12 9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -3626,86 +3632,115 @@ const logout = () => {
   box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
 }
 
-/* ====================== APPLE PAGINATION ====================== */
+/* ====================== APPLE PAGINATION (MODERN GREEN) ====================== */
 .apple-pagination {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 10px 16px;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 14px 20px;
   border-top: 1px solid #C8E6C9;
-  background: #E8F5E9;
+  background: rgba(248, 255, 250, 0.9);
+  backdrop-filter: blur(10px);
   position: sticky;
   bottom: 0;
   z-index: 5;
+  border-radius: 0 0 12px 12px;
+}
+
+.apple-pagination-info {
+  font-size: 13px;
+  color: #4CAF50;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  text-align: center;
+}
+
+.apple-pagination-info span {
+  color: #2E7D32;
+  font-weight: 600;
 }
 
 .apple-pagination-controls {
   display: flex;
   align-items: center;
   gap: 8px;
+  background: #E8F5E9;
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(76, 175, 80, 0.1);
 }
 
 .apple-pagination-btn {
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%);
-  border: none;
+  background: white;
+  color: #2E7D32;
+  border: 1px solid rgba(76, 175, 80, 0.15);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(139, 195, 74, 0.3);
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 2px rgba(76, 175, 80, 0.05);
 }
 
 .apple-pagination-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #7CB342 0%, #689F38 100%);
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+  background: #E8F5E9;
+  border-color: #8BC34A;
   transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(76, 175, 80, 0.15);
 }
 
 .apple-pagination-btn:disabled {
-  opacity: 0.3;
+  opacity: 0.4;
   cursor: not-allowed;
   box-shadow: none;
+  background: transparent;
+  border-color: transparent;
+  color: #A5D6A7;
 }
 
 .apple-pagination-btn svg {
-  width: 18px;
-  height: 18px;
-  stroke: white;
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
   stroke-width: 2.5;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 .apple-pagination-numbers {
   display: flex;
-  gap: 4px;
+  gap: 2px;
 }
 
 .apple-pagination-number {
-  width: 32px;
+  min-width: 32px;
   height: 32px;
+  padding: 0 6px;
   background: transparent;
   border: none;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--apple-text);
+  color: #4CAF50;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.apple-pagination-number:hover {
-  background: #E8F5E9;
+.apple-pagination-number:hover:not(.active) {
+  background: rgba(76, 175, 80, 0.1);
+  color: #2E7D32;
 }
 
 .apple-pagination-number.active {
   background: linear-gradient(135deg, #8BC34A 0%, #66BB6A 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(139, 195, 74, 0.4);
+  box-shadow: 0 2px 6px rgba(102, 187, 106, 0.4);
 }
 
 /* ====================== OLD STYLES FOR COMPATIBILITY ====================== */

@@ -48,7 +48,7 @@
                 </svg>
               </div>
               <div class="apple-stat-content">
-                <div class="apple-stat-value">{{ notificaciones.length }}</div>
+                <div class="apple-stat-value">{{ totalNotificaciones }}</div>
                 <div class="apple-stat-label">Total</div>
               </div>
             </div>
@@ -96,7 +96,7 @@
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"/>
                   </svg>
                   <span>Grupales</span>
-                  <span class="apple-tab-badge">{{ tabActual === 'grupales' ? notificaciones.length : '' }}</span>
+                  <span class="apple-tab-badge">{{ tabActual === 'grupales' ? totalNotificaciones : '' }}</span>
                 </button>
                 <button 
                   :class="['apple-tab-button', { 'active': tabActual === 'individuales' }]"
@@ -107,7 +107,7 @@
                     <path d="M12 14c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z" stroke-width="2"/>
                   </svg>
                   <span>Individuales</span>
-                  <span class="apple-tab-badge">{{ tabActual === 'individuales' ? notificaciones.length : '' }}</span>
+                  <span class="apple-tab-badge">{{ tabActual === 'individuales' ? totalNotificaciones : '' }}</span>
                 </button>
               </div>
 
@@ -152,7 +152,8 @@
 
           <!-- Tabla de notificaciones estilo Apple -->
           <div class="apple-table-container">
-            <table class="apple-table">
+            <div class="apple-table-wrapper">
+              <table class="apple-table">
               <thead>
                 <tr>
                   <th>Título</th>
@@ -181,7 +182,21 @@
                   </td>
                   <td>
                     <span :class="['apple-recipients-badge', { 'all-users': notificacion.enviada_a_todos }]">
-                      {{ notificacion.destinatarios_texto }}
+                      <svg v-if="notificacion.enviada_a_todos" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
+                        <circle cx="9" cy="7" r="4" stroke-width="2"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke-width="2"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"/>
+                      </svg>
+                      <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2"/>
+                        <circle cx="12" cy="7" r="4" stroke-width="2"/>
+                      </svg>
+                      <div v-if="notificacion.destinatarios_texto && notificacion.destinatarios_texto.includes('|')" class="user-info">
+                        <span class="user-name">{{ notificacion.destinatarios_texto.split('|')[0] }}</span>
+                        <span class="user-email">{{ notificacion.destinatarios_texto.split('|')[1] }}</span>
+                      </div>
+                      <span v-else>{{ notificacion.destinatarios_texto }}</span>
                     </span>
                   </td>
                   <td>
@@ -242,6 +257,7 @@
                 </tr>
               </tbody>
             </table>
+            </div>
 
             <!-- Estado vacío -->
             <div v-if="notificaciones.length === 0" class="apple-empty-state">
@@ -251,6 +267,46 @@
               <button class="apple-btn-primary" @click="mostrarModalCrear = true">
                 Crear Primera Notificación Grupal
               </button>
+            </div>
+
+            <!-- Paginación estilo Apple (Moderno) -->
+            <div v-if="totalPaginas > 1 && !cargando && notificaciones.length > 0" class="apple-pagination">
+              <div class="apple-pagination-info">
+                Mostrando <span>{{ ((paginaActual - 1) * limitePorPagina) + 1 }}</span> a <span>{{ Math.min(paginaActual * limitePorPagina, totalNotificaciones) }}</span> de <span>{{ totalNotificaciones }}</span> notificaciones
+              </div>
+              
+              <div class="apple-pagination-controls">
+                <button 
+                  @click="cambiarPagina(paginaActual - 1)" 
+                  :disabled="paginaActual === 1"
+                  class="apple-pagination-btn"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polyline points="15 18 9 12 15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+
+                <div class="apple-pagination-numbers">
+                  <button 
+                    v-for="pagina in paginasVisibles" 
+                    :key="pagina"
+                    @click="cambiarPagina(pagina)"
+                    :class="['apple-pagination-number', { 'active': paginaActual === pagina }]"
+                  >
+                    {{ pagina }}
+                  </button>
+                </div>
+
+                <button 
+                  @click="cambiarPagina(paginaActual + 1)" 
+                  :disabled="paginaActual === totalPaginas"
+                  class="apple-pagination-btn"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polyline points="9 18 15 12 9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1044,6 +1100,11 @@ export default {
       // Lista de notificaciones
       notificaciones: [],
       
+      // Paginación
+      paginaActual: 1,
+      limitePorPagina: 15,
+      totalNotificaciones: 0,
+      
       // Modal crear notificación
       mostrarModalCrear: false,
       enviandoNotificacion: false,
@@ -1149,6 +1210,27 @@ export default {
       })
     },
     
+    // Paginación calculadas
+    totalPaginas() {
+      return Math.ceil(this.totalNotificaciones / this.limitePorPagina) || 1
+    },
+    paginasVisibles() {
+      const paginas = []
+      const maxVisibles = 5
+      let inicio = Math.max(1, this.paginaActual - Math.floor(maxVisibles / 2))
+      let fin = inicio + maxVisibles - 1
+      
+      if (fin > this.totalPaginas) {
+        fin = this.totalPaginas
+        inicio = Math.max(1, fin - maxVisibles + 1)
+      }
+      
+      for (let i = inicio; i <= fin; i++) {
+        paginas.push(i)
+      }
+      return paginas
+    },
+    
     usuariosFiltradosEdicion() {
       if (!this.busquedaUsuariosEdicion.trim()) return this.usuarios
       
@@ -1217,22 +1299,35 @@ export default {
       // Actualizar formNotificacion.enviada_a_todos según la pestaña
       this.formNotificacion.enviada_a_todos = (tab === 'grupales')
       
+      // Resetear paginación
+      this.paginaActual = 1
+      this.totalNotificaciones = 0
+      
       // Recargar notificaciones
       this.cargarNotificaciones()
     },
     
-    async cargarNotificaciones() {
+    cambiarPagina(pagina) {
+      if (pagina >= 1 && pagina <= this.totalPaginas) {
+        this.cargarNotificaciones(pagina)
+      }
+    },
+    
+    async cargarNotificaciones(pagina = 1) {
       this.cargando = true
       this.error = null
+      this.paginaActual = pagina
+      const offset = (this.paginaActual - 1) * this.limitePorPagina
       
       try {
         const tipo = this.tabActual // 'grupales' o 'individuales'
         console.log(`🔄 CARGANDO notificaciones ${tipo}...`)
-        console.log(`📤 Parámetros: limit=50, offset=0, tipo="${tipo}"`)
+        console.log(`📤 Parámetros: limit=${this.limitePorPagina}, offset=${offset}, tipo="${tipo}"`)
         
-        const respuesta = await notificacionesService.listarNotificaciones(50, 0, tipo)
+        const respuesta = await notificacionesService.listarNotificaciones(this.limitePorPagina, offset, tipo)
         
         this.notificaciones = respuesta.notificaciones || []
+        this.totalNotificaciones = respuesta.total || 0
         
         console.log(`✅ Notificaciones ${tipo} cargadas: ${this.notificaciones.length}`)
         console.log('📋 Detalle de notificaciones:')
@@ -2188,19 +2283,36 @@ export default {
 
 /* ====================== APPLE TABLE ====================== */
 .apple-table-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: calc(100vh - 340px);
+  display: flex;
+  flex-direction: column;
+}
+
+.apple-table-wrapper {
+  overflow-y: auto;
   overflow-x: auto;
+  flex: 1;
+  max-height: 100%;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  scroll-behavior: smooth;
 }
 
-.apple-table-container::-webkit-scrollbar {
+.apple-table-wrapper::-webkit-scrollbar {
   height: 6px;
+  width: 6px;
 }
 
-.apple-table-container::-webkit-scrollbar-track {
+.apple-table-wrapper::-webkit-scrollbar-track {
   background: #f5f5f7;
   border-radius: 3px;
 }
 
-.apple-table-container::-webkit-scrollbar-thumb {
+.apple-table-wrapper::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
   border-radius: 3px;
 }
@@ -2209,6 +2321,12 @@ export default {
   width: 100%;
   border-collapse: collapse;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.apple-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .apple-table thead tr {
@@ -2293,7 +2411,9 @@ export default {
 }
 
 .apple-recipients-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 10px;
   border-radius: 8px;
   font-size: 11px;
@@ -2301,6 +2421,29 @@ export default {
   background: rgba(175, 82, 222, 0.1);
   color: #AF52DE;
   border: 1px solid rgba(175, 82, 222, 0.2);
+}
+
+.apple-recipients-badge svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+.user-email {
+  font-size: 10px;
+  opacity: 0.8;
+  font-weight: 400;
 }
 
 .apple-recipients-badge.all-users {
@@ -5301,5 +5444,116 @@ export default {
     width: 10px;
     height: 10px;
   }
+}
+
+/* ====================== APPLE PAGINATION (MODERN GREEN) ====================== */
+.apple-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 14px 20px;
+  border-top: 1px solid #C8E6C9;
+  background: rgba(248, 255, 250, 0.9);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  border-radius: 0 0 12px 12px;
+}
+
+.apple-pagination-info {
+  font-size: 13px;
+  color: #4CAF50;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  text-align: center;
+}
+
+.apple-pagination-info span {
+  color: #2E7D32;
+  font-weight: 600;
+}
+
+.apple-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #E8F5E9;
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.apple-pagination-btn {
+  width: 32px;
+  height: 32px;
+  background: white;
+  color: #2E7D32;
+  border: 1px solid rgba(76, 175, 80, 0.15);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 2px rgba(76, 175, 80, 0.05);
+}
+
+.apple-pagination-btn:hover:not(:disabled) {
+  background: #E8F5E9;
+  border-color: #8BC34A;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(76, 175, 80, 0.15);
+}
+
+.apple-pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+  background: transparent;
+  border-color: transparent;
+  color: #A5D6A7;
+}
+
+.apple-pagination-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+
+.apple-pagination-numbers {
+  display: flex;
+  gap: 2px;
+}
+
+.apple-pagination-number {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4CAF50;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apple-pagination-number:hover:not(.active) {
+  background: rgba(76, 175, 80, 0.1);
+  color: #2E7D32;
+}
+
+.apple-pagination-number.active {
+  background: linear-gradient(135deg, #8BC34A 0%, #66BB6A 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(102, 187, 106, 0.4);
 }
 </style>

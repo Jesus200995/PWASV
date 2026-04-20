@@ -566,7 +566,7 @@ export default {
         console.log('✅ Notificación creada:', respuesta)
         this.mostrarToast('Notificación enviada exitosamente', 'success')
         
-        this.cargarNotificaciones()
+        this.cargarNotificaciones(this.paginaActual)
         this.cerrarModalCrear()
         
       } catch (error) {
@@ -618,7 +618,7 @@ export default {
       try {
         await notificacionesService.eliminarNotificacion(id)
         this.mostrarToast('Notificación eliminada exitosamente', 'success')
-        this.cargarNotificaciones()
+        this.cargarNotificaciones(this.paginaActual)
       } catch (error) {
         console.error('❌ Error eliminando notificación:', error)
         this.mostrarToast(error.message, 'error')
@@ -1033,6 +1033,18 @@ export default {
 
 .notification-row:hover {
   background: linear-gradient(135deg, #f8fffe 0%, #f0fff4 100%);
+}
+
+.row-recien-editada {
+  animation: highlightRow 3s ease-out;
+  background: rgba(76, 175, 80, 0.12) !important;
+  border-left: 3px solid #4CAF50 !important;
+}
+
+@keyframes highlightRow {
+  0% { background: rgba(76, 175, 80, 0.25); box-shadow: inset 0 0 0 2px rgba(76, 175, 80, 0.3); }
+  30% { background: rgba(76, 175, 80, 0.18); box-shadow: inset 0 0 0 1px rgba(76, 175, 80, 0.2); }
+  100% { background: rgba(76, 175, 80, 0.05); box-shadow: none; }
 }
 
 .title-cell {

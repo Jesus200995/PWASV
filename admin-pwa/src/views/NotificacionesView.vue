@@ -165,7 +165,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="notificacion in notificaciones" :key="notificacion.id" class="apple-table-row">
+                <tr v-for="notificacion in notificaciones" :key="notificacion.id" :class="['apple-table-row', { 'row-recien-editada': notificacionRecienEditada === notificacion.id }]">
                   <td class="apple-title-cell">
                     <div class="apple-title-content">
                       <span class="apple-notification-title">{{ notificacion.titulo }}</span>
@@ -1124,6 +1124,7 @@ export default {
       archivoSeleccionadoEdicion: null,
       archivoActual: null,
       notificacionEditandoId: null,
+      notificacionRecienEditada: null,
       formEdicion: {
         titulo: '',
         subtitulo: '',
@@ -1584,9 +1585,18 @@ export default {
         console.log('✅ Notificación actualizada:', respuesta)
         this.mostrarToast('Notificación actualizada exitosamente', 'success')
         
-        // Recargar lista y cerrar modal
-        this.cargarNotificaciones()
+        // Guardar ID para resaltar la fila editada
+        const idEditado = this.notificacionEditandoId
+        
+        // Recargar lista EN LA MISMA PÁGINA y cerrar modal
+        this.cargarNotificaciones(this.paginaActual)
         this.cerrarModalEditar()
+        
+        // Resaltar la fila editada por 3 segundos
+        this.notificacionRecienEditada = idEditado
+        setTimeout(() => {
+          this.notificacionRecienEditada = null
+        }, 3000)
         
       } catch (error) {
         console.error('❌ Error actualizando notificación:', error)
@@ -1681,7 +1691,7 @@ export default {
         await notificacionesService.eliminarNotificacion(this.notificacionAEliminar.id)
         
         this.mostrarToast('Notificación eliminada exitosamente', 'success')
-        this.cargarNotificaciones()
+        this.cargarNotificaciones(this.paginaActual)
         this.cancelarEliminar()
         
       } catch (error) {
@@ -2367,6 +2377,18 @@ export default {
 .apple-table-row:hover {
   background: linear-gradient(135deg, #f8fffe 0%, #f0fff4 100%);
   border-left: 3px solid #4CAF50;
+}
+
+.row-recien-editada {
+  animation: highlightRow 3s ease-out;
+  background: rgba(76, 175, 80, 0.12) !important;
+  border-left: 3px solid #4CAF50 !important;
+}
+
+@keyframes highlightRow {
+  0% { background: rgba(76, 175, 80, 0.25); box-shadow: inset 0 0 0 2px rgba(76, 175, 80, 0.3); }
+  30% { background: rgba(76, 175, 80, 0.18); box-shadow: inset 0 0 0 1px rgba(76, 175, 80, 0.2); }
+  100% { background: rgba(76, 175, 80, 0.05); box-shadow: none; }
 }
 
 /* ====================== APPLE TABLE CELLS ====================== */

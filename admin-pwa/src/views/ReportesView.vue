@@ -261,14 +261,23 @@
         </div>
 
         <!-- Banner para facilitadores (solo sus técnicos) -->
-        <div v-if="esFacilitador" class="apple-territorio-banner" style="background: linear-gradient(135deg,#f0fdf4,#dcfce7); border-color: #86efac; color: #166534;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
-            <circle cx="9" cy="7" r="4" stroke-width="2"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke-width="2"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"/>
-          </svg>
-          <span>Mostrando reportes de tus técnicos asignados</span>
+        <div v-if="esFacilitador" class="apple-territorio-banner apple-facilitador-banner">
+          <div class="apple-facilitador-info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
+              <circle cx="9" cy="7" r="4" stroke-width="2"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke-width="2"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-width="2"/>
+            </svg>
+            <span>Mostrando reportes de tus técnicos asignados</span>
+          </div>
+          <button class="apple-btn-asociar" @click="abrirModalAsociarTecnico" title="Asociar un nuevo técnico a tu lista">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <line x1="12" y1="5" x2="12" y2="19" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="5" y1="12" x2="19" y2="12" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            <span>Asociar técnico</span>
+          </button>
         </div>
 
         <!-- Barra de acciones para firma masiva Apple Style -->
@@ -1081,6 +1090,84 @@
           </div>
         </Transition>
       </Teleport>
+
+      <!-- ================== MODAL: ASOCIAR TÉCNICO (solo facilitadores) ================== -->
+      <Teleport to="body">
+        <Transition name="apple-modal">
+          <div v-if="modalAsociarAbierto" class="apple-modal-overlay" @click.self="cerrarModalAsociarTecnico">
+            <div class="apple-modal apple-modal-asociar">
+              <div class="apple-modal-header">
+                <div>
+                  <h3>Asociar nuevo técnico</h3>
+                  <p class="apple-modal-sub">Solo se muestran técnicos sin facilitador asignado.</p>
+                </div>
+                <button class="apple-modal-close" @click="cerrarModalAsociarTecnico" aria-label="Cerrar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="18" y1="6" x2="6" y2="18" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="6" y1="6" x2="18" y2="18" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="apple-modal-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="11" cy="11" r="8" stroke-width="2"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <input
+                  v-model="asociarBusqueda"
+                  type="text"
+                  placeholder="Buscar por nombre o CURP..."
+                  @input="buscarTecnicosDisponiblesDebounced"
+                />
+              </div>
+
+              <div class="apple-modal-body">
+                <div v-if="asociarLoading" class="apple-modal-loading">
+                  <div class="apple-spinner"></div>
+                  <p>Buscando técnicos disponibles...</p>
+                </div>
+                <div v-else-if="tecnicosDisponibles.length === 0" class="apple-modal-empty">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+                    <line x1="12" y1="8" x2="12" y2="12" stroke-width="1.5"/>
+                    <circle cx="12" cy="16" r="0.5" stroke-width="2"/>
+                  </svg>
+                  <p v-if="asociarBusqueda">No se encontraron técnicos disponibles con "{{ asociarBusqueda }}".</p>
+                  <p v-else>No hay técnicos disponibles para asociar en este momento.</p>
+                </div>
+                <ul v-else class="apple-modal-lista">
+                  <li v-for="t in tecnicosDisponibles" :key="t.id" class="apple-tecnico-item">
+                    <div class="apple-tecnico-info">
+                      <div class="apple-tecnico-avatar">{{ (t.nombre_completo || '?').charAt(0).toUpperCase() }}</div>
+                      <div>
+                        <div class="apple-tecnico-nombre">{{ t.nombre_completo }}</div>
+                        <div class="apple-tecnico-meta">
+                          <span v-if="t.cargo">{{ t.cargo }}</span>
+                          <span v-if="t.territorio"> · {{ t.territorio }}</span>
+                          <span v-if="t.curp" class="apple-tecnico-curp"> · {{ t.curp }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      class="apple-btn-asociar-item"
+                      :disabled="asociandoId === t.id"
+                      @click="asociarTecnico(t)"
+                    >
+                      <span v-if="asociandoId === t.id">Asociando...</span>
+                      <span v-else>Asociar</span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              <div v-if="asociarMensaje" :class="['apple-modal-msg', asociarMensajeTipo]">
+                {{ asociarMensaje }}
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
     </main>
   </div>
 </template>
@@ -1091,6 +1178,7 @@ import { useRouter } from 'vue-router'
 import Sidebar from '../components/Sidebar.vue'
 import FirmaDigitalAdmin from '../components/FirmaDigitalAdmin.vue'
 import reportesService from '../services/reportesService'
+import facilitadoresService from '../services/facilitadoresService'
 import authService from '../services/authService'
 import { generarPDFDesdesDatos } from '../utils/pdfGenerator'
 import JSZip from 'jszip'
@@ -1105,6 +1193,76 @@ const territorioUsuario = ref(authService.getTerritorioFilter())
 // Detectar si el usuario es FACILITADOR y obtener su ID de admin
 const esFacilitador = ref(authService.isFacilitador())
 const facilitadorAdminId = ref(authService.getFacilitadorAdminId())
+
+// ===== Estado del modal para asociar nuevos técnicos (solo facilitadores) =====
+const modalAsociarAbierto = ref(false)
+const asociarBusqueda = ref('')
+const tecnicosDisponibles = ref([])
+const asociarLoading = ref(false)
+const asociandoId = ref(null)
+const asociarMensaje = ref('')
+const asociarMensajeTipo = ref('info') // 'info' | 'success' | 'error'
+let _buscarTecnicosTimer = null
+
+async function cargarTecnicosDisponibles() {
+  if (!esFacilitador.value || !facilitadorAdminId.value) return
+  asociarLoading.value = true
+  try {
+    const resp = await facilitadoresService.listarTecnicosDisponibles(
+      facilitadorAdminId.value,
+      { q: asociarBusqueda.value.trim(), limite: 50 }
+    )
+    tecnicosDisponibles.value = resp.tecnicos || []
+  } catch (e) {
+    console.error('Error cargando técnicos disponibles:', e)
+    asociarMensaje.value = e.message || 'Error al cargar técnicos'
+    asociarMensajeTipo.value = 'error'
+    tecnicosDisponibles.value = []
+  } finally {
+    asociarLoading.value = false
+  }
+}
+
+function buscarTecnicosDisponiblesDebounced() {
+  if (_buscarTecnicosTimer) clearTimeout(_buscarTecnicosTimer)
+  _buscarTecnicosTimer = setTimeout(cargarTecnicosDisponibles, 300)
+}
+
+function abrirModalAsociarTecnico() {
+  if (!esFacilitador.value) return
+  modalAsociarAbierto.value = true
+  asociarBusqueda.value = ''
+  asociarMensaje.value = ''
+  cargarTecnicosDisponibles()
+}
+
+function cerrarModalAsociarTecnico() {
+  modalAsociarAbierto.value = false
+  asociarMensaje.value = ''
+  tecnicosDisponibles.value = []
+}
+
+async function asociarTecnico(tecnico) {
+  if (!facilitadorAdminId.value || asociandoId.value) return
+  asociandoId.value = tecnico.id
+  asociarMensaje.value = ''
+  try {
+    await facilitadoresService.asignarTecnico(facilitadorAdminId.value, tecnico.id)
+    asociarMensaje.value = `✓ ${tecnico.nombre_completo} asociado correctamente`
+    asociarMensajeTipo.value = 'success'
+    // quitar de la lista local
+    tecnicosDisponibles.value = tecnicosDisponibles.value.filter(x => x.id !== tecnico.id)
+    // refrescar reportes y estadísticas para que aparezca el nuevo técnico
+    try { await cargarReportes() } catch (e) {}
+    try { await cargarEstadisticas() } catch (e) {}
+  } catch (e) {
+    console.error('Error asociando técnico:', e)
+    asociarMensaje.value = e.message || 'No se pudo asociar el técnico'
+    asociarMensajeTipo.value = 'error'
+  } finally {
+    asociandoId.value = null
+  }
+}
 
 // Función para obtener el color del territorio
 const obtenerColorTerritorio = (territorio) => {
@@ -6851,6 +7009,296 @@ onUnmounted(() => {
     padding: 12px 20px;
     font-size: 15px;
   }
+}
+
+/* ====================== BANNER FACILITADOR + BOTÓN ASOCIAR ====================== */
+.apple-facilitador-banner {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important;
+  border-color: #86efac !important;
+  color: #166534 !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.apple-facilitador-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.apple-facilitador-info svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.apple-btn-asociar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .2s ease;
+  box-shadow: 0 2px 8px rgba(22,163,74,.25);
+}
+
+.apple-btn-asociar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(22,163,74,.35);
+}
+
+.apple-btn-asociar svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ====================== MODAL ASOCIAR TÉCNICO ====================== */
+.apple-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.apple-modal-asociar {
+  background: #fff;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25);
+  overflow: hidden;
+}
+
+.apple-modal-header {
+  padding: 20px 22px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.apple-modal-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.apple-modal-sub {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.apple-modal-close {
+  background: #f1f5f9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #475569;
+  transition: background .15s;
+}
+
+.apple-modal-close:hover { background: #e2e8f0; }
+.apple-modal-close svg { width: 18px; height: 18px; }
+
+.apple-modal-search {
+  position: relative;
+  padding: 14px 22px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.apple-modal-search svg {
+  position: absolute;
+  left: 34px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.apple-modal-search input {
+  width: 100%;
+  padding: 10px 14px 10px 42px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #f8fafc;
+  outline: none;
+  transition: all .15s;
+}
+
+.apple-modal-search input:focus {
+  border-color: #16a34a;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(22,163,74,.15);
+}
+
+.apple-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px 12px;
+  min-height: 200px;
+}
+
+.apple-modal-loading,
+.apple-modal-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #64748b;
+  text-align: center;
+  gap: 10px;
+}
+
+.apple-modal-empty svg { width: 36px; height: 36px; color: #cbd5e1; }
+
+.apple-modal-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.apple-tecnico-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  transition: background .15s;
+}
+
+.apple-tecnico-item:hover { background: #f8fafc; }
+
+.apple-tecnico-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.apple-tecnico-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.apple-tecnico-nombre {
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-tecnico-meta {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-tecnico-curp {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+}
+
+.apple-btn-asociar-item {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid #16a34a;
+  background: #fff;
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+
+.apple-btn-asociar-item:hover:not(:disabled) {
+  background: #16a34a;
+  color: #fff;
+}
+
+.apple-btn-asociar-item:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.apple-modal-msg {
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 500;
+  border-top: 1px solid #f1f5f9;
+}
+
+.apple-modal-msg.success { background: #f0fdf4; color: #166534; }
+.apple-modal-msg.error   { background: #fef2f2; color: #b91c1c; }
+.apple-modal-msg.info    { background: #f0f9ff; color: #075985; }
+
+.apple-modal-enter-active,
+.apple-modal-leave-active {
+  transition: opacity .2s ease;
+}
+.apple-modal-enter-active .apple-modal-asociar,
+.apple-modal-leave-active .apple-modal-asociar {
+  transition: transform .25s cubic-bezier(.16,1,.3,1);
+}
+.apple-modal-enter-from,
+.apple-modal-leave-to { opacity: 0; }
+.apple-modal-enter-from .apple-modal-asociar,
+.apple-modal-leave-to .apple-modal-asociar {
+  transform: translateY(16px) scale(.97);
+}
+
+@media (max-width: 600px) {
+  .apple-facilitador-banner { flex-direction: column; align-items: stretch; }
+  .apple-btn-asociar { justify-content: center; width: 100%; }
+  .apple-tecnico-item { flex-wrap: wrap; }
 }
 
 </style>

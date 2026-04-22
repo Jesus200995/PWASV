@@ -2615,6 +2615,246 @@ async def mis_tecnicos_facilitador(admin_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# ENDPOINTS: Asignación manual de técnicos a facilitadores
+# (para que un facilitador pueda asociar nuevos técnicos desde ReportesView)
+# ============================================================
+
+class AsignarTecnicoRequest(BaseModel):
+    admin_id: int            # id de admin_users (facilitador)
+    tecnico_usuario_id: int  # id de usuarios (técnico en pwasuper)
+
+
+def _validar_facilitador(admin_id: int) -> int:
+    """
+    Verifica que el admin_id corresponda a un FACILITADOR activo con usuario_id vinculado.
+    Devuelve el usuario_id (pwasuper) del facilitador.
+    """
+    cursor.execute(
+        """
+        SELECT usuario_id, cargo
+        FROM admin_users
+        WHERE id = %s AND activo = TRUE
+        """,
+        (admin_id,)
+    )
+    row = cursor.fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Admin no encontrado o inactivo")
+    if not row[0]:
+        raise HTTPException(status_code=403, detail="Facilitador sin usuario vinculado en pwasuper")
+    cargo = (row[1] or "").upper()
+    if "FACILITADOR" not in cargo:
+        raise HTTPException(status_code=403, detail="Solo los facilitadores pueden asignar técnicos")
+    return row[0]
+
+
+@app.get("/facilitadores/tecnicos-disponibles")
+async def tecnicos_disponibles_facilitador(
+    admin_id: int,
+    q: Optional[str] = None,
+    territorio: Optional[str] = None,
+    limite: int = 50
+):
+    """
+    Lista técnicos de pwasuper disponibles para que un facilitador los asocie.
+    Reglas:
+      - Solo usuarios con cargo que contenga 'TECNICO' (social o productivo).
+      - Que NO tengan asignación activa a ningún facilitador.
+      - Permite búsqueda por nombre/CURP y filtro por territorio.
+    """
+    try:
+        verificar_conexion_db()
+        _validar_facilitador(admin_id)
+
+        limite = max(1, min(limite, 200))
+
+        params = []
+        where_extra = ""
+        if q:
+            where_extra += " AND (UPPER(u.nombre_completo) LIKE %s OR UPPER(u.curp) LIKE %s)"
+            like = f"%{q.strip().upper()}%"
+            params.extend([like, like])
+        if territorio:
+            where_extra += " AND UPPER(u.territorio) = %s"
+            params.append(territorio.strip().upper())
+
+        sql = f"""
+            SELECT u.id, u.nombre_completo, u.cargo, u.territorio, u.curp
+            FROM usuarios u
+            WHERE UPPER(COALESCE(u.cargo, '')) LIKE '%TECNICO%'
+              AND NOT EXISTS (
+                  SELECT 1 FROM facilitador_tecnico_asignaciones fta
+                  WHERE fta.tecnico_usuario_id = u.id AND fta.activo = TRUE
+              )
+              {where_extra}
+            ORDER BY u.nombre_completo
+            LIMIT %s
+        """
+        params.append(limite)
+        cursor.execute(sql, tuple(params))
+        rows = cursor.fetchall()
+
+        tecnicos = [{
+            "id": r[0],
+            "nombre_completo": r[1],
+            "cargo": r[2],
+            "territorio": r[3],
+            "curp": r[4],
+        } for r in rows]
+
+        return {"success": True, "tecnicos": tecnicos, "total": len(tecnicos)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error en tecnicos-disponibles: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/facilitadores/asignar-tecnico")
+async def asignar_tecnico_facilitador(payload: AsignarTecnicoRequest):
+    """
+    Asocia manualmente un técnico de pwasuper a un facilitador.
+    Reglas:
+      - Solo facilitadores activos con usuario_id vinculado.
+      - El técnico no debe tener otro facilitador activo asignado.
+      - Se registra con origen='manual'.
+    """
+    try:
+        verificar_conexion_db()
+        facilitador_uid = _validar_facilitador(payload.admin_id)
+
+        # Validar que el técnico exista y sea TECNICO
+        cursor.execute(
+            "SELECT id, nombre_completo, cargo, territorio, curp FROM usuarios WHERE id = %s",
+            (payload.tecnico_usuario_id,)
+        )
+        tec = cursor.fetchone()
+        if not tec:
+            raise HTTPException(status_code=404, detail="Técnico no encontrado en pwasuper")
+        cargo_tec = (tec[2] or "").upper()
+        if "TECNICO" not in cargo_tec:
+            raise HTTPException(status_code=400, detail="El usuario seleccionado no es técnico")
+
+        # Verificar que no tenga otro facilitador activo
+        cursor.execute(
+            """
+            SELECT fta.facilitador_usuario_id, u.nombre_completo
+            FROM facilitador_tecnico_asignaciones fta
+            JOIN usuarios u ON u.id = fta.facilitador_usuario_id
+            WHERE fta.tecnico_usuario_id = %s AND fta.activo = TRUE
+            LIMIT 1
+            """,
+            (payload.tecnico_usuario_id,)
+        )
+        existente = cursor.fetchone()
+        if existente:
+            if existente[0] == facilitador_uid:
+                raise HTTPException(status_code=409, detail="El técnico ya está asignado a ti")
+            raise HTTPException(
+                status_code=409,
+                detail=f"El técnico ya está asignado al facilitador: {existente[1]}"
+            )
+
+        # Insertar/reactivar con origen manual
+        cursor.execute(
+            """
+            INSERT INTO facilitador_tecnico_asignaciones
+                (facilitador_usuario_id, tecnico_usuario_id, origen, activo,
+                 created_by_admin_user_id)
+            VALUES (%s, %s, 'manual', TRUE, %s)
+            ON CONFLICT (facilitador_usuario_id, tecnico_usuario_id)
+            DO UPDATE SET
+                activo = TRUE,
+                origen = 'manual',
+                updated_at = NOW(),
+                created_by_admin_user_id = EXCLUDED.created_by_admin_user_id
+            RETURNING id
+            """,
+            (facilitador_uid, payload.tecnico_usuario_id, payload.admin_id)
+        )
+        asign_id = cursor.fetchone()[0]
+        conn.commit()
+
+        return {
+            "success": True,
+            "asignacion_id": asign_id,
+            "tecnico": {
+                "id": tec[0],
+                "nombre_completo": tec[1],
+                "cargo": tec[2],
+                "territorio": tec[3],
+                "curp": tec[4],
+            },
+            "mensaje": "Técnico asociado correctamente"
+        }
+    except HTTPException:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        raise
+    except Exception as e:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        print(f"❌ Error en asignar-tecnico: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/facilitadores/asignar-tecnico")
+async def desasignar_tecnico_facilitador(admin_id: int, tecnico_usuario_id: int):
+    """
+    Desasocia (soft delete) un técnico de un facilitador.
+    Solo permite quitar asignaciones con origen='manual' para no romper las del CSV.
+    """
+    try:
+        verificar_conexion_db()
+        facilitador_uid = _validar_facilitador(admin_id)
+
+        cursor.execute(
+            """
+            SELECT id, origen, activo
+            FROM facilitador_tecnico_asignaciones
+            WHERE facilitador_usuario_id = %s AND tecnico_usuario_id = %s
+            """,
+            (facilitador_uid, tecnico_usuario_id)
+        )
+        row = cursor.fetchone()
+        if not row or not row[2]:
+            raise HTTPException(status_code=404, detail="Asignación no encontrada o ya inactiva")
+        if row[1] != 'manual':
+            raise HTTPException(
+                status_code=403,
+                detail="Solo puedes desasociar técnicos que agregaste manualmente"
+            )
+
+        cursor.execute(
+            """
+            UPDATE facilitador_tecnico_asignaciones
+            SET activo = FALSE, updated_at = NOW()
+            WHERE id = %s
+            """,
+            (row[0],)
+        )
+        conn.commit()
+        return {"success": True, "mensaje": "Técnico desasociado correctamente"}
+    except HTTPException:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        raise
+    except Exception as e:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        print(f"❌ Error en desasignar-tecnico: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.delete("/reportes/quitar-firma/{reporte_id}")
 async def quitar_firma_reporte(reporte_id: int, supervisor_id: int):
     """

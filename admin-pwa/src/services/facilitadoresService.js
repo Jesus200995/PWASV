@@ -62,6 +62,53 @@ const facilitadoresService = {
       throw new Error(err.detail || `Error ${res.status}`)
     }
     return res.json()
+  },
+
+  /**
+   * Listar técnicos de pwasuper disponibles para asociar
+   * (solo técnicos sin facilitador asignado)
+   */
+  async listarTecnicosDisponibles(adminId, { q = '', territorio = '', limite = 50 } = {}) {
+    const params = new URLSearchParams({ admin_id: adminId, limite })
+    if (q) params.append('q', q)
+    if (territorio) params.append('territorio', territorio)
+    const res = await fetch(`${API_URL}/facilitadores/tecnicos-disponibles?${params}`)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.detail || `Error ${res.status}`)
+    }
+    return res.json()
+  },
+
+  /**
+   * Asociar un técnico al facilitador (origen='manual')
+   */
+  async asignarTecnico(adminId, tecnicoUsuarioId) {
+    const res = await fetch(`${API_URL}/facilitadores/asignar-tecnico`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ admin_id: adminId, tecnico_usuario_id: tecnicoUsuarioId })
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.detail || `Error ${res.status}`)
+    }
+    return res.json()
+  },
+
+  /**
+   * Desasociar un técnico del facilitador (solo origen='manual')
+   */
+  async desasignarTecnico(adminId, tecnicoUsuarioId) {
+    const params = new URLSearchParams({ admin_id: adminId, tecnico_usuario_id: tecnicoUsuarioId })
+    const res = await fetch(`${API_URL}/facilitadores/asignar-tecnico?${params}`, {
+      method: 'DELETE'
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.detail || `Error ${res.status}`)
+    }
+    return res.json()
   }
 }
 

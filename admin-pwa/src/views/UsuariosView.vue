@@ -438,195 +438,98 @@
       </div>
     </main>
 
-    <!-- Modal para detalles - Diseño Moderno Responsivo -->
-    <div v-if="showModal" class="modal-overlay-modern" @click="cerrarModal">
-      <div class="modal-content-modern" @click.stop>
-        <div class="modal-header-modern">
-          <div class="modal-title-section">
-            <div class="modal-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-            </div>
-            <h3 class="modal-title">{{ modalTitle }}</h3>
-          </div>
-          <button @click="cerrarModal" class="btn-close-modern">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-        
-        <div class="modal-body-modern">
-          <div v-if="usuarioSeleccionado" class="user-details-grid">
-            <!-- ID Usuario -->
-            <div class="detail-card">
-              <div class="detail-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                </svg>
-              </div>
-              <div class="detail-content">
-                <span class="detail-label">ID Usuario</span>
-                <span class="detail-value">#{{ usuarioSeleccionado.id }}</span>
-              </div>
-            </div>
+    <!-- Modal de detalles — Apple 2026 -->
+    <Teleport to="body">
+    <Transition name="vu-fade">
+    <div v-if="showModal" class="vu-overlay" @click.self="cerrarModal">
+      <div class="vu-panel" @click.stop>
 
-            <!-- Correo Electrónico -->
-            <div class="detail-card">
-              <div class="detail-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                  <polyline points="22,6 12,13 2,6"/>
-                </svg>
-              </div>
-              <div class="detail-content">
-                <span class="detail-label">Correo</span>
-                <span class="detail-value">{{ usuarioSeleccionado.correo }}</span>
-              </div>
-            </div>
+        <!-- Close button -->
+        <button class="vu-close" @click="cerrarModal" aria-label="Cerrar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
 
-            <!-- Nombre Completo -->
-            <div class="detail-card">
-              <div class="detail-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-              </div>
-              <div class="detail-content">
-                <span class="detail-label">Nombre</span>
-                <span class="detail-value">{{ usuarioSeleccionado.nombre_completo || 'No especificado' }}</span>
-              </div>
+        <div v-if="usuarioSeleccionado">
+          <!-- Hero -->
+          <div class="vu-hero">
+            <div class="vu-avatar" :style="{ background: avatarGradient(usuarioSeleccionado.nombre_completo) }">
+              <span>{{ avatarInitials(usuarioSeleccionado.nombre_completo) }}</span>
             </div>
-
-            <!-- Cargo -->
-            <div class="detail-card">
-              <div class="detail-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                  <line x1="8" y1="21" x2="16" y2="21"/>
-                  <line x1="12" y1="17" x2="12" y2="21"/>
-                </svg>
-              </div>
-              <div class="detail-content">
-                <span class="detail-label">Cargo</span>
-                <span v-if="usuarioSeleccionado.cargo" :class="['cargo-badge', 'cargo-badge-detail', `cargo-${obtenerColorCargo(usuarioSeleccionado.cargo)}`]">
-                  {{ usuarioSeleccionado.cargo }}
+            <div class="vu-hero-info">
+              <h2 class="vu-name">{{ usuarioSeleccionado.nombre_completo || 'Sin nombre' }}</h2>
+              <div class="vu-hero-meta">
+                <span v-if="usuarioSeleccionado.cargo" :class="['apple-cargo-badge', `cargo-${obtenerColorCargo(usuarioSeleccionado.cargo)}`]" style="font-size:11px;">{{ usuarioSeleccionado.cargo }}</span>
+                <span :class="['vu-status-pill', usuarioSeleccionado.activo === false ? 'vu-status-off' : 'vu-status-on']">
+                  <span class="vu-status-dot"></span>
+                  {{ usuarioSeleccionado.activo === false ? 'Inactivo' : 'Activo' }}
                 </span>
-                <span v-else class="detail-value">No especificado</span>
               </div>
             </div>
+          </div>
 
-            <!-- Supervisor -->
-            <div class="detail-card">
-              <div class="detail-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </div>
-              <div class="detail-content">
-                <span class="detail-label">Supervisor</span>
-                <span class="detail-value">{{ usuarioSeleccionado.supervisor || 'No asignado' }}</span>
-              </div>
+          <!-- Details grid -->
+          <div class="vu-grid">
+
+            <!-- ID -->
+            <div class="vu-field">
+              <span class="vu-field-label">ID</span>
+              <span class="vu-field-value vu-mono">#{{ usuarioSeleccionado.id }}</span>
+            </div>
+
+            <!-- Correo -->
+            <div class="vu-field">
+              <span class="vu-field-label">Correo</span>
+              <span class="vu-field-value vu-small">{{ usuarioSeleccionado.correo }}</span>
             </div>
 
             <!-- CURP -->
-            <div class="detail-card">
-              <div class="detail-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                  <polyline points="10,9 9,9 8,9"/>
-                </svg>
-              </div>
-              <div class="detail-content">
-                <span class="detail-label">CURP</span>
-                <span class="detail-value">{{ usuarioSeleccionado.curp || 'No especificada' }}</span>
-              </div>
+            <div class="vu-field">
+              <span class="vu-field-label">CURP</span>
+              <span class="vu-field-value vu-mono vu-small">{{ usuarioSeleccionado.curp || '—' }}</span>
             </div>
 
             <!-- Teléfono -->
-            <div class="detail-card">
-              <div class="detail-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                </svg>
-              </div>
-              <div class="detail-content">
-                <span class="detail-label">Teléfono</span>
-                <span class="detail-value phone-value">{{ usuarioSeleccionado.telefono || 'No especificado' }}</span>
-              </div>
+            <div class="vu-field">
+              <span class="vu-field-label">Teléfono</span>
+              <span class="vu-field-value">{{ usuarioSeleccionado.telefono || '—' }}</span>
             </div>
 
             <!-- Territorio -->
-            <div class="detail-card">
-              <div class="detail-icon territorio-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
-              </div>
-              <div class="detail-content">
-                <span class="detail-label">Territorio</span>
-                <span :class="usuarioSeleccionado.territorio ? 'detail-value territorio-value' : 'detail-value territorio-empty-detail'">{{ usuarioSeleccionado.territorio || 'Sin asignar' }}</span>
-              </div>
+            <div class="vu-field vu-field-wide">
+              <span class="vu-field-label">Territorio</span>
+              <span v-if="usuarioSeleccionado.territorio" :class="['apple-territorio-badge', `territorio-${obtenerColorTerritorio(usuarioSeleccionado.territorio)}`]" style="font-size:11px;">{{ usuarioSeleccionado.territorio }}</span>
+              <span v-else class="vu-field-empty">Sin asignar</span>
             </div>
 
-            <!-- Estado -->
-            <div class="detail-card">
-              <div class="detail-icon status-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22,4 12,14.01 9,11.01"/>
-                </svg>
-              </div>
-              <div class="detail-content">
-                <span class="detail-label">Estado</span>
-                <span class="detail-value status-active">● Activo</span>
+            <!-- Supervisor / Facilitador -->
+            <div class="vu-field vu-field-wide">
+              <span class="vu-field-label">{{ usuarioSeleccionado.supervisor_es_facilitador ? 'Facilitador Comunitario' : 'Supervisor' }}</span>
+              <div class="vu-supervisor-row">
+                <span class="vu-field-value">{{ usuarioSeleccionado.supervisor || '—' }}</span>
+                <span v-if="usuarioSeleccionado.supervisor_es_facilitador" class="badge-facilitador">FACILITADOR</span>
               </div>
             </div>
 
             <!-- Contraseña -->
-            <div class="detail-card password-card">
-              <div class="detail-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <circle cx="12" cy="16" r="1"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-              </div>
-              <div class="detail-content password-content">
-                <span class="detail-label">Contraseña</span>
-                <div class="password-display">
-                  <span class="password-value">
-                    {{ showPassword ? obtenerContrasenaUsuario(usuarioSeleccionado) : '••••••••••••' }}
-                  </span>
-                  <button @click="togglePassword" class="password-toggle-btn" type="button">
-                    <svg v-if="showPassword" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                      <line x1="1" y1="1" x2="23" y2="23"/>
-                    </svg>
-                    <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                  </button>
-                </div>
+            <div class="vu-field vu-field-wide vu-field-password">
+              <span class="vu-field-label">Contraseña</span>
+              <div class="vu-password-row">
+                <span class="vu-field-value vu-mono">
+                  {{ showPassword ? obtenerContrasenaUsuario(usuarioSeleccionado) : '••••••••••' }}
+                </span>
+                <button @click="togglePassword" class="vu-eye-btn" type="button">
+                  <svg v-if="showPassword" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
               </div>
             </div>
+
           </div>
         </div>
       </div>
     </div>
+    </Transition>
+    </Teleport>
 
     <!-- Modal de confirmación para eliminar usuario -->
     <div v-if="showDeleteModal" class="modal-overlay-modern" @click="cancelarEliminar">
@@ -751,27 +654,24 @@
     <Teleport to="body">
       <div v-if="showEditModal" class="edit-modal-overlay" @click.self="cancelarEdicion">
         <div class="edit-modal-container">
-          <!-- Header del modal -->
+          <!-- Header del modal Apple 2026 -->
           <div class="edit-modal-header">
             <div class="edit-modal-title-wrapper">
-              <div class="edit-modal-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              <div class="edit-modal-avatar" :style="{ background: avatarGradient(usuarioAEditar?.nombre_completo) }">
+                <span>{{ avatarInitials(usuarioAEditar?.nombre_completo) }}</span>
+              </div>
+              <div class="edit-modal-title-text">
+                <h3>{{ usuarioAEditar?.nombre_completo || 'Editar Usuario' }}</h3>
+                <span class="edit-modal-subtitle">#{{ usuarioAEditar?.id }} · {{ usuarioAEditar?.cargo || 'Sin cargo' }}</span>
+              </div>
+            </div>
+            <button @click="cancelarEdicion" class="edit-modal-close">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
-            </div>
-            <div class="edit-modal-title-text">
-              <h3>Editar Usuario</h3>
-              <span class="edit-modal-subtitle">ID: #{{ usuarioAEditar?.id }}</span>
-            </div>
+            </button>
           </div>
-          <button @click="cancelarEdicion" class="edit-modal-close">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
         
         <!-- Body del modal -->
         <div class="edit-modal-body">
@@ -2053,16 +1953,51 @@ const formatFecha = (fechaStr) => {
   }
 }
 
-const verDetalles = (usuario) => {
+const verDetalles = async (usuario) => {
   modalTitle.value = 'Detalles del Usuario'
-  usuarioSeleccionado.value = usuario
-  showPassword.value = false // Resetear al cerrar/abrir modal
-  
-  // Debug para ver qué datos tiene el usuario
-  console.log('🔍 Usuario seleccionado para detalles:', usuario)
-  console.log('🔑 Contraseña disponible:', usuario.contrasena || usuario.password || usuario.contraseña || 'No encontrada')
-  
+  usuarioSeleccionado.value = { ...usuario }
+  showPassword.value = false
   showModal.value = true
+
+  // Si es técnico, refrescar el facilitador asignado en tiempo real
+  const cargo = (usuario.cargo || '').toUpperCase()
+  if (cargo === 'TECNICO SOCIAL' || cargo === 'TECNICO PRODUCTIVO') {
+    try {
+      const res = await fetch(`${API_URL}/usuarios/${usuario.id}/facilitador-asignado`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.success && data.facilitador_nombre) {
+          usuarioSeleccionado.value = {
+            ...usuarioSeleccionado.value,
+            supervisor: data.facilitador_nombre,
+            supervisor_es_facilitador: true
+          }
+        }
+      }
+    } catch (_) {}
+  }
+}
+
+const avatarInitials = (nombre) => {
+  if (!nombre) return '?'
+  const parts = nombre.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0][0].toUpperCase()
+  return (parts[0][0] + parts[1][0]).toUpperCase()
+}
+
+const _avatarGradients = [
+  'linear-gradient(135deg,#6366f1,#8b5cf6)',
+  'linear-gradient(135deg,#0ea5e9,#6366f1)',
+  'linear-gradient(135deg,#10b981,#0ea5e9)',
+  'linear-gradient(135deg,#f59e0b,#ef4444)',
+  'linear-gradient(135deg,#ec4899,#f43f5e)',
+  'linear-gradient(135deg,#14b8a6,#3b82f6)',
+]
+
+const avatarGradient = (nombre) => {
+  if (!nombre) return _avatarGradients[0]
+  const code = nombre.charCodeAt(0) || 0
+  return _avatarGradients[code % _avatarGradients.length]
 }
 
 const togglePassword = () => {
@@ -6268,6 +6203,183 @@ const logout = () => {
   box-shadow: none;
 }
 
+/* ====================== APPLE 2026 DETAIL MODAL ====================== */
+/* Transition */
+.vu-fade-enter-active, .vu-fade-leave-active { transition: opacity .22s cubic-bezier(.4,0,.2,1), transform .22s cubic-bezier(.4,0,.2,1); }
+.vu-fade-enter-from, .vu-fade-leave-to { opacity: 0; }
+.vu-fade-enter-from .vu-panel, .vu-fade-leave-to .vu-panel { transform: scale(.95) translateY(12px); }
+
+.vu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.vu-panel {
+  position: relative;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.22), 0 0 0 .5px rgba(0,0,0,.06);
+  width: 100%;
+  max-width: 460px;
+  max-height: 88vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transition: transform .22s cubic-bezier(.4,0,.2,1);
+}
+
+.vu-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0,0,0,.07);
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s;
+}
+.vu-close:hover { background: rgba(0,0,0,.13); }
+
+/* Hero */
+.vu-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.vu-avatar {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -.5px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.18);
+}
+
+.vu-hero-info { flex: 1; min-width: 0; }
+.vu-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0 0 6px;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.vu-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.vu-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+.vu-status-on  { background: rgba(52,199,89,.12); color: #1a7f37; }
+.vu-status-off { background: rgba(255,59,48,.1);  color: #c0392b; }
+.vu-status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.vu-status-on  .vu-status-dot { background: #34c759; }
+.vu-status-off .vu-status-dot { background: #ff3b30; }
+
+/* Grid */
+.vu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: #f0f0f0;
+  border-radius: 0 0 22px 22px;
+  overflow: hidden;
+}
+
+.vu-field {
+  background: #fff;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.vu-field-wide { grid-column: span 2; }
+.vu-field-password { background: #fafafa; }
+
+.vu-field-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: #8e8e93;
+}
+.vu-field-value {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #1d1d1f;
+  word-break: break-all;
+}
+.vu-mono { font-family: 'SF Mono','Monaco','Menlo',monospace; }
+.vu-small { font-size: 12.5px; }
+.vu-field-empty { font-size: 13px; color: #b0b0b5; font-style: italic; }
+
+.vu-supervisor-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.vu-password-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vu-eye-btn {
+  border: none;
+  background: rgba(0,122,255,.09);
+  color: #007aff;
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.vu-eye-btn:hover { background: rgba(0,122,255,.18); }
+
+/* ==================================================================== */
 /* Modal Moderno - Diseño Responsivo */
 .modal-overlay-modern {
   position: fixed;
@@ -9075,15 +9187,15 @@ const logout = () => {
 /* Contenedor principal del modal */
 .edit-modal-container {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 22px;
   width: 100%;
   max-width: 700px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 30px 80px rgba(0,0,0,.22), 0 0 0 .5px rgba(0,0,0,.06);
   overflow: hidden;
-  animation: modalSlideIn 0.25s ease-out;
+  animation: modalSlideIn 0.22s cubic-bezier(.4,0,.2,1);
 }
 
 @keyframes modalSlideIn {
@@ -9097,95 +9209,90 @@ const logout = () => {
   }
 }
 
-/* Header del modal - Estilo vidrio líquido naranja */
+/* Header del modal - Apple 2026 */
 .edit-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, 
-    rgba(255, 152, 0, 0.85) 0%, 
-    rgba(245, 124, 0, 0.9) 50%,
-    rgba(255, 167, 38, 0.85) 100%);
-  backdrop-filter: blur(10px);
-  color: white;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 4px 15px rgba(255, 152, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  padding: 20px 22px 18px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f2;
 }
 
 .edit-modal-title-wrapper {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
 }
 
-.edit-modal-icon {
-  width: 38px;
-  height: 38px;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(4px);
-  border-radius: 10px;
+.edit-modal-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -.3px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.18);
 }
 
-.edit-modal-icon svg {
-  stroke: white;
-  width: 20px;
-  height: 20px;
+.edit-modal-title-text {
+  min-width: 0;
 }
 
 .edit-modal-title-text h3 {
-  margin: 0;
-  font-size: 17px;
+  margin: 0 0 2px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: -0.2px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  color: #1d1d1f;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 340px;
 }
 
 .edit-modal-subtitle {
-  font-size: 12px;
-  opacity: 0.9;
+  font-size: 11.5px;
+  color: #8e8e93;
   font-weight: 500;
 }
 
 .edit-modal-close {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border: none;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
-  border-radius: 8px;
+  background: rgba(0,0,0,.07);
+  border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background .15s;
+  color: #555;
+  flex-shrink: 0;
 }
 
 .edit-modal-close:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.05);
+  background: rgba(0,0,0,.13);
 }
 
 .edit-modal-close svg {
-  stroke: white;
+  stroke: #555;
 }
 
 /* Body del modal */
 .edit-modal-body {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
-  background: #f8fafc;
+  padding: 22px 24px;
+  background: #f5f5f7;
 }
 
 .edit-form-container {

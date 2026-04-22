@@ -351,6 +351,84 @@ try:
     except Exception as e:
         print(f"⚠️ Error en migración facilitador_tecnico_asignaciones: {e}")
 
+    # ===== MIGRACIÓN: agregar facilitador_admin_id y hacer facilitador_usuario_id nullable =====
+    # Permite asociar técnicos a facilitadores que NO tienen usuario_id en la tabla usuarios
+    try:
+        ejecutar_consulta_segura("""
+            DO $$
+            BEGIN
+                -- Agregar columna facilitador_admin_id si no existe
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name='facilitador_tecnico_asignaciones'
+                      AND column_name='facilitador_admin_id'
+                ) THEN
+                    ALTER TABLE facilitador_tecnico_asignaciones
+                    ADD COLUMN facilitador_admin_id INTEGER REFERENCES admin_users(id);
+                    RAISE NOTICE 'Columna facilitador_admin_id agregada';
+                END IF;
+
+                -- Hacer facilitador_usuario_id nullable
+                BEGIN
+                    ALTER TABLE facilitador_tecnico_asignaciones
+                    ALTER COLUMN facilitador_usuario_id DROP NOT NULL;
+                EXCEPTION WHEN OTHERS THEN
+                    NULL;
+                END;
+
+                -- Eliminar el UNIQUE constraint antiguo para permitir NULLs
+                BEGIN
+                    ALTER TABLE facilitador_tecnico_asignaciones
+                    DROP CONSTRAINT IF EXISTS facilitador_tecnico_asignaciones_facilitador_usuario_id_tecnico_usuario_id_key;
+                EXCEPTION WHEN OTHERS THEN
+                    NULL;
+                END;
+                BEGIN
+                    ALTER TABLE facilitador_tecnico_asignaciones
+                    DROP CONSTRAINT IF EXISTS facilitador_tecnico_asignaciones_facilitador_usuario_id_t_key;
+                EXCEPTION WHEN OTHERS THEN
+                    NULL;
+                END;
+
+                -- Check: al menos uno de los dos IDs del facilitador debe estar presente
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.table_constraints
+                    WHERE constraint_name='chk_fta_facilitador_ref'
+                      AND table_name='facilitador_tecnico_asignaciones'
+                ) THEN
+                    ALTER TABLE facilitador_tecnico_asignaciones
+                    ADD CONSTRAINT chk_fta_facilitador_ref
+                    CHECK (facilitador_usuario_id IS NOT NULL OR facilitador_admin_id IS NOT NULL);
+                END IF;
+            END $$;
+        """, fetch_type='none')
+
+        # Índices únicos parciales (para permitir ON CONFLICT)
+        ejecutar_consulta_segura("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_fta_usuario_tecnico_uq
+                ON facilitador_tecnico_asignaciones (facilitador_usuario_id, tecnico_usuario_id)
+                WHERE facilitador_usuario_id IS NOT NULL;
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_fta_admin_tecnico_uq
+                ON facilitador_tecnico_asignaciones (facilitador_admin_id, tecnico_usuario_id)
+                WHERE facilitador_admin_id IS NOT NULL;
+            CREATE INDEX IF NOT EXISTS idx_fta_admin
+                ON facilitador_tecnico_asignaciones(facilitador_admin_id) WHERE activo = TRUE;
+        """, fetch_type='none')
+
+        # Backfill: para asignaciones existentes, poblar facilitador_admin_id desde admin_users
+        ejecutar_consulta_segura("""
+            UPDATE facilitador_tecnico_asignaciones fta
+            SET facilitador_admin_id = au.id
+            FROM admin_users au
+            WHERE fta.facilitador_admin_id IS NULL
+              AND fta.facilitador_usuario_id IS NOT NULL
+              AND au.usuario_id = fta.facilitador_usuario_id;
+        """, fetch_type='none')
+
+        print("✅ Migración facilitador_admin_id aplicada")
+    except Exception as e:
+        print(f"⚠️ Error en migración facilitador_admin_id: {e}")
+
 except Exception as e:
     print(f"❌ Error en inicialización de base de datos: {e}")
     conn = None
@@ -730,18 +808,17 @@ async def crear_usuario(usuario: UserCreate):
                         fac_usuario_id = fac_row[1]  # puede ser None
                         fac_nombre = fac_row[2]
                         
-                        # Si tiene usuario_id vinculado, crear asignación formal
-                        if fac_usuario_id:
-                            cursor.execute("""
-                                INSERT INTO facilitador_tecnico_asignaciones
-                                    (facilitador_usuario_id, tecnico_usuario_id, origen, activo)
-                                VALUES (%s, %s, 'manual', TRUE)
-                                ON CONFLICT (facilitador_usuario_id, tecnico_usuario_id)
-                                DO UPDATE SET activo = TRUE, origen = 'manual', updated_at = NOW()
-                            """, (fac_usuario_id, user_id))
-                            print(f"✅ Asignación formal creada: facilitador usuario_id={fac_usuario_id} → técnico {user_id}")
-                        else:
-                            print(f"ℹ️ Facilitador admin_id={usuario.facilitador_admin_id} sin usuario_id, solo supervisor")
+                        # Crear asignación formal usando admin_id (y usuario_id si está vinculado)
+                        cursor.execute("""
+                            INSERT INTO facilitador_tecnico_asignaciones
+                                (facilitador_admin_id, facilitador_usuario_id, tecnico_usuario_id, origen, activo)
+                            VALUES (%s, %s, %s, 'manual', TRUE)
+                            ON CONFLICT (facilitador_admin_id, tecnico_usuario_id)
+                            WHERE facilitador_admin_id IS NOT NULL
+                            DO UPDATE SET activo = TRUE, origen = 'manual', updated_at = NOW(),
+                                          facilitador_usuario_id = EXCLUDED.facilitador_usuario_id
+                        """, (usuario.facilitador_admin_id, fac_usuario_id, user_id))
+                        print(f"✅ Asignación formal creada: admin_id={usuario.facilitador_admin_id} usuario_id={fac_usuario_id} → técnico {user_id}")
                         
                         # Siempre actualizar campo supervisor con el nombre del facilitador
                         cursor.execute(
@@ -2420,15 +2497,12 @@ async def firmar_reporte_supervisor(reporte_id: int, firma_data: FirmaReporteReq
                 raise HTTPException(status_code=403, detail="No tienes permiso para firmar reportes")
 
             if permisos.get('firmas') and not es_admin_rol:
-                # Es facilitador: validar usuario_id y asignación
-                if not usuario_id:
-                    raise HTTPException(status_code=403, detail="Cuenta de facilitador no vinculada a un usuario del sistema")
-
-                # Verificar cargo FACILITADOR COMUNITARIO en tabla usuarios
-                cursor.execute("SELECT cargo FROM usuarios WHERE id = %s", (usuario_id,))
-                u_row = cursor.fetchone()
-                if not u_row or 'FACILITADOR' not in (u_row[0] or '').upper():
-                    raise HTTPException(status_code=403, detail="El usuario vinculado no tiene el cargo de FACILITADOR COMUNITARIO")
+                # Es facilitador: validar cargo en admin_users (no requerimos usuario_id)
+                cursor.execute("SELECT cargo, nombre_completo FROM admin_users WHERE id = %s", (admin_db_id,))
+                au_row = cursor.fetchone()
+                if not au_row or 'FACILITADOR' not in (au_row[0] or '').upper():
+                    raise HTTPException(status_code=403, detail="El admin no tiene el cargo de FACILITADOR")
+                nombre_admin_db = au_row[1]
 
                 # Obtener usuario_id del técnico del reporte
                 cursor.execute("SELECT usuario_id FROM reportes_generados WHERE id = %s", (reporte_id,))
@@ -2437,24 +2511,28 @@ async def firmar_reporte_supervisor(reporte_id: int, firma_data: FirmaReporteReq
                     raise HTTPException(status_code=404, detail="Reporte no encontrado")
                 tecnico_uid = rep[0]
 
-                # Verificar asignación activa
+                # Verificar asignación activa (por admin_id O usuario_id)
                 cursor.execute("""
                     SELECT 1 FROM facilitador_tecnico_asignaciones
-                    WHERE facilitador_usuario_id = %s
-                      AND tecnico_usuario_id = %s
+                    WHERE tecnico_usuario_id = %s
                       AND activo = TRUE
-                """, (usuario_id, tecnico_uid))
+                      AND (facilitador_admin_id = %s
+                           OR (%s IS NOT NULL AND facilitador_usuario_id = %s))
+                """, (tecnico_uid, admin_db_id, usuario_id, usuario_id))
                 if not cursor.fetchone():
                     raise HTTPException(
                         status_code=403,
                         detail="No tienes asignado a este técnico para firmar sus reportes"
                     )
 
-                # Obtener nombre completo del facilitador desde tabla usuarios
-                cursor.execute("SELECT nombre_completo FROM usuarios WHERE id = %s", (usuario_id,))
-                u = cursor.fetchone()
-                nombre_firmante = u[0] if u else nombre_admin
-                id_firmante = usuario_id
+                # Usar nombre del admin (o del usuario vinculado si existe)
+                if usuario_id:
+                    cursor.execute("SELECT nombre_completo FROM usuarios WHERE id = %s", (usuario_id,))
+                    u = cursor.fetchone()
+                    nombre_firmante = u[0] if u else (nombre_admin_db or nombre_admin)
+                else:
+                    nombre_firmante = nombre_admin_db or nombre_admin
+                id_firmante = usuario_id or 0
             else:
                 # Admin total: usa datos del payload legacy
                 nombre_firmante = firma_data.nombre_supervisor or nombre_admin
@@ -2531,15 +2609,16 @@ async def mis_reportes_facilitador(
     """
     try:
         verificar_conexion_db()
-        # Obtener usuario_id del facilitador
+        # Obtener datos del admin facilitador
         cursor.execute(
-            "SELECT usuario_id, nombre_completo FROM admin_users WHERE id = %s AND activo = TRUE",
+            "SELECT id, usuario_id, nombre_completo FROM admin_users WHERE id = %s AND activo = TRUE",
             (admin_id,)
         )
         row = cursor.fetchone()
-        if not row or not row[0]:
-            raise HTTPException(status_code=403, detail="Facilitador no vinculado a un usuario del sistema")
-        facilitador_uid, facilitador_nombre = row
+        if not row:
+            raise HTTPException(status_code=404, detail="Admin no encontrado")
+        facilitador_uid = row[1]  # puede ser None
+        facilitador_nombre = row[2]
 
         # Construir filtro de estado
         estado_filter = ""
@@ -2562,15 +2641,16 @@ async def mis_reportes_facilitador(
             FROM reportes_generados r
             JOIN facilitador_tecnico_asignaciones fta
                 ON fta.tecnico_usuario_id = r.usuario_id
-                AND fta.facilitador_usuario_id = %s
                 AND fta.activo = TRUE
+                AND (fta.facilitador_admin_id = %s
+                     OR (%s IS NOT NULL AND fta.facilitador_usuario_id = %s))
             JOIN usuarios u ON u.id = r.usuario_id
             WHERE r.activo = TRUE
             {estado_filter}
             ORDER BY r.fecha_generado DESC
             LIMIT %s OFFSET %s
         """
-        cursor.execute(query, (facilitador_uid, limite, offset))
+        cursor.execute(query, (admin_id, facilitador_uid, facilitador_uid, limite, offset))
         rows = cursor.fetchall()
 
         reportes = []
@@ -2593,11 +2673,12 @@ async def mis_reportes_facilitador(
             FROM reportes_generados r
             JOIN facilitador_tecnico_asignaciones fta
                 ON fta.tecnico_usuario_id = r.usuario_id
-                AND fta.facilitador_usuario_id = %s
                 AND fta.activo = TRUE
+                AND (fta.facilitador_admin_id = %s
+                     OR (%s IS NOT NULL AND fta.facilitador_usuario_id = %s))
             WHERE r.activo = TRUE {estado_filter}
         """
-        cursor.execute(count_query, (facilitador_uid,))
+        cursor.execute(count_query, (admin_id, facilitador_uid, facilitador_uid))
         total = cursor.fetchone()[0]
 
         return {
@@ -2619,6 +2700,7 @@ async def mis_reportes_facilitador(
 async def mis_tecnicos_facilitador(admin_id: int):
     """
     Lista los técnicos asignados al facilitador.
+    Match por facilitador_admin_id O facilitador_usuario_id (si el admin tiene uno).
     """
     try:
         verificar_conexion_db()
@@ -2627,9 +2709,9 @@ async def mis_tecnicos_facilitador(admin_id: int):
             (admin_id,)
         )
         row = cursor.fetchone()
-        if not row or not row[0]:
-            raise HTTPException(status_code=403, detail="Facilitador no vinculado")
-        facilitador_uid = row[0]
+        if not row:
+            raise HTTPException(status_code=404, detail="Admin no encontrado")
+        facilitador_uid = row[0]  # puede ser None
 
         cursor.execute("""
             SELECT
@@ -2637,9 +2719,11 @@ async def mis_tecnicos_facilitador(admin_id: int):
                 fta.origen, fta.created_at
             FROM facilitador_tecnico_asignaciones fta
             JOIN usuarios u ON u.id = fta.tecnico_usuario_id
-            WHERE fta.facilitador_usuario_id = %s AND fta.activo = TRUE
+            WHERE fta.activo = TRUE
+              AND (fta.facilitador_admin_id = %s
+                   OR (%s IS NOT NULL AND fta.facilitador_usuario_id = %s))
             ORDER BY u.nombre_completo
-        """, (facilitador_uid,))
+        """, (admin_id, facilitador_uid, facilitador_uid))
         rows = cursor.fetchall()
 
         tecnicos = [{
@@ -2669,10 +2753,10 @@ class AsignarTecnicoRequest(BaseModel):
     tecnico_usuario_id: int  # id de usuarios (técnico en pwasuper)
 
 
-def _validar_facilitador(admin_id: int) -> int:
+def _validar_facilitador(admin_id: int):
     """
-    Verifica que el admin_id corresponda a un FACILITADOR activo con usuario_id vinculado.
-    Devuelve el usuario_id (pwasuper) del facilitador.
+    Verifica que el admin_id corresponda a un FACILITADOR activo.
+    Devuelve (usuario_id, admin_id). usuario_id puede ser None si no está vinculado.
     """
     cursor.execute(
         """
@@ -2685,12 +2769,10 @@ def _validar_facilitador(admin_id: int) -> int:
     row = cursor.fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Admin no encontrado o inactivo")
-    if not row[0]:
-        raise HTTPException(status_code=403, detail="Facilitador sin usuario vinculado en pwasuper")
     cargo = (row[1] or "").upper()
     if "FACILITADOR" not in cargo:
         raise HTTPException(status_code=403, detail="Solo los facilitadores pueden asignar técnicos")
-    return row[0]
+    return row[0], admin_id  # (usuario_id puede ser None, admin_id)
 
 
 @app.get("/facilitadores/tecnicos-disponibles")
@@ -2768,7 +2850,7 @@ async def asignar_tecnico_facilitador(payload: AsignarTecnicoRequest):
     """
     try:
         verificar_conexion_db()
-        facilitador_uid = _validar_facilitador(payload.admin_id)
+        facilitador_uid, facilitador_admin_id = _validar_facilitador(payload.admin_id)
 
         # Validar que el técnico exista y sea TECNICO
         cursor.execute(
@@ -2782,12 +2864,14 @@ async def asignar_tecnico_facilitador(payload: AsignarTecnicoRequest):
         if "TECNICO" not in cargo_tec:
             raise HTTPException(status_code=400, detail="El usuario seleccionado no es técnico")
 
-        # Verificar que no tenga otro facilitador activo
+        # Verificar que no tenga otro facilitador activo (cualquier asignación)
         cursor.execute(
             """
-            SELECT fta.facilitador_usuario_id, u.nombre_completo
+            SELECT fta.facilitador_admin_id, fta.facilitador_usuario_id,
+                   COALESCE(au.nombre_completo, uf.nombre_completo) AS fac_nombre
             FROM facilitador_tecnico_asignaciones fta
-            JOIN usuarios u ON u.id = fta.facilitador_usuario_id
+            LEFT JOIN admin_users au ON au.id = fta.facilitador_admin_id
+            LEFT JOIN usuarios uf ON uf.id = fta.facilitador_usuario_id
             WHERE fta.tecnico_usuario_id = %s AND fta.activo = TRUE
             LIMIT 1
             """,
@@ -2795,29 +2879,34 @@ async def asignar_tecnico_facilitador(payload: AsignarTecnicoRequest):
         )
         existente = cursor.fetchone()
         if existente:
-            if existente[0] == facilitador_uid:
+            ex_admin_id, ex_usuario_id, ex_nombre = existente
+            ya_es_mio = (ex_admin_id == facilitador_admin_id) or \
+                        (facilitador_uid is not None and ex_usuario_id == facilitador_uid)
+            if ya_es_mio:
                 raise HTTPException(status_code=409, detail="El técnico ya está asignado a ti")
             raise HTTPException(
                 status_code=409,
-                detail=f"El técnico ya está asignado al facilitador: {existente[1]}"
+                detail=f"El técnico ya está asignado al facilitador: {ex_nombre}"
             )
 
-        # Insertar/reactivar con origen manual
+        # Insertar/reactivar con origen manual (siempre usamos admin_id)
         cursor.execute(
             """
             INSERT INTO facilitador_tecnico_asignaciones
-                (facilitador_usuario_id, tecnico_usuario_id, origen, activo,
+                (facilitador_admin_id, facilitador_usuario_id, tecnico_usuario_id, origen, activo,
                  created_by_admin_user_id)
-            VALUES (%s, %s, 'manual', TRUE, %s)
-            ON CONFLICT (facilitador_usuario_id, tecnico_usuario_id)
+            VALUES (%s, %s, %s, 'manual', TRUE, %s)
+            ON CONFLICT (facilitador_admin_id, tecnico_usuario_id)
+            WHERE facilitador_admin_id IS NOT NULL
             DO UPDATE SET
                 activo = TRUE,
                 origen = 'manual',
                 updated_at = NOW(),
-                created_by_admin_user_id = EXCLUDED.created_by_admin_user_id
+                created_by_admin_user_id = EXCLUDED.created_by_admin_user_id,
+                facilitador_usuario_id = EXCLUDED.facilitador_usuario_id
             RETURNING id
             """,
-            (facilitador_uid, payload.tecnico_usuario_id, payload.admin_id)
+            (facilitador_admin_id, facilitador_uid, payload.tecnico_usuario_id, payload.admin_id)
         )
         asign_id = cursor.fetchone()[0]
         conn.commit()
@@ -2857,15 +2946,19 @@ async def desasignar_tecnico_facilitador(admin_id: int, tecnico_usuario_id: int)
     """
     try:
         verificar_conexion_db()
-        facilitador_uid = _validar_facilitador(admin_id)
+        facilitador_uid, facilitador_admin_id = _validar_facilitador(admin_id)
 
         cursor.execute(
             """
             SELECT id, origen, activo
             FROM facilitador_tecnico_asignaciones
-            WHERE facilitador_usuario_id = %s AND tecnico_usuario_id = %s
+            WHERE tecnico_usuario_id = %s
+              AND (facilitador_admin_id = %s
+                   OR (%s IS NOT NULL AND facilitador_usuario_id = %s))
+            ORDER BY activo DESC, updated_at DESC
+            LIMIT 1
             """,
-            (facilitador_uid, tecnico_usuario_id)
+            (tecnico_usuario_id, facilitador_admin_id, facilitador_uid, facilitador_uid)
         )
         row = cursor.fetchone()
         if not row or not row[2]:
@@ -2990,26 +3083,24 @@ async def cambiar_facilitador(user_id: int, payload: CambiarFacilitadorRequest):
         fac_usuario_id = fac[1]  # puede ser None
         fac_nombre = fac[2]
 
-        # Si el facilitador tiene usuario_id vinculado, crear asignación formal
-        if fac_usuario_id:
-            # Desactivar asignaciones manuales anteriores de este técnico
-            cursor.execute("""
-                UPDATE facilitador_tecnico_asignaciones
-                SET activo = FALSE, updated_at = NOW()
-                WHERE tecnico_usuario_id = %s AND activo = TRUE AND origen = 'manual'
-            """, (user_id,))
+        # Desactivar asignaciones manuales anteriores de este técnico
+        cursor.execute("""
+            UPDATE facilitador_tecnico_asignaciones
+            SET activo = FALSE, updated_at = NOW()
+            WHERE tecnico_usuario_id = %s AND activo = TRUE AND origen = 'manual'
+        """, (user_id,))
 
-            # Crear/reactivar nueva asignación
-            cursor.execute("""
-                INSERT INTO facilitador_tecnico_asignaciones
-                    (facilitador_usuario_id, tecnico_usuario_id, origen, activo)
-                VALUES (%s, %s, 'manual', TRUE)
-                ON CONFLICT (facilitador_usuario_id, tecnico_usuario_id)
-                DO UPDATE SET activo = TRUE, origen = 'manual', updated_at = NOW()
-            """, (fac_usuario_id, user_id))
-            print(f"✅ Asignación formal creada: facilitador usuario_id={fac_usuario_id} → técnico {user_id}")
-        else:
-            print(f"ℹ️ Facilitador admin_id={payload.facilitador_admin_id} sin usuario_id vinculado, solo se actualiza supervisor")
+        # Crear/reactivar nueva asignación usando admin_id (y usuario_id si existe)
+        cursor.execute("""
+            INSERT INTO facilitador_tecnico_asignaciones
+                (facilitador_admin_id, facilitador_usuario_id, tecnico_usuario_id, origen, activo)
+            VALUES (%s, %s, %s, 'manual', TRUE)
+            ON CONFLICT (facilitador_admin_id, tecnico_usuario_id)
+            WHERE facilitador_admin_id IS NOT NULL
+            DO UPDATE SET activo = TRUE, origen = 'manual', updated_at = NOW(),
+                          facilitador_usuario_id = EXCLUDED.facilitador_usuario_id
+        """, (payload.facilitador_admin_id, fac_usuario_id, user_id))
+        print(f"✅ Asignación creada: admin_id={payload.facilitador_admin_id} usuario_id={fac_usuario_id} → técnico {user_id}")
 
         # Siempre actualizar campo supervisor en tabla usuarios
         cursor.execute(
@@ -3131,10 +3222,11 @@ async def obtener_todos_reportes_admin(
                 r.nombre_supervisor,
                 r.supervisor_id,
                 CASE WHEN r.datos_reporte IS NOT NULL THEN true ELSE false END as tiene_datos_reporte,
-                uf.nombre_completo as facilitador_nombre
+                COALESCE(au.nombre_completo, uf.nombre_completo) as facilitador_nombre
             FROM reportes_generados r
             LEFT JOIN usuarios u ON r.usuario_id = u.id
             LEFT JOIN facilitador_tecnico_asignaciones fta ON fta.tecnico_usuario_id = u.id AND fta.activo = TRUE
+            LEFT JOIN admin_users au ON au.id = fta.facilitador_admin_id
             LEFT JOIN usuarios uf ON uf.id = fta.facilitador_usuario_id
             WHERE 1=1
         """
@@ -3158,17 +3250,20 @@ async def obtener_todos_reportes_admin(
             params.append(usuario_id)
 
         if facilitador_admin_id:
-            # Obtener usuario_id del facilitador en admin_users
+            # Obtener usuario_id del facilitador en admin_users (puede ser None)
             cursor.execute(
                 "SELECT usuario_id FROM admin_users WHERE id = %s AND activo = TRUE",
                 (facilitador_admin_id,)
             )
             fac_row = cursor.fetchone()
-            if fac_row and fac_row[0]:
-                cursor.execute(
-                    "SELECT tecnico_usuario_id FROM facilitador_tecnico_asignaciones WHERE facilitador_usuario_id = %s AND activo = TRUE",
-                    (fac_row[0],)
-                )
+            if fac_row:
+                fac_uid = fac_row[0]  # puede ser None
+                cursor.execute("""
+                    SELECT tecnico_usuario_id FROM facilitador_tecnico_asignaciones
+                    WHERE activo = TRUE
+                      AND (facilitador_admin_id = %s
+                           OR (%s IS NOT NULL AND facilitador_usuario_id = %s))
+                """, (facilitador_admin_id, fac_uid, fac_uid))
                 tecnicos = [r[0] for r in cursor.fetchall()]
                 if tecnicos:
                     placeholders = ','.join(['%s'] * len(tecnicos))
@@ -3636,11 +3731,14 @@ async def obtener_estadisticas_reportes_admin(territorio: str = None, facilitado
                 (facilitador_admin_id,)
             )
             fac_row = cursor.fetchone()
-            if fac_row and fac_row[0]:
-                cursor.execute(
-                    "SELECT tecnico_usuario_id FROM facilitador_tecnico_asignaciones WHERE facilitador_usuario_id = %s AND activo = TRUE",
-                    (fac_row[0],)
-                )
+            if fac_row:
+                fac_uid = fac_row[0]  # puede ser None
+                cursor.execute("""
+                    SELECT tecnico_usuario_id FROM facilitador_tecnico_asignaciones
+                    WHERE activo = TRUE
+                      AND (facilitador_admin_id = %s
+                           OR (%s IS NOT NULL AND facilitador_usuario_id = %s))
+                """, (facilitador_admin_id, fac_uid, fac_uid))
                 tecnicos_ids = [r[0] for r in cursor.fetchall()] or [-1]
             else:
                 tecnicos_ids = [-1]
@@ -9900,10 +9998,12 @@ async def obtener_facilitador_asignado(user_id: int):
     try:
         print(f"🔍 Buscando facilitador asignado para usuario ID: {user_id}")
         cursor.execute("""
-            SELECT u.nombre_completo
+            SELECT COALESCE(au.nombre_completo, u.nombre_completo) AS facilitador_nombre
             FROM facilitador_tecnico_asignaciones fta
-            JOIN usuarios u ON u.id = fta.facilitador_usuario_id
+            LEFT JOIN admin_users au ON au.id = fta.facilitador_admin_id
+            LEFT JOIN usuarios u ON u.id = fta.facilitador_usuario_id
             WHERE fta.tecnico_usuario_id = %s AND fta.activo = TRUE
+            ORDER BY fta.updated_at DESC
             LIMIT 1
         """, (user_id,))
         row = cursor.fetchone()

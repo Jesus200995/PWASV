@@ -279,7 +279,7 @@ class AuthService {
     if (!this.user) {
       this.user = this.getUserFromStorage()
     }
-    return (this.user?.cargo || '').toUpperCase() === 'FACILITADOR'
+    return (this.user?.cargo || '').toUpperCase().includes('FACILITADOR')
   }
 
   /**

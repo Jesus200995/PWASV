@@ -2669,7 +2669,9 @@ async def tecnicos_disponibles_facilitador(
 
         limite = max(1, min(limite, 200))
 
-        params = []
+        # Usamos un parámetro para el patrón de cargo (evita problemas con
+        # los '%' literales al pasar parámetros a psycopg2).
+        params = ['%TECNICO%']
         where_extra = ""
         if q:
             where_extra += " AND (UPPER(u.nombre_completo) LIKE %s OR UPPER(u.curp) LIKE %s)"
@@ -2682,7 +2684,7 @@ async def tecnicos_disponibles_facilitador(
         sql = f"""
             SELECT u.id, u.nombre_completo, u.cargo, u.territorio, u.curp
             FROM usuarios u
-            WHERE UPPER(COALESCE(u.cargo, '')) LIKE '%TECNICO%'
+            WHERE UPPER(COALESCE(u.cargo, '')) LIKE %s
               AND NOT EXISTS (
                   SELECT 1 FROM facilitador_tecnico_asignaciones fta
                   WHERE fta.tecnico_usuario_id = u.id AND fta.activo = TRUE

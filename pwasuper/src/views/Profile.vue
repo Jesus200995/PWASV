@@ -1688,6 +1688,9 @@ const updateUserInfo = async () => {
       console.log('✅ Respuesta del servidor:', response.data)
       
       if (response.status === 200 && response.data.success) {
+        // Capturar el admin_id del facilitador ANTES de cerrar el modal (que lo limpia)
+        const facilitadorAdminId = editFacilitadorSeleccionado.value?.admin_id || null
+
         // Actualizar los datos del usuario en el estado local
         user.value = {
           ...user.value,
@@ -1712,7 +1715,26 @@ const updateUserInfo = async () => {
           territorio: editForm.value.territorio
         }
         localStorage.setItem('user', JSON.stringify(updatedUser))
-        
+
+        // Si es técnico y eligió facilitador con ID real, guardar la asignación
+        // (ANTES de cerrar el modal para no perder el estado)
+        const cargoUpper = (cargoFinal || '').toUpperCase()
+        if ((cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO') && facilitadorAdminId) {
+          try {
+            console.log('🔄 Guardando asignación de facilitador admin_id:', facilitadorAdminId)
+            const respFac = await apiService.cambiarFacilitador(storedUser.id, facilitadorAdminId)
+            if (respFac.success && respFac.facilitador_nombre) {
+              console.log(`✅ Facilitador asignado: ${respFac.facilitador_nombre}`)
+              user.value.supervisor = respFac.facilitador_nombre
+              updatedUser.supervisor = respFac.facilitador_nombre
+              localStorage.setItem('user', JSON.stringify(updatedUser))
+            }
+          } catch (error) {
+            console.error('⚠️ Error asignando facilitador:', error)
+            alert('El perfil se guardó pero hubo un problema vinculando al facilitador. Intenta de nuevo.')
+          }
+        }
+
         // Cerrar modal de edición
         closeEditModal()
         
@@ -1723,23 +1745,6 @@ const updateUserInfo = async () => {
         setTimeout(() => {
           loadUserData()
         }, 1000)
-        
-        // Si es técnico y eligió facilitador con ID real, guardar la asignación
-        const cargoUpper = (cargoFinal || '').toUpperCase()
-        if ((cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO') && editFacilitadorSeleccionado.value && editFacilitadorSeleccionado.value.admin_id) {
-          try {
-            console.log('🔄 Guardando asignación de facilitador...')
-            const respFac = await apiService.cambiarFacilitador(storedUser.id, editFacilitadorSeleccionado.value.admin_id)
-            if (respFac.success && respFac.facilitador_nombre) {
-              console.log(`✅ Facilitador asignado: ${respFac.facilitador_nombre}`)
-              user.value.supervisor = respFac.facilitador_nombre
-              updatedUser.supervisor = respFac.facilitador_nombre
-              localStorage.setItem('user', JSON.stringify(updatedUser))
-            }
-          } catch (error) {
-            console.error('⚠️ Error asignando facilitador:', error)
-          }
-        }
       }
     } catch (error) {
       console.error('❌ Error completo:', error)

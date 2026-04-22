@@ -4127,31 +4127,35 @@ async def obtener_usuarios(territorio: str = None):
         
         tiene_columna_rol = bool(rol_check)
         
-        # Construir query base con JOIN a facilitador_tecnico_asignaciones
-        # para obtener el nombre real del facilitador asignado al tecnico (si existe)
+        # Construir query base con subquery que toma SOLO la asignación más reciente
+        # por técnico (DISTINCT ON evita filas duplicadas por múltiples asignaciones activas)
+        fta_subquery = """
+            LEFT JOIN LATERAL (
+                SELECT fta2.facilitador_admin_id, fta2.facilitador_usuario_id
+                FROM facilitador_tecnico_asignaciones fta2
+                WHERE fta2.tecnico_usuario_id = u.id AND fta2.activo = TRUE
+                ORDER BY fta2.id DESC
+                LIMIT 1
+            ) fta ON UPPER(COALESCE(u.cargo,'')) IN ('TECNICO SOCIAL','TECNICO PRODUCTIVO')
+            LEFT JOIN admin_users au ON au.id = fta.facilitador_admin_id
+            LEFT JOIN usuarios uf ON uf.id = fta.facilitador_usuario_id
+        """
+
         if tiene_columna_rol:
-            base_query = """
+            base_query = f"""
                 SELECT u.id, u.correo, u.nombre_completo, u.cargo, u.supervisor,
                        u.curp, u.contrasena, u.telefono, u.rol, u.territorio, u.activo,
                        COALESCE(au.nombre_completo, uf.nombre_completo) AS facilitador_nombre
                 FROM usuarios u
-                LEFT JOIN facilitador_tecnico_asignaciones fta
-                    ON fta.tecnico_usuario_id = u.id AND fta.activo = TRUE
-                    AND UPPER(COALESCE(u.cargo,'')) IN ('TECNICO SOCIAL','TECNICO PRODUCTIVO')
-                LEFT JOIN admin_users au ON au.id = fta.facilitador_admin_id
-                LEFT JOIN usuarios uf ON uf.id = fta.facilitador_usuario_id
+                {fta_subquery}
             """
         else:
-            base_query = """
+            base_query = f"""
                 SELECT u.id, u.correo, u.nombre_completo, u.cargo, u.supervisor,
                        u.curp, u.contrasena, u.telefono, u.territorio, u.activo,
                        COALESCE(au.nombre_completo, uf.nombre_completo) AS facilitador_nombre
                 FROM usuarios u
-                LEFT JOIN facilitador_tecnico_asignaciones fta
-                    ON fta.tecnico_usuario_id = u.id AND fta.activo = TRUE
-                    AND UPPER(COALESCE(u.cargo,'')) IN ('TECNICO SOCIAL','TECNICO PRODUCTIVO')
-                LEFT JOIN admin_users au ON au.id = fta.facilitador_admin_id
-                LEFT JOIN usuarios uf ON uf.id = fta.facilitador_usuario_id
+                {fta_subquery}
             """
 
         # Agregar filtro de territorio si se proporciona

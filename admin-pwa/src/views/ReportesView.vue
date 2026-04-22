@@ -271,12 +271,14 @@
             </svg>
             <span>Mostrando reportes de tus técnicos asignados</span>
           </div>
-          <button class="apple-btn-asociar" @click="abrirModalAsociarTecnico" title="Asociar un nuevo técnico a tu lista">
+          <button class="apple-btn-asociar" @click="abrirModalAsociarTecnico" title="Ver mis técnicos asociados y asociar nuevos">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <line x1="12" y1="5" x2="12" y2="19" stroke-width="2.5" stroke-linecap="round"/>
-              <line x1="5" y1="12" x2="19" y2="12" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
+              <circle cx="9" cy="7" r="4" stroke-width="2"/>
+              <line x1="19" y1="8" x2="19" y2="14" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="22" y1="11" x2="16" y2="11" stroke-width="2.5" stroke-linecap="round"/>
             </svg>
-            <span>Asociar técnico</span>
+            <span>Gestionar técnicos</span>
           </button>
         </div>
 
@@ -1091,15 +1093,15 @@
         </Transition>
       </Teleport>
 
-      <!-- ================== MODAL: ASOCIAR TÉCNICO (solo facilitadores) ================== -->
+      <!-- ================== MODAL: GESTIÓN DE TÉCNICOS (solo facilitadores) ================== -->
       <Teleport to="body">
         <Transition name="apple-modal">
           <div v-if="modalAsociarAbierto" class="apple-modal-overlay" @click.self="cerrarModalAsociarTecnico">
             <div class="apple-modal apple-modal-asociar">
               <div class="apple-modal-header">
                 <div>
-                  <h3>Asociar nuevo técnico</h3>
-                  <p class="apple-modal-sub">Solo se muestran técnicos sin facilitador asignado.</p>
+                  <h3>Gestión de técnicos asociados</h3>
+                  <p class="apple-modal-sub">Administra los técnicos vinculados a ti y asocia nuevos.</p>
                 </div>
                 <button class="apple-modal-close" @click="cerrarModalAsociarTecnico" aria-label="Cerrar">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -1109,57 +1111,163 @@
                 </button>
               </div>
 
-              <div class="apple-modal-search">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <circle cx="11" cy="11" r="8" stroke-width="2"/>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <input
-                  v-model="asociarBusqueda"
-                  type="text"
-                  placeholder="Buscar por nombre o CURP..."
-                  @input="buscarTecnicosDisponiblesDebounced"
-                />
+              <!-- Tabs -->
+              <div class="apple-modal-tabs">
+                <button
+                  :class="['apple-tab', { active: tabActiva === 'mis' }]"
+                  @click="cambiarTab('mis')"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/>
+                    <circle cx="9" cy="7" r="4" stroke-width="2"/>
+                  </svg>
+                  Mis técnicos
+                  <span class="apple-tab-badge">{{ misTecnicos.length }}</span>
+                </button>
+                <button
+                  :class="['apple-tab', { active: tabActiva === 'asociar' }]"
+                  @click="cambiarTab('asociar')"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="12" y1="5" x2="12" y2="19" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="5" y1="12" x2="19" y2="12" stroke-width="2.5" stroke-linecap="round"/>
+                  </svg>
+                  Asociar nuevo
+                </button>
               </div>
 
-              <div class="apple-modal-body">
-                <div v-if="asociarLoading" class="apple-modal-loading">
+              <!-- Tab 1: Mis técnicos asociados -->
+              <div v-if="tabActiva === 'mis'" class="apple-modal-body">
+                <div v-if="misTecnicosLoading" class="apple-modal-loading">
                   <div class="apple-spinner"></div>
-                  <p>Buscando técnicos disponibles...</p>
+                  <p>Cargando tus técnicos...</p>
                 </div>
-                <div v-else-if="tecnicosDisponibles.length === 0" class="apple-modal-empty">
+                <div v-else-if="misTecnicos.length === 0" class="apple-modal-empty">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
-                    <line x1="12" y1="8" x2="12" y2="12" stroke-width="1.5"/>
-                    <circle cx="12" cy="16" r="0.5" stroke-width="2"/>
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="1.5"/>
+                    <circle cx="9" cy="7" r="4" stroke-width="1.5"/>
                   </svg>
-                  <p v-if="asociarBusqueda">No se encontraron técnicos disponibles con "{{ asociarBusqueda }}".</p>
-                  <p v-else>No hay técnicos disponibles para asociar en este momento.</p>
+                  <p>Aún no tienes técnicos asociados.</p>
+                  <button class="apple-btn-asociar" @click="cambiarTab('asociar')" style="margin-top: 8px;">
+                    Asociar el primero
+                  </button>
                 </div>
-                <ul v-else class="apple-modal-lista">
-                  <li v-for="t in tecnicosDisponibles" :key="t.id" class="apple-tecnico-item">
-                    <div class="apple-tecnico-info">
-                      <div class="apple-tecnico-avatar">{{ (t.nombre_completo || '?').charAt(0).toUpperCase() }}</div>
-                      <div>
-                        <div class="apple-tecnico-nombre">{{ t.nombre_completo }}</div>
-                        <div class="apple-tecnico-meta">
-                          <span v-if="t.cargo">{{ t.cargo }}</span>
-                          <span v-if="t.territorio"> · {{ t.territorio }}</span>
-                          <span v-if="t.curp" class="apple-tecnico-curp"> · {{ t.curp }}</span>
+                <div v-else class="apple-table-scroll">
+                  <table class="apple-tecnicos-table">
+                    <thead>
+                      <tr>
+                        <th>Técnico</th>
+                        <th>Territorio</th>
+                        <th>Origen</th>
+                        <th>Asociado el</th>
+                        <th class="th-actions">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="t in misTecnicos" :key="t.id">
+                        <td>
+                          <div class="apple-tecnico-info">
+                            <div class="apple-tecnico-avatar">{{ (t.nombre_completo || '?').charAt(0).toUpperCase() }}</div>
+                            <div>
+                              <div class="apple-tecnico-nombre">{{ t.nombre_completo }}</div>
+                              <div class="apple-tecnico-meta">
+                                <span v-if="t.cargo">{{ t.cargo }}</span>
+                                <span v-if="t.curp" class="apple-tecnico-curp"> · {{ t.curp }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>{{ t.territorio || '—' }}</td>
+                        <td>
+                          <span :class="['apple-origen-badge', t.origen === 'manual' ? 'manual' : 'csv']">
+                            {{ t.origen === 'manual' ? 'Manual' : 'CSV' }}
+                          </span>
+                        </td>
+                        <td class="apple-fecha-cell">{{ formatearFechaAsignacion(t.asignado_desde) }}</td>
+                        <td class="th-actions">
+                          <button
+                            v-if="t.origen === 'manual'"
+                            class="apple-btn-quitar"
+                            :disabled="desasociandoId === t.id"
+                            @click="desasociarTecnico(t)"
+                            title="Desasociar técnico"
+                          >
+                            <svg v-if="desasociandoId !== t.id" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                              <polyline points="3 6 5 6 21 6" stroke-width="2" stroke-linecap="round"/>
+                              <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6" stroke-width="2" stroke-linecap="round"/>
+                              <path d="M10 11v6M14 11v6" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            <span>{{ desasociandoId === t.id ? '...' : 'Quitar' }}</span>
+                          </button>
+                          <span v-else class="apple-badge-lock" title="Las asignaciones del CSV original no se pueden quitar desde aquí">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                              <rect x="3" y="11" width="18" height="11" rx="2" stroke-width="2"/>
+                              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-width="2"/>
+                            </svg>
+                            Fija
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Tab 2: Asociar nuevo -->
+              <template v-else>
+                <div class="apple-modal-search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="11" cy="11" r="8" stroke-width="2"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  <input
+                    v-model="asociarBusqueda"
+                    type="text"
+                    placeholder="Buscar por nombre o CURP..."
+                    @input="buscarTecnicosDisponiblesDebounced"
+                  />
+                </div>
+
+                <div class="apple-modal-body">
+                  <div v-if="asociarLoading" class="apple-modal-loading">
+                    <div class="apple-spinner"></div>
+                    <p>Buscando técnicos disponibles...</p>
+                  </div>
+                  <div v-else-if="tecnicosDisponibles.length === 0" class="apple-modal-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+                      <line x1="12" y1="8" x2="12" y2="12" stroke-width="1.5"/>
+                      <circle cx="12" cy="16" r="0.5" stroke-width="2"/>
+                    </svg>
+                    <p v-if="asociarBusqueda">No se encontraron técnicos disponibles con "{{ asociarBusqueda }}".</p>
+                    <p v-else>No hay técnicos disponibles para asociar en este momento.</p>
+                    <small>Solo aparecen técnicos sin facilitador asignado.</small>
+                  </div>
+                  <ul v-else class="apple-modal-lista">
+                    <li v-for="t in tecnicosDisponibles" :key="t.id" class="apple-tecnico-item">
+                      <div class="apple-tecnico-info">
+                        <div class="apple-tecnico-avatar">{{ (t.nombre_completo || '?').charAt(0).toUpperCase() }}</div>
+                        <div>
+                          <div class="apple-tecnico-nombre">{{ t.nombre_completo }}</div>
+                          <div class="apple-tecnico-meta">
+                            <span v-if="t.cargo">{{ t.cargo }}</span>
+                            <span v-if="t.territorio"> · {{ t.territorio }}</span>
+                            <span v-if="t.curp" class="apple-tecnico-curp"> · {{ t.curp }}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <button
-                      class="apple-btn-asociar-item"
-                      :disabled="asociandoId === t.id"
-                      @click="asociarTecnico(t)"
-                    >
-                      <span v-if="asociandoId === t.id">Asociando...</span>
-                      <span v-else>Asociar</span>
-                    </button>
-                  </li>
-                </ul>
-              </div>
+                      <button
+                        class="apple-btn-asociar-item"
+                        :disabled="asociandoId === t.id"
+                        @click="asociarTecnico(t)"
+                      >
+                        <span v-if="asociandoId === t.id">Asociando...</span>
+                        <span v-else>Asociar</span>
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </template>
 
               <div v-if="asociarMensaje" :class="['apple-modal-msg', asociarMensajeTipo]">
                 {{ asociarMensaje }}
@@ -1194,15 +1302,50 @@ const territorioUsuario = ref(authService.getTerritorioFilter())
 const esFacilitador = ref(authService.isFacilitador())
 const facilitadorAdminId = ref(authService.getFacilitadorAdminId())
 
-// ===== Estado del modal para asociar nuevos técnicos (solo facilitadores) =====
+// ===== Estado del modal para gestionar técnicos (solo facilitadores) =====
 const modalAsociarAbierto = ref(false)
+const tabActiva = ref('mis') // 'mis' | 'asociar'
 const asociarBusqueda = ref('')
 const tecnicosDisponibles = ref([])
 const asociarLoading = ref(false)
 const asociandoId = ref(null)
 const asociarMensaje = ref('')
 const asociarMensajeTipo = ref('info') // 'info' | 'success' | 'error'
+// Pestaña "Mis técnicos"
+const misTecnicos = ref([])
+const misTecnicosLoading = ref(false)
+const desasociandoId = ref(null)
 let _buscarTecnicosTimer = null
+
+function formatearFechaAsignacion(iso) {
+  if (!iso) return '—'
+  try {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return '—'
+    return d.toLocaleDateString('es-MX', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    })
+  } catch (e) {
+    return '—'
+  }
+}
+
+async function cargarMisTecnicos() {
+  if (!esFacilitador.value || !facilitadorAdminId.value) return
+  misTecnicosLoading.value = true
+  try {
+    const resp = await facilitadoresService.misTecnicos(facilitadorAdminId.value)
+    misTecnicos.value = resp.tecnicos || []
+  } catch (e) {
+    console.error('Error cargando mis técnicos:', e)
+    asociarMensaje.value = e.message || 'Error al cargar tus técnicos'
+    asociarMensajeTipo.value = 'error'
+    misTecnicos.value = []
+  } finally {
+    misTecnicosLoading.value = false
+  }
+}
 
 async function cargarTecnicosDisponibles() {
   if (!esFacilitador.value || !facilitadorAdminId.value) return
@@ -1228,12 +1371,23 @@ function buscarTecnicosDisponiblesDebounced() {
   _buscarTecnicosTimer = setTimeout(cargarTecnicosDisponibles, 300)
 }
 
+function cambiarTab(tab) {
+  tabActiva.value = tab
+  asociarMensaje.value = ''
+  if (tab === 'mis') {
+    cargarMisTecnicos()
+  } else {
+    asociarBusqueda.value = ''
+    cargarTecnicosDisponibles()
+  }
+}
+
 function abrirModalAsociarTecnico() {
   if (!esFacilitador.value) return
   modalAsociarAbierto.value = true
-  asociarBusqueda.value = ''
   asociarMensaje.value = ''
-  cargarTecnicosDisponibles()
+  tabActiva.value = 'mis'
+  cargarMisTecnicos()
 }
 
 function cerrarModalAsociarTecnico() {
@@ -1250,9 +1404,10 @@ async function asociarTecnico(tecnico) {
     await facilitadoresService.asignarTecnico(facilitadorAdminId.value, tecnico.id)
     asociarMensaje.value = `✓ ${tecnico.nombre_completo} asociado correctamente`
     asociarMensajeTipo.value = 'success'
-    // quitar de la lista local
+    // quitar de la lista de disponibles
     tecnicosDisponibles.value = tecnicosDisponibles.value.filter(x => x.id !== tecnico.id)
-    // refrescar reportes y estadísticas para que aparezca el nuevo técnico
+    // refrescar "mis técnicos" y los reportes
+    try { await cargarMisTecnicos() } catch (e) {}
     try { await cargarReportes() } catch (e) {}
     try { await cargarEstadisticas() } catch (e) {}
   } catch (e) {
@@ -1261,6 +1416,31 @@ async function asociarTecnico(tecnico) {
     asociarMensajeTipo.value = 'error'
   } finally {
     asociandoId.value = null
+  }
+}
+
+async function desasociarTecnico(tecnico) {
+  if (!facilitadorAdminId.value || desasociandoId.value) return
+  const confirmar = window.confirm(
+    `¿Desasociar a ${tecnico.nombre_completo}?\n\nDejarás de ver sus reportes. Podrás volver a asociarlo luego desde "Asociar nuevo".`
+  )
+  if (!confirmar) return
+  desasociandoId.value = tecnico.id
+  asociarMensaje.value = ''
+  try {
+    await facilitadoresService.desasignarTecnico(facilitadorAdminId.value, tecnico.id)
+    asociarMensaje.value = `✓ ${tecnico.nombre_completo} fue desasociado`
+    asociarMensajeTipo.value = 'success'
+    misTecnicos.value = misTecnicos.value.filter(x => x.id !== tecnico.id)
+    // refrescar reportes para que desaparezcan los del técnico removido
+    try { await cargarReportes() } catch (e) {}
+    try { await cargarEstadisticas() } catch (e) {}
+  } catch (e) {
+    console.error('Error desasociando técnico:', e)
+    asociarMensaje.value = e.message || 'No se pudo desasociar el técnico'
+    asociarMensajeTipo.value = 'error'
+  } finally {
+    desasociandoId.value = null
   }
 }
 
@@ -7295,10 +7475,165 @@ onUnmounted(() => {
   transform: translateY(16px) scale(.97);
 }
 
+.apple-modal-asociar { max-width: 720px; }
+
+/* ===== Tabs ===== */
+.apple-modal-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px 0;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.apple-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .15s;
+  margin-bottom: -1px;
+}
+
+.apple-tab:hover { color: #0f172a; }
+
+.apple-tab.active {
+  color: #16a34a;
+  border-bottom-color: #16a34a;
+  background: #fff;
+}
+
+.apple-tab svg { width: 16px; height: 16px; }
+
+.apple-tab-badge {
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.apple-tab.active .apple-tab-badge {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* ===== Tabla mis técnicos ===== */
+.apple-table-scroll {
+  overflow-x: auto;
+  padding: 8px 8px 12px;
+}
+
+.apple-tecnicos-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.apple-tecnicos-table thead th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: #64748b;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  position: sticky;
+  top: 0;
+}
+
+.apple-tecnicos-table tbody td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #0f172a;
+  vertical-align: middle;
+}
+
+.apple-tecnicos-table tbody tr:hover { background: #f8fafc; }
+.apple-tecnicos-table .th-actions { text-align: right; white-space: nowrap; }
+.apple-fecha-cell { color: #475569; font-size: 12.5px; white-space: nowrap; }
+
+.apple-origen-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+
+.apple-origen-badge.manual {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.apple-origen-badge.csv {
+  background: #e0f2fe;
+  color: #075985;
+  border: 1px solid #7dd3fc;
+}
+
+.apple-btn-quitar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #dc2626;
+  font-weight: 600;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.apple-btn-quitar:hover:not(:disabled) {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+}
+
+.apple-btn-quitar:disabled { opacity: .55; cursor: not-allowed; }
+.apple-btn-quitar svg { width: 14px; height: 14px; }
+
+.apple-badge-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: help;
+}
+
+.apple-badge-lock svg { width: 12px; height: 12px; }
+
 @media (max-width: 600px) {
   .apple-facilitador-banner { flex-direction: column; align-items: stretch; }
   .apple-btn-asociar { justify-content: center; width: 100%; }
   .apple-tecnico-item { flex-wrap: wrap; }
+  .apple-modal-tabs { padding: 8px 8px 0; }
+  .apple-tab { padding: 8px 10px; font-size: 12.5px; }
+  .apple-tecnicos-table { font-size: 12px; }
+  .apple-tecnicos-table thead th,
+  .apple-tecnicos-table tbody td { padding: 8px; }
 }
 
 </style>

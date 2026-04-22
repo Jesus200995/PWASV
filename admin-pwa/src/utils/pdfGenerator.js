@@ -354,7 +354,7 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
     doc.setFont(undefined, 'normal')
     if (esFacilitador) {
       // Firmante es Facilitador Comunitario
-      doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
+      doc.text('FACILITADOR COMUNITARIO', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
     } else {
       // Firmante es supervisor territorial (Encargada de Despacho)
       doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
@@ -701,7 +701,7 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
       doc.setFontSize(7.5)
       doc.setFont(undefined, 'normal')
       if (esFacilitador) {
-        doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
+        doc.text('FACILITADOR COMUNITARIO', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
       } else {
         doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
         doc.text('Territorial ' + (usuario.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' })

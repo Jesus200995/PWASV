@@ -1716,14 +1716,20 @@ export default {
         // Cargo del responsable (primero, puede ser en dos líneas)
         doc.setFontSize(7.5);
         doc.setFont(undefined, 'normal');
-        doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
-        doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
-        
+        const esTecnicoConFacilitador_a = (this.usuarioInfo.cargo || '').toUpperCase().includes('TECNICO') && !!this.usuarioInfo.supervisor;
+        if (esTecnicoConFacilitador_a) {
+          doc.text('FACILITADOR COMUNITARIO', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+        } else {
+          doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+          doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+        }
+
         // Nombre del supervisor/responsable (después, en negrita)
         doc.setFontSize(8);
         doc.setFont(undefined, 'bold');
         const nombreSupervisor = this.usuarioInfo.supervisor || 'Sin asignar';
-        doc.text(nombreSupervisor, firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
+        const nombreSupY_a = esTecnicoConFacilitador_a ? firmaY + firmaHeight + 17 : firmaY + firmaHeight + 22;
+        doc.text(nombreSupervisor, firmaResponsableX + firmaWidth / 2, nombreSupY_a, { align: 'center' });
         
         currentY = firmaY + firmaHeight + 30;
       }
@@ -2072,11 +2078,17 @@ export default {
             // Información del responsable
             doc.setFontSize(7.5);
             doc.setFont(undefined, 'normal');
-            doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
-            doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+            const esTecnicoConFacilitador_b = (this.usuarioInfo.cargo || '').toUpperCase().includes('TECNICO') && !!this.usuarioInfo.supervisor;
+            if (esTecnicoConFacilitador_b) {
+              doc.text('FACILITADOR COMUNITARIO', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+            } else {
+              doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+              doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+            }
             doc.setFontSize(8);
             doc.setFont(undefined, 'bold');
-            doc.text(this.usuarioInfo.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
+            const nombreSupY_b = esTecnicoConFacilitador_b ? firmaY + firmaHeight + 17 : firmaY + firmaHeight + 22;
+            doc.text(this.usuarioInfo.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, nombreSupY_b, { align: 'center' });
           }
           
           console.log('✅ Página de evidencias fotográficas completada con imágenes');
@@ -2132,11 +2144,17 @@ export default {
           // Información del responsable
           doc.setFontSize(7.5);
           doc.setFont(undefined, 'normal');
-          doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
-          doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+          const esTecnicoConFacilitador_c = (this.usuarioInfo.cargo || '').toUpperCase().includes('TECNICO') && !!this.usuarioInfo.supervisor;
+          if (esTecnicoConFacilitador_c) {
+            doc.text('FACILITADOR COMUNITARIO', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+          } else {
+            doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+            doc.text('Territorial ' + (this.usuarioInfo.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+          }
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
-          doc.text(this.usuarioInfo.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
+          const nombreSupY_c = esTecnicoConFacilitador_c ? firmaY + firmaHeight + 17 : firmaY + firmaHeight + 22;
+          doc.text(this.usuarioInfo.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, nombreSupY_c, { align: 'center' });
         }
         
         console.log('✅ Página de evidencias fotográficas completada');
@@ -2935,12 +2953,18 @@ export default {
       
       doc.setFontSize(7.5);
       doc.setFont(undefined, 'normal');
-      doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
-      doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
-      
+      const esTecnicoConFacilitador_d = (usuario.cargo || '').toUpperCase().includes('TECNICO') && !!(nombreSupervisor || usuario.supervisor);
+      if (esTecnicoConFacilitador_d) {
+        doc.text('FACILITADOR COMUNITARIO', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+      } else {
+        doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+        doc.text('Territorial ' + (usuario.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+      }
+
       doc.setFontSize(8);
       doc.setFont(undefined, 'bold');
-      doc.text(nombreSupervisor || usuario.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
+      const nombreSupY_d = esTecnicoConFacilitador_d ? firmaY + firmaHeight + 17 : firmaY + firmaHeight + 22;
+      doc.text(nombreSupervisor || usuario.supervisor || 'Sin asignar', firmaResponsableX + firmaWidth / 2, nombreSupY_d, { align: 'center' });
 
       // ========== SEGUNDA PÁGINA: EVIDENCIAS FOTOGRÁFICAS ==========
       try {
@@ -3252,12 +3276,18 @@ const imgGridWidth = 55;
           // Información del responsable
           doc.setFontSize(7.5);
           doc.setFont(undefined, 'normal');
-          doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
-          doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+          const esTecnicoConFacilitador_e = (usuario.cargo || '').toUpperCase().includes('TECNICO') && !!(nombreSupervisor || usuario.supervisor);
+          if (esTecnicoConFacilitador_e) {
+            doc.text('FACILITADOR COMUNITARIO', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+          } else {
+            doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' });
+            doc.text('Territorial ' + (usuario.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' });
+          }
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           const nombreSupervisorFinal = nombreSupervisor || usuario.supervisor || 'Sin asignar';
-          doc.text(nombreSupervisorFinal, firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' });
+          const nombreSupY_e = esTecnicoConFacilitador_e ? firmaY + firmaHeight + 17 : firmaY + firmaHeight + 22;
+          doc.text(nombreSupervisorFinal, firmaResponsableX + firmaWidth / 2, nombreSupY_e, { align: 'center' });
         }
         
         console.log('✅ Página de evidencias fotográficas completada');

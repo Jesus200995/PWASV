@@ -3752,16 +3752,13 @@ const validatePhoneEdit = () => {
 }
 
 .facilitador-results {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  margin-top: 4px;
+  position: relative;
+  margin-top: 6px;
   background: white;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 14px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  z-index: 50;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 10;
   max-height: 220px;
   overflow-y: auto;
 }

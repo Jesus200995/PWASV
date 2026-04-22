@@ -429,10 +429,10 @@ class UserInfoUpdate(BaseModel):
     nombre_completo: str
     correo: str
     cargo: str
-    supervisor: str = None
-    curp: str = None
-    telefono: str = None
-    territorio: str = None
+    supervisor: Optional[str] = None
+    curp: Optional[str] = None
+    telefono: Optional[str] = None
+    territorio: Optional[str] = None
 
 class TerminosAceptados(BaseModel):
     usuario_id: int

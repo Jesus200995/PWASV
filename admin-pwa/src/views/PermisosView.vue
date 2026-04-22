@@ -455,9 +455,9 @@
                   type="text"
                   class="form-input uppercase-input"
                   placeholder="Ingrese el nombre completo"
-                  @input="convertirMayusculas('nombre_completo')"
+                  @input="convertirMayusSinTildes('nombre_completo')"
                 />
-                <small class="form-help">Se convertirá automáticamente a mayúsculas</small>
+                <small class="form-help">Se convertirá automáticamente a MAYÚSCULAS sin tildes</small>
               </div>
 
               <!-- CURP -->
@@ -491,15 +491,30 @@
                   </svg>
                   Cargo
                 </label>
+                <select
+                  id="cargo_select"
+                  v-model="cargoSeleccion"
+                  class="form-input"
+                  @change="onCargoSelectChange"
+                >
+                  <option value="">— Selecciona un cargo —</option>
+                  <option v-for="c in cargosDisponibles" :key="c" :value="c">{{ c }}</option>
+                  <option value="__OTRO__">Otro (escribir)...</option>
+                </select>
                 <input
-                  id="cargo"
+                  v-if="cargoSeleccion === '__OTRO__'"
+                  id="cargo_otro"
                   v-model="formularioUsuario.cargo"
                   type="text"
                   class="form-input uppercase-input"
-                  placeholder="Ingrese el cargo"
-                  @input="convertirMayusculas('cargo')"
+                  placeholder="Escribe el cargo (se guardará en MAYÚSCULAS sin tildes)"
+                  style="margin-top: 8px;"
+                  @input="convertirMayusSinTildes('cargo')"
                 />
-                <small class="form-help">Se convertirá automáticamente a mayúsculas</small>
+                <small class="form-help">
+                  Selecciona un cargo del catálogo o escoge "Otro" para escribir uno.
+                  Todo se guarda en MAYÚSCULAS y sin tildes.
+                </small>
               </div>
 
               <!-- Username -->
@@ -1457,6 +1472,24 @@ export default {
         }
       },
       
+      // Cargo: select catálogo + "Otro"
+      cargoSeleccion: '', // '' | 'FACILITADOR' | ... | '__OTRO__'
+      cargosDisponibles: [
+        'FACILITADOR',
+        'COORDINACION TERRITORIAL',
+        'COORDINACION TERRITORIAL A',
+        'COORDINACION TERRITORIAL B',
+        'COORDINACION TERRITORIAL C',
+        'ESPECIALISTAS PRODUCTIVOS Y SOCIALES',
+        'DIRECTOR GENERAL',
+        'DIRECTORA DE AREA',
+        'DIRECTOR',
+        'ADMINISTRACION Y DESARROLLO',
+        'COORDINADOR REGIONAL',
+        'SECRETARIA TECNICA',
+        'ADMIN'
+      ],
+      
       // Lista de territorios de Sembrando Vida
       territoriosSembrandoVida: [
         "Acapulco - Centro - Norte - Tierra Caliente",
@@ -1819,6 +1852,11 @@ export default {
       // Resetear visibilidad de contraseñas
       this.mostrarPassword = false
       this.mostrarConfirmPassword = false
+      // Sincronizar el select de cargo con el valor actual (normalizado)
+      if (this.formularioUsuario.cargo) {
+        this.formularioUsuario.cargo = this.normalizarMayusSinTildes(this.formularioUsuario.cargo)
+      }
+      this.sincronizarCargoSeleccion()
       this.mostrarModalEditar = true
     },
 
@@ -1856,6 +1894,11 @@ export default {
         this.mostrarToast('Debe seleccionar un territorio para usuarios territoriales', 'error')
         return
       }
+      
+      // Normalizar datos antes de enviar (mayúsculas sin tildes)
+      this.formularioUsuario.nombre_completo = this.normalizarMayusSinTildes(this.formularioUsuario.nombre_completo)
+      this.formularioUsuario.curp = this.normalizarMayusSinTildes(this.formularioUsuario.curp)
+      this.formularioUsuario.cargo = this.normalizarMayusSinTildes(this.formularioUsuario.cargo).trim()
       
       this.guardando = true
       
@@ -1992,6 +2035,8 @@ export default {
       // Resetear visibilidad de contraseñas
       this.mostrarPassword = false
       this.mostrarConfirmPassword = false
+      // Resetear selección de cargo
+      this.cargoSeleccion = ''
     },
 
     // Métodos para seleccionar/deseleccionar permisos
@@ -2011,6 +2056,52 @@ export default {
     convertirMayusculas(campo) {
       if (this.formularioUsuario[campo]) {
         this.formularioUsuario[campo] = this.formularioUsuario[campo].toUpperCase()
+      }
+    },
+
+    // Normaliza a MAYÚSCULAS SIN TILDES (preserva Ñ) y colapsa espacios.
+    normalizarMayusSinTildes(texto) {
+      if (texto === null || texto === undefined) return ''
+      let s = String(texto)
+      // Preservar Ñ/ñ
+      s = s.replace(/Ñ/g, '\u0000').replace(/ñ/g, '\u0001')
+      // Quitar tildes/diéresis
+      s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      // Restaurar Ñ
+      s = s.replace(/\u0000/g, 'Ñ').replace(/\u0001/g, 'Ñ')
+      return s.toUpperCase()
+    },
+
+    // Método unificado para input (sin colapsar espacios mientras escribe)
+    convertirMayusSinTildes(campo) {
+      if (this.formularioUsuario[campo]) {
+        this.formularioUsuario[campo] = this.normalizarMayusSinTildes(this.formularioUsuario[campo])
+      }
+    },
+
+    // Handler del select de cargo
+    onCargoSelectChange() {
+      if (this.cargoSeleccion === '__OTRO__') {
+        // El usuario quiere escribir uno personalizado: limpiar el valor para
+        // que empiece a escribir. No borrar si ya venía uno custom en edición.
+        if (this.cargosDisponibles.includes(this.formularioUsuario.cargo)) {
+          this.formularioUsuario.cargo = ''
+        }
+      } else {
+        // Usar el valor seleccionado del catálogo tal cual
+        this.formularioUsuario.cargo = this.cargoSeleccion
+      }
+    },
+
+    // Sincroniza cargoSeleccion en base al valor actual del formulario
+    sincronizarCargoSeleccion() {
+      const actual = (this.formularioUsuario.cargo || '').trim()
+      if (!actual) {
+        this.cargoSeleccion = ''
+      } else if (this.cargosDisponibles.includes(actual)) {
+        this.cargoSeleccion = actual
+      } else {
+        this.cargoSeleccion = '__OTRO__'
       }
     },
 

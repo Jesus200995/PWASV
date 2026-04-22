@@ -16,6 +16,7 @@ import bcrypt
 import pytz
 import json
 from typing import List, Optional
+import unicodedata
 import io
 import zipfile
 import base64
@@ -4205,6 +4206,80 @@ TERRITORIOS_SEMBRANDO_VIDA = [
     "Oficinas Centrales"
 ]
 
+# ==================== NORMALIZACIÓN DE CARGOS ====================
+# Catálogo oficial de cargos para admin_users (MAYÚSCULAS SIN TILDES)
+CARGOS_ADMIN_CATALOGO = [
+    "FACILITADOR",
+    "COORDINACION TERRITORIAL",
+    "COORDINACION TERRITORIAL A",
+    "COORDINACION TERRITORIAL B",
+    "COORDINACION TERRITORIAL C",
+    "ESPECIALISTAS PRODUCTIVOS Y SOCIALES",
+    "DIRECTOR GENERAL",
+    "DIRECTORA DE AREA",
+    "DIRECTOR",
+    "ADMINISTRACION Y DESARROLLO",
+    "COORDINADOR REGIONAL",
+    "SECRETARIA TECNICA",
+    "ADMIN",
+]
+
+
+def normalizar_mayus_sin_tildes(texto):
+    """
+    Devuelve el texto en MAYÚSCULAS, sin tildes/diéresis y sin espacios
+    repetidos. Preserva la 'Ñ'. Si la entrada es None o vacía, devuelve None.
+    """
+    if texto is None:
+        return None
+    s = str(texto).strip()
+    if not s:
+        return None
+    # Separar caracteres base + diacríticos; preservamos Ñ/ñ
+    s = s.replace('Ñ', '\x00').replace('ñ', '\x01')
+    s = unicodedata.normalize('NFD', s)
+    s = ''.join(ch for ch in s if unicodedata.category(ch) != 'Mn')
+    s = s.replace('\x00', 'Ñ').replace('\x01', 'Ñ')
+    s = s.upper()
+    # Colapsar espacios múltiples
+    s = re.sub(r'\s+', ' ', s).strip()
+    return s
+
+
+# Migración una sola vez al iniciar: normalizar cargos existentes
+try:
+    cursor.execute("""
+        SELECT DISTINCT cargo FROM admin_users
+        WHERE cargo IS NOT NULL AND cargo <> ''
+    """)
+    _rows_cargo = cursor.fetchall()
+    _actualizados = 0
+    for _r in _rows_cargo:
+        _cargo_orig = _r[0]
+        _cargo_norm = normalizar_mayus_sin_tildes(_cargo_orig)
+        if _cargo_norm and _cargo_norm != _cargo_orig:
+            cursor.execute(
+                "UPDATE admin_users SET cargo = %s WHERE cargo = %s",
+                (_cargo_norm, _cargo_orig)
+            )
+            _actualizados += cursor.rowcount
+    conn.commit()
+    if _actualizados:
+        print(f"✅ Cargos normalizados en admin_users: {_actualizados} filas")
+except Exception as _e_norm:
+    print(f"⚠️ Error normalizando cargos existentes: {_e_norm}")
+    try:
+        conn.rollback()
+    except Exception:
+        pass
+
+
+@app.get("/admin/cargos-catalogo")
+async def obtener_cargos_catalogo():
+    """Devuelve el catálogo oficial de cargos (mayúsculas sin tildes)."""
+    return {"success": True, "cargos": CARGOS_ADMIN_CATALOGO}
+
+
 @app.patch("/usuarios/{user_id}/estado")
 async def cambiar_estado_usuario_regular(user_id: int, datos: dict):
     """Activar o desactivar una cuenta de usuario de la tabla usuarios"""
@@ -8063,10 +8138,10 @@ async def crear_usuario_admin(usuario: AdminUserCreate):
                 raise HTTPException(status_code=400, detail="Territorio inválido. Debe ser uno de los territorios de Sembrando Vida.")
             territorio_valor = usuario.territorio
         
-        # Preparar los nuevos campos (convertir a mayúsculas)
-        nombre_completo_valor = usuario.nombre_completo.upper() if usuario.nombre_completo else None
-        curp_valor = usuario.curp.upper() if usuario.curp else None
-        cargo_valor = usuario.cargo.upper() if usuario.cargo else None
+        # Preparar los nuevos campos (normalizar a MAYÚSCULAS SIN TILDES)
+        nombre_completo_valor = normalizar_mayus_sin_tildes(usuario.nombre_completo)
+        curp_valor = normalizar_mayus_sin_tildes(usuario.curp)
+        cargo_valor = normalizar_mayus_sin_tildes(usuario.cargo)
         
         # Insertar nuevo usuario con permisos, es_territorial y territorio
         cursor.execute("""
@@ -8217,20 +8292,20 @@ async def actualizar_usuario_admin(user_id: int, usuario: AdminUserUpdate):
             campos_actualizar.append("territorio = %s")
             valores.append(usuario.territorio if usuario.territorio else None)
         
-        # Campo nombre_completo (convertir a mayúsculas)
+        # Campo nombre_completo (MAYÚSCULAS SIN TILDES)
         if usuario.nombre_completo is not None:
             campos_actualizar.append("nombre_completo = %s")
-            valores.append(usuario.nombre_completo.upper() if usuario.nombre_completo else None)
+            valores.append(normalizar_mayus_sin_tildes(usuario.nombre_completo))
         
-        # Campo curp (convertir a mayúsculas)
+        # Campo curp (MAYÚSCULAS SIN TILDES)
         if usuario.curp is not None:
             campos_actualizar.append("curp = %s")
-            valores.append(usuario.curp.upper() if usuario.curp else None)
+            valores.append(normalizar_mayus_sin_tildes(usuario.curp))
         
-        # Campo cargo (convertir a mayúsculas)
+        # Campo cargo (MAYÚSCULAS SIN TILDES)
         if usuario.cargo is not None:
             campos_actualizar.append("cargo = %s")
-            valores.append(usuario.cargo.upper() if usuario.cargo else None)
+            valores.append(normalizar_mayus_sin_tildes(usuario.cargo))
         
         if not campos_actualizar:
             raise HTTPException(status_code=400, detail="No hay campos para actualizar")

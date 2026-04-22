@@ -11,13 +11,18 @@ import superiorImage from '../assets/images/superior2.png'
  * @param {string} firmaUsuario - Firma del usuario en base64
  * @param {string} firmaSupervisor - Firma del supervisor en base64 (opcional)
  * @param {string} nombreSupervisor - Nombre del supervisor (opcional)
+ * @param {string} facilitadorNombre - Nombre del facilitador asignado (si existe). Si se proporciona, el subtítulo del firmante será "Facilitador Comunitario" en lugar de "Encargada de Despacho...Territorial".
  * @returns {Promise<string>} - PDF en base64 (sin prefijo data:)
  */
-export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor, nombreSupervisor) {
+export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor, nombreSupervisor, facilitadorNombre = null) {
   console.log('📄 [PDFGenerator] Generando PDF desde datos estructurados...')
   console.log('   - Actividades:', datos.actividades?.length || 0)
   console.log('   - Firma usuario:', firmaUsuario ? 'Sí' : 'No')
   console.log('   - Firma supervisor:', firmaSupervisor ? 'Sí' : 'No')
+  console.log('   - Facilitador:', facilitadorNombre || 'No (supervisor territorial)')
+
+  // Determinar si el firmante/responsable es un facilitador comunitario
+  const esFacilitador = !!(facilitadorNombre && String(facilitadorNombre).trim())
   
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -347,14 +352,22 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
     
     doc.setFontSize(7.5)
     doc.setFont(undefined, 'normal')
-    doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
-    doc.text('Territorial ' + (usuario.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' })
-    
+    if (esFacilitador) {
+      // Firmante es Facilitador Comunitario
+      doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
+    } else {
+      // Firmante es supervisor territorial (Encargada de Despacho)
+      doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
+      doc.text('Territorial ' + (usuario.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' })
+    }
+
     doc.setFontSize(8)
     doc.setFont(undefined, 'bold')
-    const nombreSupervisorFinal = nombreSupervisor || usuario.supervisor || 'Sin asignar'
-    doc.text(nombreSupervisorFinal, firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' })
-    
+    const nombreSupervisorFinal = nombreSupervisor || facilitadorNombre || usuario.supervisor || 'Sin asignar'
+    // Si es facilitador, el nombre sube (solo una línea de cargo)
+    const nombreY = esFacilitador ? firmaY + firmaHeight + 17 : firmaY + firmaHeight + 22
+    doc.text(nombreSupervisorFinal, firmaResponsableX + firmaWidth / 2, nombreY, { align: 'center' })
+
     currentY = firmaY + firmaHeight + 30
   }
 
@@ -687,12 +700,17 @@ export async function generarPDFDesdesDatos(datos, firmaUsuario, firmaSupervisor
       // Información del responsable
       doc.setFontSize(7.5)
       doc.setFont(undefined, 'normal')
-      doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
-      doc.text('Territorial ' + (usuario.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' })
+      if (esFacilitador) {
+        doc.text('Facilitador Comunitario', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
+      } else {
+        doc.text('Encargada de Despacho de la Coordinación', firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 11, { align: 'center' })
+        doc.text('Territorial ' + (usuario.territorio || ''), firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 16, { align: 'center' })
+      }
       doc.setFontSize(8)
       doc.setFont(undefined, 'bold')
-      const nombreSupervisorFinal = nombreSupervisor || usuario.supervisor || 'Sin asignar'
-      doc.text(nombreSupervisorFinal, firmaResponsableX + firmaWidth / 2, firmaY + firmaHeight + 22, { align: 'center' })
+      const nombreSupervisorFinal = nombreSupervisor || facilitadorNombre || usuario.supervisor || 'Sin asignar'
+      const nombreY = esFacilitador ? firmaY + firmaHeight + 17 : firmaY + firmaHeight + 22
+      doc.text(nombreSupervisorFinal, firmaResponsableX + firmaWidth / 2, nombreY, { align: 'center' })
     }
     
   } catch (evidenciasError) {

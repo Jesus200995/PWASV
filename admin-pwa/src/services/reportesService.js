@@ -213,7 +213,8 @@ const reportesService = {
             reporte.datos_reporte,
             reporte.firma_usuario_base64,
             reporte.firma_supervisor_base64,
-            reporte.nombre_supervisor
+            reporte.nombre_supervisor,
+            reporte.facilitador_nombre || null
           )
           
           // Convertir base64 a blob

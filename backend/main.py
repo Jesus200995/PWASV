@@ -2364,9 +2364,14 @@ async def descargar_reporte(reporte_id: int):
                 r.usuario_id,
                 u.curp as curp_actual,
                 u.nombre_completo as nombre_actual,
-                u.territorio as territorio_actual
+                u.territorio as territorio_actual,
+                COALESCE(au.nombre_completo, uf.nombre_completo) as facilitador_nombre
             FROM reportes_generados r
             LEFT JOIN usuarios u ON r.usuario_id = u.id
+            LEFT JOIN facilitador_tecnico_asignaciones fta
+                ON fta.tecnico_usuario_id = r.usuario_id AND fta.activo = TRUE
+            LEFT JOIN admin_users au ON au.id = fta.facilitador_admin_id
+            LEFT JOIN usuarios uf ON uf.id = fta.facilitador_usuario_id
             WHERE r.id = %s
         """, (reporte_id,))
         
@@ -2434,7 +2439,8 @@ async def descargar_reporte(reporte_id: int):
                 "fecha_firma_supervisor": reporte[8].isoformat() if reporte[8] else None,
                 "firma_supervisor_base64": reporte[9],
                 "nombre_supervisor": reporte[10],
-                "supervisor_id": reporte[11]
+                "supervisor_id": reporte[11],
+                "facilitador_nombre": reporte[18]  # Nombre del facilitador asignado (si existe)
             }
         }
         

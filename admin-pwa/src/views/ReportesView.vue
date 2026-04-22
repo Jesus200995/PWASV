@@ -1996,7 +1996,8 @@ async function descargarReporte(reporte) {
         reporteData.datos_reporte,
         reporteData.firma_usuario_base64,
         reporteData.firmado_supervisor ? reporteData.firma_supervisor_base64 : null,
-        reporteData.nombre_supervisor
+        reporteData.nombre_supervisor,
+        reporteData.facilitador_nombre || reporte.facilitador_nombre || null
       )
       
       clearInterval(intervaloPDF)
@@ -2345,7 +2346,8 @@ async function descargarReportesZip() {
             reporteData.datos_reporte,
             reporteData.firma_usuario_base64,
             reporteData.firma_supervisor_base64,
-            reporteData.nombre_supervisor
+            reporteData.nombre_supervisor,
+            reporteData.facilitador_nombre || reporte.facilitador_nombre || null
           )
         } else if (reporteData.pdf_base64) {
           // Si hay PDF guardado, usar ese

@@ -128,6 +128,20 @@ export const apiService = {
     return response.data;
   },
 
+  // Buscar facilitadores (público, para registro y perfil)
+  async buscarFacilitadores(query) {
+    const response = await api.get(`/facilitadores/buscar-publico?q=${encodeURIComponent(query)}`);
+    return response.data;
+  },
+
+  // Cambiar facilitador asignado (para técnicos)
+  async cambiarFacilitador(userId, facilitadorAdminId) {
+    const response = await api.post(`/usuarios/${userId}/cambiar-facilitador`, {
+      facilitador_admin_id: facilitadorAdminId
+    });
+    return response.data;
+  },
+
   // Registros
   async createRecord(formData) {
     const response = await api.post('/registro', formData, {

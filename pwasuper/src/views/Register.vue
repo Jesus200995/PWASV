@@ -209,27 +209,103 @@
             </div>
           </Transition>
 
-          <!-- Supervisor -->
-          <div class="form-field">
-            <label class="field-label">Supervisor Inmediato</label>
-            <div class="input-wrapper" :class="{ 'is-disabled': esTecnico }">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
-                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-              <input v-model="form.supervisor" @input="formatSupervisor" type="text" required :readonly="esTecnico" :placeholder="esTecnico && buscandoSupervisor ? 'Buscando...' : 'NOMBRE DEL SUPERVISOR'" class="uppercase-input"/>
-              <div v-if="buscandoSupervisor" class="input-spinner"></div>
+          <!-- Facilitador (solo para técnicos) -->
+          <Transition name="field-expand">
+            <div v-if="esTecnico" class="form-field facilitador-search-field">
+              <label class="field-label">
+                Busca tu Facilitador
+                <span class="field-label-badge">Obligatorio</span>
+              </label>
+              <div class="input-wrapper" :class="{ 'has-success': facilitadorSeleccionado }">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                  <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+                  <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <input
+                  v-model="facilitadorQuery"
+                  @input="buscarFacilitadoresRT"
+                  @focus="mostrarResultadosFacilitador = true"
+                  type="text"
+                  :placeholder="facilitadorSeleccionado ? '' : 'Busca por nombre o CURP...'"
+                  class="uppercase-input"
+                  autocomplete="off"
+                />
+                <div v-if="buscandoFacilitador" class="input-spinner"></div>
+                <button v-if="facilitadorSeleccionado" type="button" @click="limpiarFacilitador" class="facilitador-clear-btn" title="Cambiar facilitador">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+              <!-- Facilitador seleccionado -->
+              <div v-if="facilitadorSeleccionado" class="facilitador-selected-card">
+                <div class="facilitador-avatar">{{ facilitadorSeleccionado.nombre_completo.charAt(0) }}</div>
+                <div class="facilitador-selected-info">
+                  <span class="facilitador-selected-name">{{ facilitadorSeleccionado.nombre_completo }}</span>
+                  <span class="facilitador-selected-meta">
+                    <span v-if="facilitadorSeleccionado.curp">{{ facilitadorSeleccionado.curp }}</span>
+                    <span v-if="facilitadorSeleccionado.territorio"> · {{ facilitadorSeleccionado.territorio }}</span>
+                  </span>
+                </div>
+                <svg class="facilitador-check" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                  <path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <!-- Resultados de búsqueda -->
+              <Transition name="dropdown-fade">
+                <div v-if="mostrarResultadosFacilitador && !facilitadorSeleccionado && facilitadorQuery.length >= 2" class="facilitador-results">
+                  <div v-if="buscandoFacilitador" class="facilitador-results-loading">
+                    <div class="input-spinner" style="position:static;margin-right:8px;"></div>
+                    <span>Buscando facilitadores...</span>
+                  </div>
+                  <div v-else-if="facilitadoresEncontrados.length === 0" class="facilitador-results-empty">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                      <path d="M8 15s1.5-2 4-2 4 2 4 2M9 9h.01M15 9h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span>No se encontraron facilitadores</span>
+                  </div>
+                  <ul v-else class="facilitador-results-list">
+                    <li v-for="fac in facilitadoresEncontrados" :key="fac.admin_id" @click="seleccionarFacilitador(fac)" class="facilitador-result-item">
+                      <div class="facilitador-avatar">{{ fac.nombre_completo.charAt(0) }}</div>
+                      <div class="facilitador-result-info">
+                        <span class="facilitador-result-name">{{ fac.nombre_completo }}</span>
+                        <span class="facilitador-result-meta">
+                          {{ fac.curp || '' }}
+                          <span v-if="fac.territorio"> · {{ fac.territorio }}</span>
+                        </span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </Transition>
+              <span v-if="!facilitadorSeleccionado" class="field-hint">Escribe al menos 2 caracteres para buscar tu facilitador</span>
+              <span v-else class="field-hint success-hint">
+                <svg viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Facilitador seleccionado correctamente
+              </span>
             </div>
-            <span v-if="esTecnico" class="field-hint success-hint">
-              <svg viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Supervisor asignado automáticamente
-            </span>
-            <span v-else class="field-hint">Nombre completo de tu jefe directo</span>
-          </div>
+          </Transition>
+
+          <!-- Supervisor (solo para NO técnicos) -->
+          <Transition name="field-expand">
+            <div v-if="!esTecnico" class="form-field">
+              <label class="field-label">Supervisor Inmediato</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                  <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <input v-model="form.supervisor" @input="formatSupervisor" type="text" required placeholder="NOMBRE DEL SUPERVISOR" class="uppercase-input"/>
+              </div>
+              <span class="field-hint">Nombre completo de tu jefe directo</span>
+            </div>
+          </Transition>
         </div>
 
         <!-- Contact Information -->
@@ -491,6 +567,14 @@ const cargosDisponibles = [
 
 const buscandoSupervisor = ref(false);
 
+// Facilitador search state
+const facilitadorQuery = ref('');
+const facilitadoresEncontrados = ref([]);
+const facilitadorSeleccionado = ref(null);
+const buscandoFacilitador = ref(false);
+const mostrarResultadosFacilitador = ref(false);
+let _facilitadorDebounce = null;
+
 const esTecnico = computed(() => {
   const cargoUpper = (form.cargo || '').toUpperCase();
   return cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO';
@@ -506,7 +590,6 @@ const isFormComplete = computed(() => {
     form.cargo.trim() !== '' &&
     form.curp.trim() !== '' &&
     form.territorio.trim() !== '' &&
-    form.supervisor.trim() !== '' &&
     form.telefono.trim() !== '' &&
     form.password.trim() !== '' &&
     form.confirmPassword.trim() !== '';
@@ -516,7 +599,12 @@ const isFormComplete = computed(() => {
     ? form.cargoOtro.trim() !== '' 
     : true;
   
-  return basicFieldsFilled && cargoOtroFilled;
+  // Si es técnico, necesita facilitador seleccionado; si no, supervisor
+  const supervisorOk = esTecnico.value
+    ? !!facilitadorSeleccionado.value
+    : form.supervisor.trim() !== '';
+  
+  return basicFieldsFilled && cargoOtroFilled && supervisorOk;
 });
 
 const territoriosSembrandoVida = [
@@ -579,24 +667,16 @@ const filteredCountries = computed(() => {
   );
 });
 
-watch(() => form.territorio, async (nuevoTerritorio, viejoTerritorio) => {
-  if (nuevoTerritorio && nuevoTerritorio !== viejoTerritorio && esTecnico.value) {
-    await buscarSupervisorPorTerritorio(nuevoTerritorio);
-  }
-});
-
-watch(() => form.cargo, async (nuevoCargo, viejoCargo) => {
+watch(() => form.cargo, (nuevoCargo, viejoCargo) => {
   if (nuevoCargo !== viejoCargo) {
-    const cargoUpper = (nuevoCargo || '').toUpperCase();
-    const esNuevoTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO';
-    
     if (viejoCargo === 'OTRO' && nuevoCargo !== 'OTRO') {
       form.cargoOtro = '';
     }
-    
-    if (esNuevoTecnico && form.territorio) {
-      await buscarSupervisorPorTerritorio(form.territorio);
-    } else if (!esNuevoTecnico) {
+    // Si deja de ser técnico, limpiar facilitador y resetear supervisor
+    const cargoUpper = (nuevoCargo || '').toUpperCase();
+    const esNuevoTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO';
+    if (!esNuevoTecnico) {
+      limpiarFacilitador();
       form.supervisor = '';
     }
   }
@@ -635,6 +715,50 @@ function checkPasswordsMatch() {
   }
 }
 
+// ==================== FACILITADOR SEARCH ====================
+
+function buscarFacilitadoresRT() {
+  facilitadorQuery.value = facilitadorQuery.value.toUpperCase();
+  const q = facilitadorQuery.value.trim();
+  
+  if (q.length < 2) {
+    facilitadoresEncontrados.value = [];
+    return;
+  }
+  
+  clearTimeout(_facilitadorDebounce);
+  _facilitadorDebounce = setTimeout(async () => {
+    buscandoFacilitador.value = true;
+    try {
+      const resp = await apiService.buscarFacilitadores(q);
+      if (resp.success) {
+        facilitadoresEncontrados.value = resp.facilitadores;
+      }
+    } catch (err) {
+      console.error('Error buscando facilitadores:', err);
+      facilitadoresEncontrados.value = [];
+    } finally {
+      buscandoFacilitador.value = false;
+    }
+  }, 300);
+}
+
+function seleccionarFacilitador(fac) {
+  facilitadorSeleccionado.value = fac;
+  facilitadorQuery.value = fac.nombre_completo;
+  mostrarResultadosFacilitador.value = false;
+  facilitadoresEncontrados.value = [];
+  // Set supervisor name for display and backend
+  form.supervisor = fac.nombre_completo;
+}
+
+function limpiarFacilitador() {
+  facilitadorSeleccionado.value = null;
+  facilitadorQuery.value = '';
+  facilitadoresEncontrados.value = [];
+  mostrarResultadosFacilitador.value = false;
+}
+
 async function register() {
   if (!validateForm()) return;
   
@@ -665,6 +789,11 @@ async function register() {
       telefono: telefonoCompleto,
       territorio: form.territorio
     };
+    
+    // Si es técnico y eligió facilitador, enviarlo
+    if (facilitadorSeleccionado.value && facilitadorSeleccionado.value.admin_id) {
+      payload.facilitador_admin_id = facilitadorSeleccionado.value.admin_id;
+    }
     
     const response = await apiService.createUser(payload);
     currentApiUrl.value = apiService.getCurrentApiUrl();
@@ -762,7 +891,13 @@ function validateForm() {
     return false;
   }
 
-  if (!esTecnico.value) {
+  if (esTecnico.value) {
+    if (!facilitadorSeleccionado.value) {
+      message.text = 'Debes seleccionar un facilitador';
+      message.type = 'error';
+      return false;
+    }
+  } else {
     if (!form.supervisor || !form.supervisor.trim()) {
       message.text = 'El supervisor inmediato es obligatorio';
       message.type = 'error';
@@ -865,25 +1000,6 @@ function formatSupervisor() {
 
 function formatCargoOtro() {
   form.cargoOtro = form.cargoOtro.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
-
-async function buscarSupervisorPorTerritorio(territorio) {
-  if (!territorio || !esTecnico.value) return;
-  
-  buscandoSupervisor.value = true;
-  try {
-    const response = await apiService.obtenerSupervisorTerritorio(territorio);
-    if (response.success && response.supervisor) {
-      form.supervisor = response.supervisor;
-    } else {
-      form.supervisor = '';
-    }
-  } catch (error) {
-    console.error('Error buscando supervisor:', error);
-    form.supervisor = '';
-  } finally {
-    buscandoSupervisor.value = false;
-  }
 }
 
 function validatePhone() {
@@ -2050,5 +2166,187 @@ function goToLogin() {
   .modal-backdrop {
     background: rgba(0, 0, 0, 0.8);
   }
+}
+
+/* ==========================================================================
+   FACILITADOR SEARCH STYLES
+   ========================================================================== */
+
+.facilitador-search-field {
+  position: relative;
+}
+
+.field-label-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.facilitador-clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 2;
+}
+.facilitador-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+.facilitador-clear-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.facilitador-selected-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1.5px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+}
+
+.facilitador-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.facilitador-selected-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.facilitador-selected-name {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.facilitador-selected-meta {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 1px;
+}
+
+.facilitador-check {
+  width: 22px;
+  height: 22px;
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.facilitador-results {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.facilitador-results-loading,
+.facilitador-results-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 18px;
+  color: #9ca3af;
+  font-size: 13px;
+}
+.facilitador-results-empty svg {
+  width: 20px;
+  height: 20px;
+}
+
+.facilitador-results-list {
+  list-style: none;
+  padding: 6px;
+  margin: 0;
+}
+
+.facilitador-result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.facilitador-result-item:hover {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.facilitador-result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.facilitador-result-name {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.facilitador-result-meta {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 1px;
+}
+
+.input-spinner {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(16, 185, 129, 0.2);
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spinner-rotate 0.7s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to { transform: translateY(-50%) rotate(360deg); }
 }
 </style>

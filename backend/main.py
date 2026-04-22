@@ -414,6 +414,7 @@ class UserCreate(BaseModel):
     telefono: str  # Teléfono obligatorio
     territorio: str = None  # Estado de México (opcional pero recomendado)
     rol: str = 'user'  # Rol por defecto es user
+    facilitador_admin_id: int = None  # ID del facilitador en admin_users (para técnicos)
 
 class UserLogin(BaseModel):
     correo: str
@@ -713,13 +714,55 @@ async def crear_usuario(usuario: UserCreate):
             print(f"❌ Error registrando términos para usuario {user_id}: {e}")
             # No hacer rollback completo, solo advertir
         
+        # ==================== ASIGNACIÓN DE FACILITADOR (para técnicos) ====================
+        facilitador_asignado = False
+        if usuario.facilitador_admin_id:
+            cargo_upper = (usuario.cargo or '').upper()
+            if 'TECNICO' in cargo_upper:
+                try:
+                    # Verificar que el facilitador exista en admin_users
+                    cursor.execute(
+                        "SELECT id, usuario_id, nombre_completo FROM admin_users WHERE id = %s AND activo = TRUE AND UPPER(COALESCE(cargo, '')) LIKE '%%FACILITADOR%%'",
+                        (usuario.facilitador_admin_id,)
+                    )
+                    fac_row = cursor.fetchone()
+                    if fac_row:
+                        fac_usuario_id = fac_row[1]  # puede ser None
+                        fac_nombre = fac_row[2]
+                        
+                        # Si tiene usuario_id vinculado, crear asignación formal
+                        if fac_usuario_id:
+                            cursor.execute("""
+                                INSERT INTO facilitador_tecnico_asignaciones
+                                    (facilitador_usuario_id, tecnico_usuario_id, origen, activo)
+                                VALUES (%s, %s, 'manual', TRUE)
+                                ON CONFLICT (facilitador_usuario_id, tecnico_usuario_id)
+                                DO UPDATE SET activo = TRUE, origen = 'manual', updated_at = NOW()
+                            """, (fac_usuario_id, user_id))
+                            print(f"✅ Asignación formal creada: facilitador usuario_id={fac_usuario_id} → técnico {user_id}")
+                        else:
+                            print(f"ℹ️ Facilitador admin_id={usuario.facilitador_admin_id} sin usuario_id, solo supervisor")
+                        
+                        # Siempre actualizar campo supervisor con el nombre del facilitador
+                        cursor.execute(
+                            "UPDATE usuarios SET supervisor = %s WHERE id = %s",
+                            (fac_nombre, user_id)
+                        )
+                        facilitador_asignado = True
+                        print(f"✅ Facilitador {fac_nombre} asignado al técnico {user_id}")
+                    else:
+                        print(f"⚠️ Facilitador admin_id {usuario.facilitador_admin_id} no encontrado")
+                except Exception as e_fac:
+                    print(f"⚠️ Error asignando facilitador: {e_fac}")
+        
         conn.commit()
         
         return {
             "id": user_id, 
             "mensaje": "Usuario creado exitosamente con términos aceptados automáticamente", 
             "curp": curp_upper,
-            "terminos_registrados": True
+            "terminos_registrados": True,
+            "facilitador_asignado": facilitador_asignado
         }
         
     except HTTPException:
@@ -2855,6 +2898,143 @@ async def desasignar_tecnico_facilitador(admin_id: int, tecnico_usuario_id: int)
         except Exception:
             pass
         print(f"❌ Error en desasignar-tecnico: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================
+# ENDPOINTS PÚBLICOS: Búsqueda de facilitadores (para registro y perfil)
+# ============================================================
+
+@app.get("/facilitadores/buscar-publico")
+async def buscar_facilitadores_publico(q: str = "", limite: int = 20):
+    """
+    Endpoint PÚBLICO (sin auth) para buscar facilitadores.
+    Devuelve admin_users cuyo cargo contenga 'FACILITADOR', activos.
+    Búsqueda por nombre_completo o curp. Mínimo 2 caracteres para buscar.
+    Devuelve admin_id (siempre) y usuario_id (si está vinculado).
+    """
+    try:
+        verificar_conexion_db()
+        limite = max(1, min(limite, 50))
+        q = (q or "").strip()
+        if len(q) < 2:
+            return {"success": True, "facilitadores": [], "total": 0}
+
+        like = f"%{q.upper()}%"
+        cursor.execute("""
+            SELECT au.id, au.usuario_id, au.nombre_completo, au.curp, au.territorio
+            FROM admin_users au
+            WHERE UPPER(COALESCE(au.cargo, '')) LIKE '%%FACILITADOR%%'
+              AND au.activo = TRUE
+              AND (
+                  UPPER(COALESCE(au.nombre_completo, '')) LIKE %s
+                  OR UPPER(COALESCE(au.curp, '')) LIKE %s
+              )
+            ORDER BY au.nombre_completo
+            LIMIT %s
+        """, (like, like, limite))
+        rows = cursor.fetchall()
+
+        facilitadores = [{
+            "admin_id": r[0],
+            "usuario_id": r[1],
+            "nombre_completo": r[2],
+            "curp": r[3],
+            "territorio": r[4]
+        } for r in rows]
+
+        return {"success": True, "facilitadores": facilitadores, "total": len(facilitadores)}
+    except Exception as e:
+        print(f"❌ Error en buscar-facilitadores-publico: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class CambiarFacilitadorRequest(BaseModel):
+    facilitador_admin_id: int  # ID en tabla admin_users del facilitador
+
+
+@app.post("/usuarios/{user_id}/cambiar-facilitador")
+async def cambiar_facilitador(user_id: int, payload: CambiarFacilitadorRequest):
+    """
+    Permite a un técnico cambiar su facilitador asignado.
+    Recibe facilitador_admin_id (admin_users.id).
+    Si el facilitador tiene usuario_id vinculado, crea asignación en la tabla.
+    Siempre actualiza el campo supervisor con el nombre del facilitador.
+    """
+    try:
+        verificar_conexion_db()
+
+        # Verificar que el usuario exista y sea técnico
+        cursor.execute(
+            "SELECT id, nombre_completo, cargo FROM usuarios WHERE id = %s",
+            (user_id,)
+        )
+        tec = cursor.fetchone()
+        if not tec:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        cargo_upper = (tec[2] or "").upper()
+        if "TECNICO" not in cargo_upper:
+            raise HTTPException(status_code=400, detail="Solo los técnicos pueden elegir facilitador")
+
+        # Verificar que el facilitador exista en admin_users
+        cursor.execute("""
+            SELECT au.id, au.usuario_id, au.nombre_completo
+            FROM admin_users au
+            WHERE au.id = %s AND au.activo = TRUE
+              AND UPPER(COALESCE(au.cargo, '')) LIKE '%%FACILITADOR%%'
+        """, (payload.facilitador_admin_id,))
+        fac = cursor.fetchone()
+        if not fac:
+            raise HTTPException(status_code=404, detail="Facilitador no encontrado o inactivo")
+
+        fac_usuario_id = fac[1]  # puede ser None
+        fac_nombre = fac[2]
+
+        # Si el facilitador tiene usuario_id vinculado, crear asignación formal
+        if fac_usuario_id:
+            # Desactivar asignaciones manuales anteriores de este técnico
+            cursor.execute("""
+                UPDATE facilitador_tecnico_asignaciones
+                SET activo = FALSE, updated_at = NOW()
+                WHERE tecnico_usuario_id = %s AND activo = TRUE AND origen = 'manual'
+            """, (user_id,))
+
+            # Crear/reactivar nueva asignación
+            cursor.execute("""
+                INSERT INTO facilitador_tecnico_asignaciones
+                    (facilitador_usuario_id, tecnico_usuario_id, origen, activo)
+                VALUES (%s, %s, 'manual', TRUE)
+                ON CONFLICT (facilitador_usuario_id, tecnico_usuario_id)
+                DO UPDATE SET activo = TRUE, origen = 'manual', updated_at = NOW()
+            """, (fac_usuario_id, user_id))
+            print(f"✅ Asignación formal creada: facilitador usuario_id={fac_usuario_id} → técnico {user_id}")
+        else:
+            print(f"ℹ️ Facilitador admin_id={payload.facilitador_admin_id} sin usuario_id vinculado, solo se actualiza supervisor")
+
+        # Siempre actualizar campo supervisor en tabla usuarios
+        cursor.execute(
+            "UPDATE usuarios SET supervisor = %s WHERE id = %s",
+            (fac_nombre, user_id)
+        )
+        conn.commit()
+
+        return {
+            "success": True,
+            "mensaje": f"Facilitador cambiado a {fac_nombre}",
+            "facilitador_nombre": fac_nombre
+        }
+    except HTTPException:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        raise
+    except Exception as e:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        print(f"❌ Error en cambiar-facilitador: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

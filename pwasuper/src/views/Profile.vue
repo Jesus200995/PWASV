@@ -554,7 +554,7 @@
                   <div class="form-field">
                     <label class="field-label">
                       Territorio de Sembrando Vida
-                      <span v-if="esTecnico" class="field-badge">Define tu supervisor</span>
+                      <span v-if="esTecnico" class="field-badge">Tu zona de trabajo</span>
                     </label>
                     <div class="input-wrapper" :class="{ 'has-focus-blue': esTecnico }">
                       <svg class="input-icon" viewBox="0 0 24 24" fill="none">
@@ -571,49 +571,109 @@
                         <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
                         <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                       </svg>
-                      Al cambiar territorio tu supervisor se actualizará automáticamente
+                      Selecciona tu territorio y busca tu facilitador abajo
                     </span>
                   </div>
 
-                  <!-- Supervisor -->
-                  <div class="form-field">
-                    <label class="field-label">
-                      {{ esTecnico ? 'Facilitador' : 'Supervisor' }}
-                      <span v-if="esTecnico && !buscandoSupervisor" class="field-badge badge-success">Automático</span>
-                      <span v-if="buscandoSupervisor" class="field-badge badge-warning">Buscando...</span>
-                    </label>
-                    <div class="input-wrapper" :class="{ 'is-locked': esTecnico && !buscandoSupervisor, 'is-loading': buscandoSupervisor }">
-                      <svg class="input-icon" viewBox="0 0 24 24" fill="none">
-                        <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8-8c1.66 0 3-1.34 3-3S9.66 0 8 0 5 1.34 5 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.89 1.97 1.5 1.97 2.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" stroke="currentColor" stroke-width="2"/>
-                      </svg>
-                      <input 
-                        v-model="editForm.supervisor"
-                        type="text"
-                        :readonly="esTecnico"
-                        :placeholder="esTecnico ? 'Se asigna automáticamente' : 'Nombre de tu supervisor'"
-                        @input="!esTecnico && (editForm.supervisor = editForm.supervisor.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))"
-                      />
-                      <div v-if="esTecnico && !buscandoSupervisor" class="input-lock">
-                        <svg viewBox="0 0 24 24" fill="none">
-                          <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
-                          <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2"/>
+                  <!-- Facilitador (solo para técnicos) -->
+                  <transition name="field-slide">
+                    <div v-if="esTecnico" class="form-field facilitador-search-field">
+                      <label class="field-label">
+                        Busca tu Facilitador
+                        <span class="field-label-badge">Obligatorio</span>
+                      </label>
+                      <div class="input-wrapper" :class="{ 'has-success': editFacilitadorSeleccionado }">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+                          <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <input
+                          v-model="editFacilitadorQuery"
+                          @input="buscarFacilitadoresEditRT"
+                          @focus="editMostrarResultadosFacilitador = true"
+                          type="text"
+                          :placeholder="editFacilitadorSeleccionado ? '' : 'Busca por nombre o CURP...'"
+                          class="uppercase-input"
+                          autocomplete="off"
+                        />
+                        <div v-if="editBuscandoFacilitador" class="edit-input-spinner"></div>
+                        <button v-if="editFacilitadorSeleccionado" type="button" @click="limpiarEditFacilitador" class="facilitador-clear-btn" title="Cambiar facilitador">
+                          <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                      <!-- Facilitador seleccionado -->
+                      <div v-if="editFacilitadorSeleccionado" class="facilitador-selected-card">
+                        <div class="facilitador-avatar">{{ editFacilitadorSeleccionado.nombre_completo.charAt(0) }}</div>
+                        <div class="facilitador-selected-info">
+                          <span class="facilitador-selected-name">{{ editFacilitadorSeleccionado.nombre_completo }}</span>
+                          <span class="facilitador-selected-meta">
+                            <span v-if="editFacilitadorSeleccionado.curp">{{ editFacilitadorSeleccionado.curp }}</span>
+                            <span v-if="editFacilitadorSeleccionado.territorio"> · {{ editFacilitadorSeleccionado.territorio }}</span>
+                          </span>
+                        </div>
+                        <svg class="facilitador-check" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                          <path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                       </div>
-                      <div v-if="buscandoSupervisor" class="input-spinner">
-                        <svg viewBox="0 0 24 24" fill="none">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                      <!-- Resultados de búsqueda -->
+                      <transition name="dropdown-fade">
+                        <div v-if="editMostrarResultadosFacilitador && !editFacilitadorSeleccionado && editFacilitadorQuery.length >= 2" class="facilitador-results">
+                          <div v-if="editBuscandoFacilitador" class="facilitador-results-loading">
+                            <div class="edit-input-spinner" style="position:static;margin-right:8px;"></div>
+                            <span>Buscando facilitadores...</span>
+                          </div>
+                          <div v-else-if="editFacilitadoresEncontrados.length === 0" class="facilitador-results-empty">
+                            <svg viewBox="0 0 24 24" fill="none">
+                              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                              <path d="M8 15s1.5-2 4-2 4 2 4 2M9 9h.01M15 9h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                            <span>No se encontraron facilitadores</span>
+                          </div>
+                          <ul v-else class="facilitador-results-list">
+                            <li v-for="fac in editFacilitadoresEncontrados" :key="fac.admin_id" @click="seleccionarEditFacilitador(fac)" class="facilitador-result-item">
+                              <div class="facilitador-avatar">{{ fac.nombre_completo.charAt(0) }}</div>
+                              <div class="facilitador-result-info">
+                                <span class="facilitador-result-name">{{ fac.nombre_completo }}</span>
+                                <span class="facilitador-result-meta">
+                                  {{ fac.curp || '' }}
+                                  <span v-if="fac.territorio"> · {{ fac.territorio }}</span>
+                                </span>
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
+                      </transition>
+                      <span v-if="!editFacilitadorSeleccionado" class="field-hint">Escribe al menos 2 caracteres para buscar tu facilitador</span>
+                      <span v-else class="field-hint success-hint">
+                        <svg viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                          <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
+                        Facilitador seleccionado correctamente
+                      </span>
+                    </div>
+                  </transition>
+
+                  <!-- Supervisor (solo para NO técnicos) -->
+                  <transition name="field-slide">
+                    <div v-if="!esTecnico" class="form-field">
+                      <label class="field-label">Supervisor</label>
+                      <div class="input-wrapper">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                          <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8-8c1.66 0 3-1.34 3-3S9.66 0 8 0 5 1.34 5 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.89 1.97 1.5 1.97 2.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <input 
+                          v-model="editForm.supervisor"
+                          type="text"
+                          placeholder="Nombre de tu supervisor"
+                          @input="editForm.supervisor = editForm.supervisor.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')"
+                        />
                       </div>
                     </div>
-                    <span v-if="esTecnico && !buscandoSupervisor" class="field-hint info-hint">
-                      <svg viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                      </svg>
-                      El facilitador se asigna automáticamente
-                    </span>
-                  </div>
+                  </transition>
                 </div>
 
                 <!-- Información Adicional -->
@@ -829,7 +889,6 @@ const showConfirmPassword = ref(false)
 const showEditModal = ref(false)
 const showEditSuccessModal = ref(false)
 const isUpdatingUser = ref(false)
-const buscandoSupervisor = ref(false)
 const editErrors = ref({})
 const editForm = ref({
   nombre_completo: '',
@@ -904,63 +963,62 @@ const esTecnicoActual = computed(() => {
   return cargo === 'TECNICO SOCIAL' || cargo === 'TECNICO PRODUCTIVO'
 })
 
-// Función para buscar supervisor territorial por territorio
-const buscarSupervisorPorTerritorio = async (territorio) => {
-  if (!territorio || !user.value.id) return null
+// ==================== FACILITADOR SEARCH STATE ====================
+const editFacilitadorQuery = ref('')
+const editFacilitadoresEncontrados = ref([])
+const editFacilitadorSeleccionado = ref(null)
+const editBuscandoFacilitador = ref(false)
+const editMostrarResultadosFacilitador = ref(false)
+let _editFacilitadorDebounce = null
+
+function buscarFacilitadoresEditRT() {
+  editFacilitadorQuery.value = editFacilitadorQuery.value.toUpperCase()
+  const q = editFacilitadorQuery.value.trim()
   
-  buscandoSupervisor.value = true
-  editForm.value.supervisor = 'Buscando...'
-  
-  try {
-    // Necesitamos un endpoint que busque por territorio directamente
-    // Mientras tanto, usamos el endpoint existente pero primero actualizamos el territorio temporalmente
-    const respuesta = await apiService.obtenerSupervisorTerritorio(territorio)
-    
-    if (respuesta.success && respuesta.supervisor) {
-      editForm.value.supervisor = respuesta.supervisor
-      
-      // Actualizar también el user.value para que se refleje en Profile
-      user.value.supervisor = respuesta.supervisor
-      
-      // Actualizar localStorage
-      const storedUser = JSON.parse(localStorage.getItem('user'))
-      storedUser.supervisor = respuesta.supervisor
-      localStorage.setItem('user', JSON.stringify(storedUser))
-      
-      console.log(`✅ Supervisor actualizado: ${respuesta.supervisor}`)
-      return respuesta.supervisor
-    } else {
-      editForm.value.supervisor = 'No hay supervisor asignado'
-      console.log(`ℹ️ No se encontró supervisor para: ${territorio}`)
-      return null
-    }
-  } catch (error) {
-    console.error('❌ Error buscando supervisor:', error)
-    editForm.value.supervisor = 'Error al buscar'
-    return null
-  } finally {
-    buscandoSupervisor.value = false
+  if (q.length < 2) {
+    editFacilitadoresEncontrados.value = []
+    return
   }
+  
+  clearTimeout(_editFacilitadorDebounce)
+  _editFacilitadorDebounce = setTimeout(async () => {
+    editBuscandoFacilitador.value = true
+    try {
+      const resp = await apiService.buscarFacilitadores(q)
+      if (resp.success) {
+        editFacilitadoresEncontrados.value = resp.facilitadores
+      }
+    } catch (err) {
+      console.error('Error buscando facilitadores:', err)
+      editFacilitadoresEncontrados.value = []
+    } finally {
+      editBuscandoFacilitador.value = false
+    }
+  }, 300)
 }
 
-// Watch para actualizar el supervisor automáticamente cuando cambie el territorio (solo para técnicos)
-watch(() => editForm.value.territorio, async (nuevoTerritorio, viejoTerritorio) => {
-  // Solo si cambió el territorio y es técnico
-  if (nuevoTerritorio && nuevoTerritorio !== viejoTerritorio && esTecnico.value) {
-    console.log('🔄 Territorio cambió, buscando nuevo supervisor...')
-    await buscarSupervisorPorTerritorio(nuevoTerritorio)
-  }
-})
+function seleccionarEditFacilitador(fac) {
+  editFacilitadorSeleccionado.value = fac
+  editFacilitadorQuery.value = fac.nombre_completo
+  editMostrarResultadosFacilitador.value = false
+  editFacilitadoresEncontrados.value = []
+  editForm.value.supervisor = fac.nombre_completo
+}
 
-// Watch para cuando cambie el cargo
-watch(() => editForm.value.cargo, async (nuevoCargo, viejoCargo) => {
+function limpiarEditFacilitador() {
+  editFacilitadorSeleccionado.value = null
+  editFacilitadorQuery.value = ''
+  editFacilitadoresEncontrados.value = []
+  editMostrarResultadosFacilitador.value = false
+}
+
+// Watch para cuando cambie el cargo en edición
+watch(() => editForm.value.cargo, (nuevoCargo, viejoCargo) => {
   if (nuevoCargo !== viejoCargo) {
     const cargoUpper = (nuevoCargo || '').toUpperCase()
     const esNuevoTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO'
-    
-    if (esNuevoTecnico && editForm.value.territorio) {
-      // Si ahora es técnico, buscar supervisor automático
-      await buscarSupervisorPorTerritorio(editForm.value.territorio)
+    if (!esNuevoTecnico) {
+      limpiarEditFacilitador()
     }
   }
 })
@@ -1412,6 +1470,21 @@ const openEditModal = () => {
   // Resetear errores
   editErrors.value = {}
   
+  // Si es técnico, pre-cargar facilitador actual como seleccionado (por nombre)
+  limpiarEditFacilitador()
+  const cargoUpper = (editForm.value.cargo || '').toUpperCase()
+  if ((cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO') && user.value.supervisor) {
+    // Pre-fill con datos conocidos; al guardar se confirma con el ID real
+    editFacilitadorQuery.value = user.value.supervisor
+    editFacilitadorSeleccionado.value = { 
+      nombre_completo: user.value.supervisor,
+      admin_id: null, // se rellena al buscar/seleccionar un nuevo facilitador
+      usuario_id: null,
+      curp: null,
+      territorio: null
+    }
+  }
+  
   showEditModal.value = true
 }
 
@@ -1420,6 +1493,7 @@ const closeEditModal = () => {
   showEditModal.value = false
   showCountrySelector.value = false
   countrySearch.value = ''
+  limpiarEditFacilitador()
   editForm.value = {
     nombre_completo: '',
     correo: '',
@@ -1468,6 +1542,12 @@ const updateUserInfo = async () => {
     // Validar cargoOtro si seleccionó OTRO
     if (editForm.value.cargo === 'OTRO' && !editForm.value.cargoOtro?.trim()) {
       editErrors.value.cargoOtro = 'Debes especificar tu cargo'
+      return
+    }
+    
+    // Validar facilitador para técnicos
+    if (esTecnico.value && !editFacilitadorSeleccionado.value) {
+      editErrors.value.general = 'Debes seleccionar un facilitador'
       return
     }
     
@@ -1591,21 +1671,20 @@ const updateUserInfo = async () => {
           loadUserData()
         }, 1000)
         
-        // Si es técnico y tiene territorio, actualizar supervisor automáticamente en la base de datos
+        // Si es técnico y eligió facilitador con ID real, guardar la asignación
         const cargoUpper = (cargoFinal || '').toUpperCase()
-        if ((cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO') && editForm.value.territorio) {
+        if ((cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO') && editFacilitadorSeleccionado.value && editFacilitadorSeleccionado.value.admin_id) {
           try {
-            console.log('🔄 Actualizando supervisor automático en BD después de guardar...')
-            const respuestaSupervisor = await apiService.obtenerSupervisorAutomatico(storedUser.id)
-            if (respuestaSupervisor.success && respuestaSupervisor.supervisor) {
-              console.log(`✅ Supervisor actualizado en BD: ${respuestaSupervisor.supervisor}`)
-              // Actualizar en memoria también
-              user.value.supervisor = respuestaSupervisor.supervisor
-              updatedUser.supervisor = respuestaSupervisor.supervisor
+            console.log('🔄 Guardando asignación de facilitador...')
+            const respFac = await apiService.cambiarFacilitador(storedUser.id, editFacilitadorSeleccionado.value.admin_id)
+            if (respFac.success && respFac.facilitador_nombre) {
+              console.log(`✅ Facilitador asignado: ${respFac.facilitador_nombre}`)
+              user.value.supervisor = respFac.facilitador_nombre
+              updatedUser.supervisor = respFac.facilitador_nombre
               localStorage.setItem('user', JSON.stringify(updatedUser))
             }
           } catch (error) {
-            console.error('⚠️ Error actualizando supervisor automático:', error)
+            console.error('⚠️ Error asignando facilitador:', error)
           }
         }
       }
@@ -2597,6 +2676,15 @@ const validatePhoneEdit = () => {
   padding-right: 40px;
 }
 
+.input-wrapper.has-success input {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.04);
+}
+
+.input-wrapper.has-success input:focus {
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
 .input-wrapper.is-loading input {
   background: #fff9f0;
   border-color: #ffb951;
@@ -3485,5 +3573,213 @@ const validatePhoneEdit = () => {
   .value-date {
     color: #8b5cf6;
   }
+}
+
+/* ==========================================================================
+   FACILITADOR SEARCH STYLES (Edit Modal)
+   ========================================================================== */
+
+.facilitador-search-field {
+  position: relative;
+}
+
+.field-label-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.facilitador-clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 2;
+}
+.facilitador-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+.facilitador-clear-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.facilitador-selected-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1.5px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+}
+
+.facilitador-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.facilitador-selected-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.facilitador-selected-name {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.facilitador-selected-meta {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 1px;
+}
+
+.facilitador-check {
+  width: 22px;
+  height: 22px;
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.facilitador-results {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.facilitador-results-loading,
+.facilitador-results-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 18px;
+  color: #9ca3af;
+  font-size: 13px;
+}
+.facilitador-results-empty svg {
+  width: 20px;
+  height: 20px;
+}
+
+.facilitador-results-list {
+  list-style: none;
+  padding: 6px;
+  margin: 0;
+}
+
+.facilitador-result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.facilitador-result-item:hover {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.facilitador-result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.facilitador-result-name {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.facilitador-result-meta {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 1px;
+}
+
+.edit-input-spinner {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(16, 185, 129, 0.2);
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: fac-spinner 0.7s linear infinite;
+}
+
+.success-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #059669 !important;
+}
+.success-hint svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.uppercase-input {
+  text-transform: uppercase;
+}
+
+.dropdown-fade-enter-active,
+.dropdown-fade-leave-active {
+  transition: all 0.2s ease;
+}
+.dropdown-fade-enter-from,
+.dropdown-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+@keyframes fac-spinner {
+  to { transform: translateY(-50%) rotate(360deg); }
 }
 </style>

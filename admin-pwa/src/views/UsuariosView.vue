@@ -312,7 +312,10 @@
                     <span v-else class="apple-cargo-badge cargo-empty">Sin cargo</span>
                   </td>
                   <td>
-                    <span class="apple-supervisor">{{ usuario.supervisor || '—' }}</span>
+                    <div class="supervisor-cell">
+                      <span class="apple-supervisor">{{ usuario.supervisor || '—' }}</span>
+                      <span v-if="usuario.supervisor_es_facilitador" class="badge-facilitador">FACILITADOR</span>
+                    </div>
                   </td>
                   <td>
                     <span class="apple-curp">{{ (usuario.curp || 'N/A').toUpperCase() }}</span>
@@ -3400,6 +3403,25 @@ const logout = () => {
 .apple-supervisor {
   font-size: 12px;
   color: #1d1d1f;
+}
+
+.supervisor-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-start;
+}
+
+.badge-facilitador {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  color: #fff;
+  white-space: nowrap;
 }
 
 .apple-curp {

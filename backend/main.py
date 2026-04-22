@@ -4127,41 +4127,86 @@ async def obtener_usuarios(territorio: str = None):
         
         tiene_columna_rol = bool(rol_check)
         
-        # Construir query base
+        # Construir query base con JOIN a facilitador_tecnico_asignaciones
+        # para obtener el nombre real del facilitador asignado al tecnico (si existe)
         if tiene_columna_rol:
-            base_query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, rol, territorio, activo FROM usuarios"
+            base_query = """
+                SELECT u.id, u.correo, u.nombre_completo, u.cargo, u.supervisor,
+                       u.curp, u.contrasena, u.telefono, u.rol, u.territorio, u.activo,
+                       COALESCE(au.nombre_completo, uf.nombre_completo) AS facilitador_nombre
+                FROM usuarios u
+                LEFT JOIN facilitador_tecnico_asignaciones fta
+                    ON fta.tecnico_usuario_id = u.id AND fta.activo = TRUE
+                    AND UPPER(COALESCE(u.cargo,'')) IN ('TECNICO SOCIAL','TECNICO PRODUCTIVO')
+                LEFT JOIN admin_users au ON au.id = fta.facilitador_admin_id
+                LEFT JOIN usuarios uf ON uf.id = fta.facilitador_usuario_id
+            """
         else:
-            base_query = "SELECT id, correo, nombre_completo, cargo, supervisor, curp, contrasena, telefono, territorio, activo FROM usuarios"
-        
+            base_query = """
+                SELECT u.id, u.correo, u.nombre_completo, u.cargo, u.supervisor,
+                       u.curp, u.contrasena, u.telefono, u.territorio, u.activo,
+                       COALESCE(au.nombre_completo, uf.nombre_completo) AS facilitador_nombre
+                FROM usuarios u
+                LEFT JOIN facilitador_tecnico_asignaciones fta
+                    ON fta.tecnico_usuario_id = u.id AND fta.activo = TRUE
+                    AND UPPER(COALESCE(u.cargo,'')) IN ('TECNICO SOCIAL','TECNICO PRODUCTIVO')
+                LEFT JOIN admin_users au ON au.id = fta.facilitador_admin_id
+                LEFT JOIN usuarios uf ON uf.id = fta.facilitador_usuario_id
+            """
+
         # Agregar filtro de territorio si se proporciona
         if territorio:
-            query = f"{base_query} WHERE territorio = %s ORDER BY id DESC"
+            query = f"{base_query} WHERE u.territorio = %s ORDER BY u.id DESC"
             resultados = ejecutar_consulta_segura(query, (territorio,), fetch_type='all')
         else:
-            query = f"{base_query} ORDER BY id DESC"
+            query = f"{base_query} ORDER BY u.id DESC"
             resultados = ejecutar_consulta_segura(query, fetch_type='all')
-        
+
         if not resultados:
             resultados = []
-        
+
         print(f"📊 Encontrados {len(resultados)} usuarios")
-        
+
         # Convertir tuplas a diccionarios manualmente
+        # facilitador_nombre es siempre el último campo (índice 11 con rol / 10 sin rol)
         usuarios = []
         for row in resultados:
-            usuario = {
-                "id": row[0],
-                "correo": row[1],
-                "nombre_completo": row[2],
-                "cargo": row[3],
-                "supervisor": row[4],
-                "curp": row[5],
-                "contrasena": row[6],
-                "telefono": row[7] if len(row) > 7 else None,
-                "rol": row[8] if tiene_columna_rol and len(row) > 8 else 'user',
-                "territorio": row[9] if tiene_columna_rol and len(row) > 9 else (row[8] if not tiene_columna_rol and len(row) > 8 else None),
-                "activo": row[10] if tiene_columna_rol and len(row) > 10 else (row[9] if not tiene_columna_rol and len(row) > 9 else True)
-            }
+            if tiene_columna_rol:
+                facilitador_nombre = row[11] if len(row) > 11 else None
+                cargo = row[3] or ''
+                es_tecnico = cargo.upper() in ('TECNICO SOCIAL', 'TECNICO PRODUCTIVO')
+                usuario = {
+                    "id": row[0],
+                    "correo": row[1],
+                    "nombre_completo": row[2],
+                    "cargo": row[3],
+                    "supervisor": facilitador_nombre if (es_tecnico and facilitador_nombre) else row[4],
+                    "supervisor_es_facilitador": bool(es_tecnico and facilitador_nombre),
+                    "curp": row[5],
+                    "contrasena": row[6],
+                    "telefono": row[7] if len(row) > 7 else None,
+                    "rol": row[8] if len(row) > 8 else 'user',
+                    "territorio": row[9] if len(row) > 9 else None,
+                    "activo": row[10] if len(row) > 10 else True
+                }
+            else:
+                facilitador_nombre = row[10] if len(row) > 10 else None
+                cargo = row[3] or ''
+                es_tecnico = cargo.upper() in ('TECNICO SOCIAL', 'TECNICO PRODUCTIVO')
+                usuario = {
+                    "id": row[0],
+                    "correo": row[1],
+                    "nombre_completo": row[2],
+                    "cargo": row[3],
+                    "supervisor": facilitador_nombre if (es_tecnico and facilitador_nombre) else row[4],
+                    "supervisor_es_facilitador": bool(es_tecnico and facilitador_nombre),
+                    "curp": row[5],
+                    "contrasena": row[6],
+                    "telefono": row[7] if len(row) > 7 else None,
+                    "rol": 'user',
+                    "territorio": row[8] if len(row) > 8 else None,
+                    "activo": row[9] if len(row) > 9 else True
+                }
             usuarios.append(usuario)
         
         print(f"✅ Usuarios procesados correctamente con información de roles")

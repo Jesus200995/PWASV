@@ -7260,9 +7260,10 @@ onUnmounted(() => {
 .apple-modal-asociar {
   background: #fff;
   border-radius: 18px;
-  width: 100%;
-  max-width: 560px;
-  max-height: 85vh;
+  width: min(96vw, 1100px);
+  max-width: 1100px;
+  height: min(90vh, 820px);
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 24px 60px rgba(0,0,0,.25);
@@ -7343,7 +7344,7 @@ onUnmounted(() => {
 }
 
 .apple-modal-body {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   padding: 8px 12px 12px;
   min-height: 200px;
@@ -7367,6 +7368,16 @@ onUnmounted(() => {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+}
+
+@media (min-width: 900px) {
+  .apple-modal-lista {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
 }
 
 .apple-tecnico-item {
@@ -7474,8 +7485,6 @@ onUnmounted(() => {
 .apple-modal-leave-to .apple-modal-asociar {
   transform: translateY(16px) scale(.97);
 }
-
-.apple-modal-asociar { max-width: 720px; }
 
 /* ===== Tabs ===== */
 .apple-modal-tabs {

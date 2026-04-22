@@ -1412,7 +1412,11 @@ const cargarSupervisoresTerritoriales = async () => {
 }
 
 // Función para actualizar supervisor de un técnico según su territorio
+// SOLO aplica si el técnico NO tiene un facilitador asignado (el backend ya lo resuelve)
 const actualizarSupervisorTecnico = (usuario) => {
+  // Si el backend ya resolvió un facilitador, no sobreescribir
+  if (usuario.supervisor_es_facilitador) return usuario
+
   const esTecnico = usuario.cargo && (
     usuario.cargo.toUpperCase().includes('TECNICO SOCIAL') ||
     usuario.cargo.toUpperCase().includes('TECNICO PRODUCTIVO')

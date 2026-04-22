@@ -10004,7 +10004,12 @@ async def obtener_facilitador_asignado(user_id: int):
     try:
         print(f"🔍 Buscando facilitador asignado para usuario ID: {user_id}")
         cursor.execute("""
-            SELECT COALESCE(au.nombre_completo, u.nombre_completo) AS facilitador_nombre
+            SELECT
+                COALESCE(au.nombre_completo, u.nombre_completo) AS facilitador_nombre,
+                fta.facilitador_admin_id,
+                fta.facilitador_usuario_id,
+                COALESCE(au.curp, u.curp) AS facilitador_curp,
+                fta.origen
             FROM facilitador_tecnico_asignaciones fta
             LEFT JOIN admin_users au ON au.id = fta.facilitador_admin_id
             LEFT JOIN usuarios u ON u.id = fta.facilitador_usuario_id
@@ -10015,10 +10020,23 @@ async def obtener_facilitador_asignado(user_id: int):
         row = cursor.fetchone()
         if row and row[0]:
             print(f"   ✅ Facilitador encontrado: {row[0]}")
-            return {"success": True, "facilitador_nombre": row[0]}
+            return {
+                "success": True,
+                "facilitador_nombre": row[0],
+                "facilitador_admin_id": row[1],
+                "facilitador_usuario_id": row[2],
+                "facilitador_curp": row[3],
+                "origen": row[4]
+            }
         else:
             print(f"   ℹ️ No hay facilitador asignado para usuario {user_id}")
-            return {"success": True, "facilitador_nombre": None, "mensaje": "Sin facilitador asignado"}
+            return {
+                "success": True,
+                "facilitador_nombre": None,
+                "facilitador_admin_id": None,
+                "facilitador_usuario_id": None,
+                "mensaje": "Sin facilitador asignado"
+            }
     except Exception as e:
         print(f"❌ Error obteniendo facilitador asignado: {e}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")

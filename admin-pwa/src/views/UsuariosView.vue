@@ -819,23 +819,67 @@
                   <option v-for="cargo in cargosDisponibles" :key="cargo" :value="cargo">{{ cargo }}</option>
                 </select>
               </div>
-              <div class="edit-form-field">
+              <div class="edit-form-field" style="position: relative;">
                 <label for="edit-supervisor">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                  Supervisor
+                  {{ esTecnicoEdicion ? 'Facilitador asignado' : 'Supervisor' }}
                 </label>
-                <input 
+
+                <!-- Para técnicos: selector de facilitador -->
+                <template v-if="esTecnicoEdicion">
+                  <!-- Mostrar facilitador seleccionado como chip/badge -->
+                  <div v-if="facilitadorEdicionSeleccionado" class="facilitador-chip">
+                    <div class="facilitador-chip-info">
+                      <span class="facilitador-chip-nombre">{{ facilitadorEdicionSeleccionado.nombre_completo }}</span>
+                      <span v-if="facilitadorEdicionSeleccionado.curp" class="facilitador-chip-curp">{{ facilitadorEdicionSeleccionado.curp }}</span>
+                    </div>
+                    <button type="button" class="facilitador-chip-clear" @click="limpiarFacilitadorEdicion" title="Quitar facilitador">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                  </div>
+
+                  <!-- Input de búsqueda -->
+                  <input
+                    id="edit-supervisor"
+                    v-model="facilitadorEdicionQuery"
+                    type="text"
+                    :placeholder="facilitadorEdicionSeleccionado ? 'Cambiar facilitador: escribe nombre o CURP...' : 'Escribe nombre o CURP del facilitador (min. 2 caracteres)'"
+                    @input="buscarFacilitadoresEdicion"
+                    @focus="buscarFacilitadoresEdicion"
+                    autocomplete="off"
+                    style="text-transform: uppercase;"
+                  />
+
+                  <!-- Resultados de búsqueda -->
+                  <div v-if="facilitadorEdicionResultados.length > 0 && facilitadorEdicionQuery.length >= 2" class="facilitador-dropdown">
+                    <div
+                      v-for="fac in facilitadorEdicionResultados"
+                      :key="fac.admin_id"
+                      class="facilitador-dropdown-item"
+                      @click="seleccionarFacilitadorEdicion(fac)"
+                    >
+                      <div class="facilitador-dropdown-nombre">{{ fac.nombre_completo }}</div>
+                      <div class="facilitador-dropdown-meta">
+                        <span v-if="fac.curp">{{ fac.curp }}</span>
+                        <span v-if="fac.territorio"> · {{ fac.territorio }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p v-if="buscandoFacilitadoresEdicion" style="margin-top: 0.25rem; font-size: 0.75rem; color: #6b7280;">🔍 Buscando...</p>
+                  <p v-else-if="facilitadorEdicionQuery.length >= 2 && facilitadorEdicionResultados.length === 0" style="margin-top: 0.25rem; font-size: 0.75rem; color: #ef4444;">Sin resultados</p>
+                  <p v-else-if="!facilitadorEdicionSeleccionado" style="margin-top: 0.25rem; font-size: 0.75rem; color: #6b7280;">Sin facilitador asignado</p>
+                </template>
+
+                <!-- Para no-técnicos: input de supervisor clásico -->
+                <input
+                  v-else
                   id="edit-supervisor"
-                  v-model="datosEdicion.supervisor" 
-                  type="text" 
-                  :placeholder="esTecnicoEdicion && buscandoSupervisor ? 'Buscando supervisor...' : 'Nombre del supervisor'"
-                  :readonly="esTecnicoEdicion"
-                  :style="esTecnicoEdicion ? 'background-color: #e5e7eb; cursor: not-allowed; color: #1f2937;' : 'text-transform: uppercase;'"
-                  @input="!esTecnicoEdicion && (datosEdicion.supervisor = normalizarTexto($event.target.value))"
+                  v-model="datosEdicion.supervisor"
+                  type="text"
+                  placeholder="Nombre del supervisor"
+                  style="text-transform: uppercase;"
+                  @input="datosEdicion.supervisor = normalizarTexto($event.target.value)"
                 />
-                <p v-if="esTecnicoEdicion" style="margin-top: 0.25rem; font-size: 0.75rem; color: #10b981;">
-                  ✅ Supervisor asignado automáticamente según territorio
-                </p>
               </div>
             </div>
 
@@ -1095,6 +1139,13 @@ const modalContent = ref('')
 const usuarioSeleccionado = ref(null)
 const showPassword = ref(false)
 const showEditPassword = ref(false) // Nueva variable para el modal de edición
+const showEditModal = ref(false)
+const facilitadorEdicionSeleccionado = ref(null) // { admin_id, usuario_id, nombre_completo, curp, territorio } | null
+const facilitadorEdicionOriginal = ref(null) // snapshot del facilitador inicial al abrir el modal (para detectar cambios)
+const facilitadorEdicionQuery = ref('')
+const facilitadorEdicionResultados = ref([])
+const buscandoFacilitadoresEdicion = ref(false)
+let facilitadorEdicionTimeout = null
 
 // Variables para eliminación de usuarios
 const showDeleteModal = ref(false)
@@ -1107,7 +1158,6 @@ const usuarioACambiarEstado = ref(null)
 const cambiandoEstado = ref(false)
 
 // Variables para edición de usuarios
-const showEditModal = ref(false)
 const usuarioAEditar = ref(null)
 const editandoUsuario = ref(false)
 const inicializandoModalEdicion = ref(false) // Para evitar que watchers limpien campos al abrir modal
@@ -1299,11 +1349,85 @@ const buscarSupervisorAutomatico = async (territorio) => {
   }
 }
 
+// ==================== SELECTOR DE FACILITADOR EN EDICIÓN ====================
+
+// Búsqueda debounced de facilitadores (admin_users con cargo FACILITADOR)
+const buscarFacilitadoresEdicion = () => {
+  if (facilitadorEdicionTimeout) clearTimeout(facilitadorEdicionTimeout)
+  const q = (facilitadorEdicionQuery.value || '').trim()
+  if (q.length < 2) {
+    facilitadorEdicionResultados.value = []
+    buscandoFacilitadoresEdicion.value = false
+    return
+  }
+  buscandoFacilitadoresEdicion.value = true
+  facilitadorEdicionTimeout = setTimeout(async () => {
+    try {
+      const res = await fetch(`${API_URL}/facilitadores/buscar-publico?q=${encodeURIComponent(q)}&limite=20`)
+      const data = await res.json()
+      facilitadorEdicionResultados.value = data.success ? (data.facilitadores || []) : []
+    } catch (err) {
+      console.error('❌ Error buscando facilitadores:', err)
+      facilitadorEdicionResultados.value = []
+    } finally {
+      buscandoFacilitadoresEdicion.value = false
+    }
+  }, 300)
+}
+
+const seleccionarFacilitadorEdicion = (fac) => {
+  facilitadorEdicionSeleccionado.value = { ...fac }
+  facilitadorEdicionQuery.value = ''
+  facilitadorEdicionResultados.value = []
+  // Reflejar el nombre en datosEdicion.supervisor para mantener coherencia con el guardado
+  if (fac && fac.nombre_completo) {
+    datosEdicion.value.supervisor = fac.nombre_completo
+  }
+}
+
+const limpiarFacilitadorEdicion = () => {
+  facilitadorEdicionSeleccionado.value = null
+  facilitadorEdicionQuery.value = ''
+  facilitadorEdicionResultados.value = []
+  // Vaciar supervisor para que al guardar no mantenga el nombre antiguo
+  datosEdicion.value.supervisor = ''
+}
+
+// Carga el facilitador actualmente asignado al usuario (si existe)
+const cargarFacilitadorAsignado = async (userId) => {
+  try {
+    const res = await fetch(`${API_URL}/usuarios/${userId}/facilitador-asignado`)
+    const data = await res.json()
+    if (data.success && data.facilitador_admin_id) {
+      const fac = {
+        admin_id: data.facilitador_admin_id,
+        usuario_id: data.facilitador_usuario_id || null,
+        nombre_completo: data.facilitador_nombre,
+        curp: data.facilitador_curp || null,
+        territorio: null
+      }
+      facilitadorEdicionSeleccionado.value = fac
+      facilitadorEdicionOriginal.value = { ...fac }
+      datosEdicion.value.supervisor = fac.nombre_completo
+    } else {
+      facilitadorEdicionSeleccionado.value = null
+      facilitadorEdicionOriginal.value = null
+    }
+  } catch (err) {
+    console.error('❌ Error cargando facilitador asignado:', err)
+    facilitadorEdicionSeleccionado.value = null
+    facilitadorEdicionOriginal.value = null
+  }
+}
+
 // Watcher: cuando cambie el territorio en el modal de edición
 watch(() => datosEdicion.value.territorio, async (nuevoTerritorio, viejoTerritorio) => {
   // No hacer nada si estamos inicializando el modal
   if (inicializandoModalEdicion.value) return
-  
+
+  // Si es técnico y hay facilitador asignado, no sobrescribir el supervisor
+  if (esTecnicoEdicion.value && facilitadorEdicionSeleccionado.value) return
+
   if (nuevoTerritorio !== viejoTerritorio && esTecnicoEdicion.value) {
     await buscarSupervisorAutomatico(nuevoTerritorio)
   }
@@ -2079,16 +2203,27 @@ const editarUsuario = async (usuario) => {
     territorio: usuario.territorio || ''
   }
   
+  // Resetear estado del selector de facilitador
+  facilitadorEdicionSeleccionado.value = null
+  facilitadorEdicionOriginal.value = null
+  facilitadorEdicionQuery.value = ''
+  facilitadorEdicionResultados.value = []
+
+  // Si es técnico, cargar el facilitador actualmente asignado
+  const cargoUpper = (usuario.cargo || '').toUpperCase()
+  const esTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO'
+  if (esTecnico) {
+    await cargarFacilitadorAsignado(usuario.id)
+  }
+
   // Esperar un tick para que los watchers no interfieran
   await new Promise(resolve => setTimeout(resolve, 50))
   inicializandoModalEdicion.value = false // Desactivar bandera
-  
+
   showEditModal.value = true
-  
-  // Si es técnico y tiene territorio, buscar supervisor automático
-  const cargoUpper = (usuario.cargo || '').toUpperCase()
-  const esTecnico = cargoUpper === 'TECNICO SOCIAL' || cargoUpper === 'TECNICO PRODUCTIVO'
-  if (esTecnico && usuario.territorio) {
+
+  // Solo si es técnico SIN facilitador asignado, usar supervisor territorial como fallback
+  if (esTecnico && !facilitadorEdicionSeleccionado.value && usuario.territorio) {
     await buscarSupervisorAutomatico(usuario.territorio)
   }
 }
@@ -2099,6 +2234,15 @@ const cancelarEdicion = () => {
   editandoUsuario.value = false
   inicializandoModalEdicion.value = false // Resetear bandera
   showEditPassword.value = false // Resetear visibilidad de contraseña
+  // Limpiar estado del selector de facilitador
+  facilitadorEdicionSeleccionado.value = null
+  facilitadorEdicionOriginal.value = null
+  facilitadorEdicionQuery.value = ''
+  facilitadorEdicionResultados.value = []
+  if (facilitadorEdicionTimeout) {
+    clearTimeout(facilitadorEdicionTimeout)
+    facilitadorEdicionTimeout = null
+  }
   // Limpiar formulario
   datosEdicion.value = {
     correo: '',
@@ -2153,25 +2297,65 @@ const guardarEdicion = async () => {
     
     console.log('📤 Enviando datos al backend:', datosParaEnviar)
     
+    // Capturar estado del facilitador ANTES de cerrar el modal (que lo limpia)
+    const esTecnicoGuardar = esTecnicoEdicion.value
+    const facilitadorSel = facilitadorEdicionSeleccionado.value ? { ...facilitadorEdicionSeleccionado.value } : null
+    const facilitadorOrig = facilitadorEdicionOriginal.value ? { ...facilitadorEdicionOriginal.value } : null
+    const userIdGuardar = usuarioAEditar.value.id
+
     // Llamar al servicio para actualizar el usuario en la base de datos
-    const resultado = await usuariosService.actualizarUsuario(usuarioAEditar.value.id, datosParaEnviar)
-    
+    const resultado = await usuariosService.actualizarUsuario(userIdGuardar, datosParaEnviar)
+
+    // Si es técnico, sincronizar asignación de facilitador
+    if (esTecnicoGuardar) {
+      try {
+        const nuevoAdminId = facilitadorSel?.admin_id || null
+        const origAdminId = facilitadorOrig?.admin_id || null
+        if (nuevoAdminId && nuevoAdminId !== origAdminId) {
+          console.log(`🔄 Asignando facilitador admin_id=${nuevoAdminId} al técnico ${userIdGuardar}`)
+          const resp = await fetch(`${API_URL}/usuarios/${userIdGuardar}/cambiar-facilitador`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ facilitador_admin_id: nuevoAdminId })
+          })
+          const respData = await resp.json()
+          if (!resp.ok || !respData.success) {
+            throw new Error(respData.detail || 'No se pudo vincular al facilitador')
+          }
+          // Reflejar el nombre del facilitador devuelto en el usuario actualizado
+          if (respData.facilitador_nombre && resultado.usuario) {
+            resultado.usuario.supervisor = respData.facilitador_nombre
+          }
+          console.log(`✅ Facilitador asignado: ${respData.facilitador_nombre}`)
+        } else if (!nuevoAdminId && origAdminId) {
+          // El admin quitó el facilitador → limpiar supervisor
+          if (resultado.usuario) {
+            resultado.usuario.supervisor = ''
+          }
+          console.log('ℹ️ Se quitó el facilitador asignado (quedará sin supervisor)')
+        }
+      } catch (facErr) {
+        console.error('⚠️ Error sincronizando facilitador:', facErr)
+        alert(`El usuario se guardó, pero hubo un problema vinculando al facilitador: ${facErr.message}`)
+      }
+    }
+
     // Actualizar el usuario en el array local con los datos devueltos por el servidor
-    const index = usuarios.value.findIndex(u => u.id === usuarioAEditar.value.id)
+    const index = usuarios.value.findIndex(u => u.id === userIdGuardar)
     if (index !== -1) {
       // Actualizar supervisor si es técnico (reactivo)
       const usuarioActualizado = actualizarSupervisorTecnico({...resultado.usuario})
       usuarios.value[index] = usuarioActualizado
     }
-    
+
     // Actualizar usuarios filtrados SIN resetear la paginación
     filtrarUsuarios(false)
-    
+
     console.log('✅ Usuario editado exitosamente en la base de datos')
-    
+
     // Cerrar modal de edición
     cancelarEdicion()
-    
+
     // Mostrar modal de éxito
     showSuccessModal.value = true
     
@@ -9415,6 +9599,90 @@ const logout = () => {
     padding: 11px 14px;
     font-size: 14px;
   }
+}
+
+/* ====================== SELECTOR DE FACILITADOR (EDICIÓN) ====================== */
+.facilitador-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.10), rgba(99, 102, 241, 0.10));
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+.facilitador-chip-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.facilitador-chip-nombre {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.facilitador-chip-curp {
+  font-size: 11px;
+  color: #6b7280;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.facilitador-chip-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.facilitador-chip-clear:hover {
+  background: rgba(239, 68, 68, 0.22);
+  transform: scale(1.05);
+}
+.facilitador-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 50;
+}
+.facilitador-dropdown-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s ease;
+}
+.facilitador-dropdown-item:last-child { border-bottom: none; }
+.facilitador-dropdown-item:hover {
+  background: rgba(139, 92, 246, 0.08);
+}
+.facilitador-dropdown-nombre {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1f2937;
+}
+.facilitador-dropdown-meta {
+  margin-top: 2px;
+  font-size: 11px;
+  color: #6b7280;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 </style>
 

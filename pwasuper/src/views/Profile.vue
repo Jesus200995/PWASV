@@ -579,38 +579,19 @@
                   <transition name="field-slide">
                     <div v-if="esTecnico" class="form-field facilitador-search-field">
                       <label class="field-label">
-                        Busca tu Facilitador
+                        Tu Facilitador
                         <span class="field-label-badge">Obligatorio</span>
                       </label>
-                      <div class="input-wrapper" :class="{ 'has-success': editFacilitadorSeleccionado }">
-                        <svg class="input-icon" viewBox="0 0 24 24" fill="none">
-                          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
-                          <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                        <input
-                          v-model="editFacilitadorQuery"
-                          @input="buscarFacilitadoresEditRT"
-                          @focus="editMostrarResultadosFacilitador = true"
-                          type="text"
-                          :placeholder="editFacilitadorSeleccionado ? '' : 'Busca por nombre o CURP...'"
-                          class="uppercase-input"
-                          autocomplete="off"
-                        />
-                        <div v-if="editBuscandoFacilitador" class="edit-input-spinner"></div>
-                        <button v-if="editFacilitadorSeleccionado" type="button" @click="limpiarEditFacilitador" class="facilitador-clear-btn" title="Cambiar facilitador">
-                          <svg viewBox="0 0 24 24" fill="none">
-                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                          </svg>
-                        </button>
-                      </div>
-                      <!-- Facilitador seleccionado -->
-                      <div v-if="editFacilitadorSeleccionado" class="facilitador-selected-card">
+
+                      <!-- Facilitador actual (modo vista) -->
+                      <div v-if="editFacilitadorSeleccionado && !editBuscandoNuevoFacilitador" class="facilitador-selected-card">
                         <div class="facilitador-avatar">{{ editFacilitadorSeleccionado.nombre_completo.charAt(0) }}</div>
                         <div class="facilitador-selected-info">
                           <span class="facilitador-selected-name">{{ editFacilitadorSeleccionado.nombre_completo }}</span>
                           <span class="facilitador-selected-meta">
                             <span v-if="editFacilitadorSeleccionado.curp">{{ editFacilitadorSeleccionado.curp }}</span>
                             <span v-if="editFacilitadorSeleccionado.territorio"> · {{ editFacilitadorSeleccionado.territorio }}</span>
+                            <span v-if="!editFacilitadorSeleccionado.curp && !editFacilitadorSeleccionado.territorio">Facilitador actual</span>
                           </span>
                         </div>
                         <svg class="facilitador-check" viewBox="0 0 24 24" fill="none">
@@ -618,41 +599,89 @@
                           <path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                       </div>
-                      <!-- Resultados de búsqueda -->
-                      <transition name="dropdown-fade">
-                        <div v-if="editMostrarResultadosFacilitador && !editFacilitadorSeleccionado && editFacilitadorQuery.length >= 2" class="facilitador-results">
-                          <div v-if="editBuscandoFacilitador" class="facilitador-results-loading">
-                            <div class="edit-input-spinner" style="position:static;margin-right:8px;"></div>
-                            <span>Buscando facilitadores...</span>
-                          </div>
-                          <div v-else-if="editFacilitadoresEncontrados.length === 0" class="facilitador-results-empty">
+
+                      <!-- Botón para cambiar facilitador -->
+                      <button
+                        v-if="editFacilitadorSeleccionado && !editBuscandoNuevoFacilitador"
+                        type="button"
+                        @click="iniciarCambioFacilitador"
+                        class="facilitador-change-btn"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Cambiar facilitador
+                      </button>
+
+                      <!-- Buscador de facilitador (modo búsqueda) -->
+                      <div v-if="editBuscandoNuevoFacilitador || !editFacilitadorSeleccionado">
+                        <div class="input-wrapper">
+                          <svg class="input-icon" viewBox="0 0 24 24" fill="none">
+                            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+                            <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          </svg>
+                          <input
+                            ref="editFacilitadorInputRef"
+                            v-model="editFacilitadorQuery"
+                            @input="buscarFacilitadoresEditRT"
+                            @focus="editMostrarResultadosFacilitador = true"
+                            type="text"
+                            placeholder="Busca por nombre o CURP..."
+                            class="uppercase-input"
+                            autocomplete="off"
+                          />
+                          <div v-if="editBuscandoFacilitador" class="edit-input-spinner"></div>
+                          <button
+                            v-if="editBuscandoNuevoFacilitador && editFacilitadorSeleccionado"
+                            type="button"
+                            @click="cancelarCambioFacilitador"
+                            class="facilitador-clear-btn"
+                            title="Cancelar cambio"
+                          >
                             <svg viewBox="0 0 24 24" fill="none">
-                              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
-                              <path d="M8 15s1.5-2 4-2 4 2 4 2M9 9h.01M15 9h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                             </svg>
-                            <span>No se encontraron facilitadores</span>
-                          </div>
-                          <ul v-else class="facilitador-results-list">
-                            <li v-for="fac in editFacilitadoresEncontrados" :key="fac.admin_id" @click="seleccionarEditFacilitador(fac)" class="facilitador-result-item">
-                              <div class="facilitador-avatar">{{ fac.nombre_completo.charAt(0) }}</div>
-                              <div class="facilitador-result-info">
-                                <span class="facilitador-result-name">{{ fac.nombre_completo }}</span>
-                                <span class="facilitador-result-meta">
-                                  {{ fac.curp || '' }}
-                                  <span v-if="fac.territorio"> · {{ fac.territorio }}</span>
-                                </span>
-                              </div>
-                            </li>
-                          </ul>
+                          </button>
                         </div>
-                      </transition>
-                      <span v-if="!editFacilitadorSeleccionado" class="field-hint">Escribe al menos 2 caracteres para buscar tu facilitador</span>
-                      <span v-else class="field-hint success-hint">
+
+                        <!-- Resultados de búsqueda en tiempo real -->
+                        <transition name="dropdown-fade">
+                          <div v-if="editMostrarResultadosFacilitador && editFacilitadorQuery.length >= 2" class="facilitador-results">
+                            <div v-if="editBuscandoFacilitador" class="facilitador-results-loading">
+                              <div class="edit-input-spinner" style="position:static;margin-right:8px;"></div>
+                              <span>Buscando facilitadores...</span>
+                            </div>
+                            <div v-else-if="editFacilitadoresEncontrados.length === 0" class="facilitador-results-empty">
+                              <svg viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M8 15s1.5-2 4-2 4 2 4 2M9 9h.01M15 9h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                              </svg>
+                              <span>No se encontraron facilitadores</span>
+                            </div>
+                            <ul v-else class="facilitador-results-list">
+                              <li v-for="fac in editFacilitadoresEncontrados" :key="fac.admin_id" @click="seleccionarEditFacilitador(fac)" class="facilitador-result-item">
+                                <div class="facilitador-avatar">{{ fac.nombre_completo.charAt(0) }}</div>
+                                <div class="facilitador-result-info">
+                                  <span class="facilitador-result-name">{{ fac.nombre_completo }}</span>
+                                  <span class="facilitador-result-meta">
+                                    {{ fac.curp || '' }}
+                                    <span v-if="fac.territorio"> · {{ fac.territorio }}</span>
+                                  </span>
+                                </div>
+                              </li>
+                            </ul>
+                          </div>
+                        </transition>
+                        <span class="field-hint">Escribe al menos 2 caracteres para buscar tu facilitador</span>
+                      </div>
+
+                      <!-- Hint de éxito -->
+                      <span v-if="editFacilitadorSeleccionado && !editBuscandoNuevoFacilitador" class="field-hint success-hint">
                         <svg viewBox="0 0 16 16" fill="none">
                           <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
                           <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        Facilitador seleccionado correctamente
+                        Facilitador seleccionado — pulsa "Cambiar" para buscar otro
                       </span>
                     </div>
                   </transition>
@@ -969,6 +998,8 @@ const editFacilitadoresEncontrados = ref([])
 const editFacilitadorSeleccionado = ref(null)
 const editBuscandoFacilitador = ref(false)
 const editMostrarResultadosFacilitador = ref(false)
+const editBuscandoNuevoFacilitador = ref(false)
+const editFacilitadorInputRef = ref(null)
 let _editFacilitadorDebounce = null
 
 function buscarFacilitadoresEditRT() {
@@ -1002,11 +1033,33 @@ function seleccionarEditFacilitador(fac) {
   editFacilitadorQuery.value = fac.nombre_completo
   editMostrarResultadosFacilitador.value = false
   editFacilitadoresEncontrados.value = []
+  editBuscandoNuevoFacilitador.value = false
   editForm.value.supervisor = fac.nombre_completo
 }
 
 function limpiarEditFacilitador() {
   editFacilitadorSeleccionado.value = null
+  editFacilitadorQuery.value = ''
+  editFacilitadoresEncontrados.value = []
+  editMostrarResultadosFacilitador.value = false
+  editBuscandoNuevoFacilitador.value = false
+}
+
+function iniciarCambioFacilitador() {
+  editBuscandoNuevoFacilitador.value = true
+  editFacilitadorQuery.value = ''
+  editFacilitadoresEncontrados.value = []
+  editMostrarResultadosFacilitador.value = true
+  // Enfocar el input después del render
+  setTimeout(() => {
+    if (editFacilitadorInputRef.value) {
+      editFacilitadorInputRef.value.focus()
+    }
+  }, 100)
+}
+
+function cancelarCambioFacilitador() {
+  editBuscandoNuevoFacilitador.value = false
   editFacilitadorQuery.value = ''
   editFacilitadoresEncontrados.value = []
   editMostrarResultadosFacilitador.value = false
@@ -3593,6 +3646,32 @@ const validatePhoneEdit = () => {
   font-weight: 600;
   margin-left: 6px;
   vertical-align: middle;
+}
+
+.facilitador-change-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 14px;
+  border: 1.5px dashed rgba(16, 185, 129, 0.4);
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.04);
+  color: #059669;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.facilitador-change-btn:hover {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.6);
+}
+.facilitador-change-btn svg {
+  width: 15px;
+  height: 15px;
 }
 
 .facilitador-clear-btn {

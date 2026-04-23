@@ -1186,7 +1186,6 @@
                         <td class="apple-fecha-cell">{{ formatearFechaAsignacion(t.asignado_desde) }}</td>
                         <td class="th-actions">
                           <button
-                            v-if="t.origen === 'manual'"
                             class="apple-btn-quitar"
                             :disabled="desasociandoId === t.id"
                             @click="desasociarTecnico(t)"
@@ -1199,13 +1198,6 @@
                             </svg>
                             <span>{{ desasociandoId === t.id ? '...' : 'Quitar' }}</span>
                           </button>
-                          <span v-else class="apple-badge-lock" title="Las asignaciones del CSV original no se pueden quitar desde aquí">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                              <rect x="3" y="11" width="18" height="11" rx="2" stroke-width="2"/>
-                              <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-width="2"/>
-                            </svg>
-                            Fija
-                          </span>
                         </td>
                       </tr>
                     </tbody>

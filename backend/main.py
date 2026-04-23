@@ -2948,7 +2948,7 @@ async def asignar_tecnico_facilitador(payload: AsignarTecnicoRequest):
 async def desasignar_tecnico_facilitador(admin_id: int, tecnico_usuario_id: int):
     """
     Desasocia (soft delete) un técnico de un facilitador.
-    Solo permite quitar asignaciones con origen='manual' para no romper las del CSV.
+    Permite quitar cualquier asignación activa (manual o CSV).
     """
     try:
         verificar_conexion_db()
@@ -2969,12 +2969,6 @@ async def desasignar_tecnico_facilitador(admin_id: int, tecnico_usuario_id: int)
         row = cursor.fetchone()
         if not row or not row[2]:
             raise HTTPException(status_code=404, detail="Asignación no encontrada o ya inactiva")
-        if row[1] != 'manual':
-            raise HTTPException(
-                status_code=403,
-                detail="Solo puedes desasociar técnicos que agregaste manualmente"
-            )
-
         cursor.execute(
             """
             UPDATE facilitador_tecnico_asignaciones

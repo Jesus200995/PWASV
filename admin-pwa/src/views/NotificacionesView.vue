@@ -129,6 +129,31 @@
       </div>
 
       <div class="apple-page-content">
+        <!-- ================== BUSCADOR EN TIEMPO REAL APPLE 2026 ================== -->
+        <div class="apple-search-bar-wrapper">
+          <div class="apple-search-bar">
+            <svg class="apple-search-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="8" stroke-width="2"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input
+              v-model="busquedaTabla"
+              type="text"
+              class="apple-search-bar-input"
+              :placeholder="tabActual === 'individuales' ? 'Buscar por nombre o correo del destinatario...' : 'Buscar por título o subtítulo...'"
+              autocomplete="off"
+            />
+            <button v-if="busquedaTabla" class="apple-search-bar-clear" @click="busquedaTabla = ''">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                <line x1="15" y1="9" x2="9" y2="15" stroke-width="2" stroke-linecap="round"/>
+                <line x1="9" y1="9" x2="15" y2="15" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <span v-if="busquedaTabla" class="apple-search-bar-count">{{ notificacionesFiltradas.length }} resultado{{ notificacionesFiltradas.length !== 1 ? 's' : '' }}</span>
+        </div>
+
         <!-- Mensaje de carga -->
         <div v-if="cargando" class="apple-loading-state">
           <div class="apple-loading-spinner"></div>
@@ -147,7 +172,7 @@
         <div v-if="!cargando && !error" class="apple-notificaciones-list">
           <div class="apple-list-header">
             <h2>{{ tabActual === 'grupales' ? 'Notificaciones Grupales' : 'Notificaciones Individuales' }}</h2>
-            <span class="apple-count-badge">{{ notificaciones.length }}</span>
+            <span class="apple-count-badge">{{ notificacionesFiltradas.length }}</span>
           </div>
 
           <!-- Tabla de notificaciones estilo Apple -->
@@ -165,7 +190,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="notificacion in notificaciones" :key="notificacion.id" :class="['apple-table-row', { 'row-recien-editada': notificacionRecienEditada === notificacion.id }]">
+                <tr v-for="notificacion in notificacionesFiltradas" :key="notificacion.id" :class="['apple-table-row', { 'row-recien-editada': notificacionRecienEditada === notificacion.id }]">
                   <td class="apple-title-cell">
                     <div class="apple-title-content">
                       <span class="apple-notification-title">{{ notificacion.titulo }}</span>
@@ -260,7 +285,7 @@
             </div>
 
             <!-- Estado vacío -->
-            <div v-if="notificaciones.length === 0" class="apple-empty-state">
+            <div v-if="notificacionesFiltradas.length === 0 && !busquedaTabla" class="apple-empty-state">
               <div class="apple-empty-icon">📢</div>
               <h3>No hay notificaciones grupales</h3>
               <p>Crea tu primera notificación grupal para comunicarte con todos los usuarios del sistema.</p>
@@ -1139,6 +1164,7 @@ export default {
       usuarios: [],
       cargandoUsuarios: false,
       busquedaUsuarios: '',
+      busquedaTabla: '',
       
       // Modal detalle
       mostrarModalDetalle: false,
@@ -1193,6 +1219,23 @@ export default {
       return this.userPermisos?.notificaciones_acciones === true
     },
     
+    notificacionesFiltradas() {
+      if (!this.busquedaTabla.trim()) return this.notificaciones
+      const q = this.busquedaTabla.toLowerCase().trim()
+      return this.notificaciones.filter(n => {
+        if (this.tabActual === 'individuales') {
+          // Buscar en destinatarios (nombre | correo)
+          const dest = (n.destinatarios_texto || '').toLowerCase()
+          return dest.includes(q)
+        } else {
+          // Buscar en título o subtítulo
+          const titulo = (n.titulo || '').toLowerCase()
+          const subtitulo = (n.subtitulo || '').toLowerCase()
+          return titulo.includes(q) || subtitulo.includes(q)
+        }
+      })
+    },
+
     usuariosFiltrados() {
       if (!this.busquedaUsuarios.trim()) return this.usuarios
       
@@ -1300,9 +1343,10 @@ export default {
       // Actualizar formNotificacion.enviada_a_todos según la pestaña
       this.formNotificacion.enviada_a_todos = (tab === 'grupales')
       
-      // Resetear paginación
+      // Resetear paginación y búsqueda
       this.paginaActual = 1
       this.totalNotificaciones = 0
+      this.busquedaTabla = ''
       
       // Recargar notificaciones
       this.cargarNotificaciones()
@@ -2197,6 +2241,99 @@ export default {
 /* ====================== APPLE PAGE CONTENT ====================== */
 .apple-page-content {
   padding: 0;
+}
+
+/* ====================== BUSCADOR TABLA APPLE 2026 ====================== */
+.apple-search-bar-wrapper {
+  padding: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.apple-search-bar {
+  position: relative;
+  flex: 1;
+  max-width: 520px;
+}
+
+.apple-search-bar-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  stroke: #8e8e93;
+  pointer-events: none;
+  transition: stroke .2s;
+}
+
+.apple-search-bar-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 42px 0 42px;
+  border: 1.5px solid #e5e5ea;
+  border-radius: 14px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 450;
+  color: #1d1d1f;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.apple-search-bar-input::placeholder {
+  color: #b0b0b5;
+  font-weight: 400;
+}
+
+.apple-search-bar-input:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3.5px rgba(76, 175, 80, .15);
+  background: #fff;
+}
+
+.apple-search-bar-input:focus ~ .apple-search-bar-icon,
+.apple-search-bar:focus-within .apple-search-bar-icon {
+  stroke: #4CAF50;
+}
+
+.apple-search-bar-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background .15s;
+}
+
+.apple-search-bar-clear:hover {
+  background: rgba(0,0,0,.06);
+}
+
+.apple-search-bar-clear svg {
+  width: 18px;
+  height: 18px;
+  stroke: #8e8e93;
+}
+
+.apple-search-bar-count {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #8e8e93;
+  white-space: nowrap;
+  letter-spacing: -.1px;
 }
 
 /* ====================== APPLE LOADING & ERROR STATES ====================== */

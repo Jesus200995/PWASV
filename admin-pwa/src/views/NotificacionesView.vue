@@ -179,6 +179,14 @@
           <div class="apple-table-container">
             <div class="apple-table-wrapper">
               <table class="apple-table">
+              <colgroup>
+                <col style="width: 22%;" />
+                <col style="width: 20%;" />
+                <col style="width: 22%;" />
+                <col style="width: 14%;" />
+                <col style="width: 9%;" />
+                <col style="width: 13%;" />
+              </colgroup>
               <thead>
                 <tr>
                   <th>Título</th>
@@ -1911,22 +1919,23 @@ export default {
   flex: 1;
   margin-left: min(220px, 18vw);
   width: calc(100vw - min(220px, 18vw));
-  min-height: 100vh;
+  height: 100vh;
   position: relative;
   box-sizing: border-box;
-  overflow-x: hidden;
+  overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 8px 16px 0 16px;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ====================== APPLE STICKY WRAPPER ====================== */
 .apple-sticky-wrapper {
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
   z-index: 100;
   background: transparent;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 /* ====================== APPLE PAGE HEADER ====================== */
@@ -2241,20 +2250,25 @@ export default {
 /* ====================== APPLE PAGE CONTENT ====================== */
 .apple-page-content {
   padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* ====================== BUSCADOR TABLA APPLE 2026 ====================== */
 .apple-search-bar-wrapper {
-  padding: 0 0 16px;
+  padding: 0 0 12px;
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .apple-search-bar {
   position: relative;
   flex: 1;
-  max-width: 520px;
 }
 
 .apple-search-bar-icon {
@@ -2400,15 +2414,20 @@ export default {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(76, 175, 80, 0.1);
   overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .apple-list-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 14px 20px;
   background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
   border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+  flex-shrink: 0;
 }
 
 .apple-list-header h2 {
@@ -2433,19 +2452,19 @@ export default {
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  max-height: calc(100vh - 340px);
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .apple-table-wrapper {
-  overflow-y: auto;
   overflow-x: auto;
+  overflow-y: auto;
   flex: 1;
-  max-height: 100%;
+  min-height: 0;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  overscroll-behavior-y: auto;
+  overscroll-behavior: contain;
   scroll-behavior: smooth;
 }
 
@@ -2468,6 +2487,7 @@ export default {
   width: 100%;
   border-collapse: collapse;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  table-layout: fixed;
 }
 
 .apple-table thead {
@@ -2505,6 +2525,9 @@ export default {
   vertical-align: middle;
   font-size: 13px;
   color: #1d1d1f;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .apple-table-row {
@@ -2530,7 +2553,7 @@ export default {
 
 /* ====================== APPLE TABLE CELLS ====================== */
 .apple-title-cell {
-  min-width: 180px;
+  overflow: hidden;
 }
 
 .apple-title-content {
@@ -2543,6 +2566,10 @@ export default {
   font-weight: 600;
   color: #1d1d1f;
   font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
 }
 
 .apple-attachment-badge {
@@ -2555,12 +2582,16 @@ export default {
 }
 
 .apple-subtitle-cell {
-  max-width: 200px;
+  overflow: hidden;
 }
 
 .apple-notification-subtitle {
   color: #666;
   font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
 }
 
 .apple-no-subtitle {
@@ -2580,6 +2611,8 @@ export default {
   background: rgba(175, 82, 222, 0.1);
   color: #AF52DE;
   border: 1px solid rgba(175, 82, 222, 0.2);
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .apple-recipients-badge svg {
@@ -2593,6 +2626,14 @@ export default {
   display: flex;
   flex-direction: column;
   line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.user-name, .user-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-name {
@@ -4523,6 +4564,8 @@ export default {
   .main-content {
     margin-left: 200px;
     width: calc(100vw - 200px);
+    height: 100vh;
+    overflow: hidden;
   }
   
   .modal-overlay {
@@ -4543,6 +4586,8 @@ export default {
   .main-content {
     margin-left: 0;
     width: 100vw;
+    height: 100vh;
+    overflow: hidden;
   }
   
   .modal-overlay {
@@ -4590,6 +4635,8 @@ export default {
   .main-content {
     margin-left: 0;
     width: 100vw;
+    height: 100vh;
+    overflow: hidden;
   }
   
   .page-header {
@@ -5357,6 +5404,8 @@ export default {
     margin-left: 0;
     width: 100%;
     padding: 8px 12px 0 12px;
+    height: 100vh;
+    overflow: hidden;
   }
   
   .apple-sticky-wrapper {
@@ -5612,14 +5661,13 @@ export default {
   justify-content: center;
   flex-wrap: wrap;
   gap: 20px;
-  padding: 14px 20px;
+  padding: 12px 20px;
   border-top: 1px solid #C8E6C9;
-  background: rgba(248, 255, 250, 0.9);
+  background: rgba(248, 255, 250, 0.95);
   backdrop-filter: blur(10px);
-  position: sticky;
-  bottom: 0;
   z-index: 5;
   border-radius: 0 0 12px 12px;
+  flex-shrink: 0;
 }
 
 .apple-pagination-info {

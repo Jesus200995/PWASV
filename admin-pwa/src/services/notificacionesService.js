@@ -89,15 +89,16 @@ export const notificacionesService = {
    * @param {string} tipo - Filtro por tipo: 'todas', 'individuales', 'grupales'
    * @returns {Promise} Lista de notificaciones
    */
-  async listarNotificaciones(limit = 50, offset = 0, tipo = 'todas') {
+  async listarNotificaciones(limit = 50, offset = 0, tipo = 'todas', busqueda = '') {
     try {
-      console.log(`📋 Obteniendo notificaciones (limit: ${limit}, offset: ${offset}, tipo: ${tipo})`)
+      console.log(`📋 Obteniendo notificaciones (limit: ${limit}, offset: ${offset}, tipo: ${tipo}, busqueda: ${busqueda})`)
       
       // SIEMPRE enviar el parámetro tipo al backend
       const params = { 
         limit, 
         offset,
-        tipo
+        tipo,
+        busqueda
       }
       
       const response = await api.get('/notificaciones', {

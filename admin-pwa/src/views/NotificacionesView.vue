@@ -151,7 +151,7 @@
               </svg>
             </button>
           </div>
-          <span v-if="busquedaTabla" class="apple-search-bar-count">{{ notificacionesFiltradas.length }} resultado{{ notificacionesFiltradas.length !== 1 ? 's' : '' }}</span>
+          <span v-if="busquedaTabla && !cargando" class="apple-search-bar-count">{{ totalNotificaciones }} resultado{{ totalNotificaciones !== 1 ? 's' : '' }}</span>
         </div>
 
         <!-- Mensaje de carga -->
@@ -1228,20 +1228,8 @@ export default {
     },
     
     notificacionesFiltradas() {
-      if (!this.busquedaTabla.trim()) return this.notificaciones
-      const q = this.busquedaTabla.toLowerCase().trim()
-      return this.notificaciones.filter(n => {
-        if (this.tabActual === 'individuales') {
-          // Buscar en destinatarios (nombre | correo)
-          const dest = (n.destinatarios_texto || '').toLowerCase()
-          return dest.includes(q)
-        } else {
-          // Buscar en título o subtítulo
-          const titulo = (n.titulo || '').toLowerCase()
-          const subtitulo = (n.subtitulo || '').toLowerCase()
-          return titulo.includes(q) || subtitulo.includes(q)
-        }
-      })
+      // La búsqueda se hace en el backend, devolver directamente
+      return this.notificaciones
     },
 
     usuariosFiltrados() {
@@ -1301,6 +1289,16 @@ export default {
     }
   },
   
+  watch: {
+    busquedaTabla() {
+      clearTimeout(this._busquedaTimer)
+      this._busquedaTimer = setTimeout(() => {
+        this.paginaActual = 1
+        this.cargarNotificaciones(1)
+      }, 350)
+    }
+  },
+
   mounted() {
     this.configurarEventosConexion()
     this.configurarEventosPermisos()
@@ -1308,7 +1306,7 @@ export default {
   },
   
   beforeUnmount() {
-    // Remover listener de permisos
+    clearTimeout(this._busquedaTimer)
     window.removeEventListener('user-session-updated', this.actualizarPermisosUsuario)
   },
   
@@ -1377,7 +1375,7 @@ export default {
         console.log(`🔄 CARGANDO notificaciones ${tipo}...`)
         console.log(`📤 Parámetros: limit=${this.limitePorPagina}, offset=${offset}, tipo="${tipo}"`)
         
-        const respuesta = await notificacionesService.listarNotificaciones(this.limitePorPagina, offset, tipo)
+        const respuesta = await notificacionesService.listarNotificaciones(this.limitePorPagina, offset, tipo, this.busquedaTabla.trim())
         
         this.notificaciones = respuesta.notificaciones || []
         this.totalNotificaciones = respuesta.total || 0

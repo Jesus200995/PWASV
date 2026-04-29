@@ -6632,12 +6632,13 @@ async def crear_notificacion(
         raise HTTPException(status_code=500, detail=f"Error al crear notificación: {str(e)}")
 
 @app.get("/notificaciones")
-async def listar_notificaciones(limit: int = 50, offset: int = 0, tipo: str = 'todas'):
+async def listar_notificaciones(limit: int = 50, offset: int = 0, tipo: str = 'todas', busqueda: str = ''):
     """Listar todas las notificaciones
     Args:
         limit: Número máximo de resultados
         offset: Desplazamiento para paginación
         tipo: Filtro por tipo - 'todas', 'individuales', 'grupales'
+        busqueda: Texto de búsqueda para filtrar
     """
     try:
         if not conn:
@@ -6648,18 +6649,41 @@ async def listar_notificaciones(limit: int = 50, offset: int = 0, tipo: str = 't
         print(f"   - Limit: {limit}")
         print(f"   - Offset: {offset}")
         print(f"   - Tipo: '{tipo}'")
+        print(f"   - Búsqueda: '{busqueda}'")
         print(f"{'='*60}\n")
         
         # Construir filtro WHERE según el tipo
-        where_clause = ""
+        conditions = []
+        params = []
         if tipo == 'individuales':
-            where_clause = "WHERE n.enviada_a_todos = FALSE"
+            conditions.append("n.enviada_a_todos = FALSE")
             print(f"🔍 FILTRO APLICADO: Solo notificaciones individuales (enviada_a_todos = FALSE)")
         elif tipo == 'grupales':
-            where_clause = "WHERE n.enviada_a_todos = TRUE"
+            conditions.append("n.enviada_a_todos = TRUE")
             print(f"🔍 FILTRO APLICADO: Solo notificaciones grupales (enviada_a_todos = TRUE)")
         else:
             print(f"🔍 SIN FILTRO: Mostrando todas las notificaciones")
+        
+        # Búsqueda por texto
+        busqueda_clean = busqueda.strip() if busqueda else ''
+        if busqueda_clean:
+            if tipo == 'individuales':
+                # Buscar en nombre o correo del destinatario
+                conditions.append("""
+                    EXISTS (
+                        SELECT 1 FROM notificacion_usuarios nu2
+                        LEFT JOIN usuarios u2 ON nu2.usuario_id = u2.id
+                        WHERE nu2.notificacion_id = n.id
+                        AND (LOWER(u2.nombre_completo) LIKE %s OR LOWER(u2.correo) LIKE %s)
+                    )
+                """)
+                params.extend([f'%{busqueda_clean.lower()}%', f'%{busqueda_clean.lower()}%'])
+            else:
+                # Buscar en título o subtítulo
+                conditions.append("(LOWER(n.titulo) LIKE %s OR LOWER(COALESCE(n.subtitulo, '')) LIKE %s)")
+                params.extend([f'%{busqueda_clean.lower()}%', f'%{busqueda_clean.lower()}%'])
+        
+        where_clause = ("WHERE " + " AND ".join(conditions)) if conditions else ""
         
         # Obtener notificaciones con información de destinatarios
         query = f"""
@@ -6686,9 +6710,11 @@ async def listar_notificaciones(limit: int = 50, offset: int = 0, tipo: str = 't
             LIMIT %s OFFSET %s
         """
         
+        query_params = params + [limit, offset]
+        
         print(f"📝 Query SQL:\n{query}\n")
         
-        cursor.execute(query, (limit, offset))
+        cursor.execute(query, query_params)
         
         resultados = cursor.fetchall()
         
@@ -6700,7 +6726,7 @@ async def listar_notificaciones(limit: int = 50, offset: int = 0, tipo: str = 't
         
         # Obtener total de notificaciones con el mismo filtro
         count_query = f"SELECT COUNT(*) FROM notificaciones n {where_clause}"
-        cursor.execute(count_query)
+        cursor.execute(count_query, params)
         total = cursor.fetchone()[0]
         
         notificaciones = []

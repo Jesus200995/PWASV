@@ -5192,10 +5192,15 @@ async def marcar_entrada(
         print(f"   descripcion: {descripcion}")
         print(f"   foto: {foto.filename}")
         print(f"   timestamp_offline: {timestamp_offline}")
-        
-        if not conn:
+
+        # Leer el archivo PRIMERO (único punto de await) para evitar que otros requests
+        # corrompan el cursor global mientras esperamos el upload
+        contenido = await foto.read()
+
+        # Verificar/reconectar BD después del await - a partir de aquí todo es síncrono
+        if not verificar_conexion_db():
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
-        
+
         # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
         fecha, hora_entrada, timestamp_for_filename = obtener_fecha_hora_cdmx(timestamp_offline)
 
@@ -5211,7 +5216,7 @@ async def marcar_entrada(
 
         if existe:
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail=f"El usuario {usuario_id} ya tiene registro de entrada para el día {fecha}"
             )
 
@@ -5219,9 +5224,8 @@ async def marcar_entrada(
         ext = os.path.splitext(foto.filename)[1]
         nombre_archivo = f"entrada_{usuario_id}_{timestamp_for_filename}{ext}"
         ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
-        
+
         with open(ruta_archivo, "wb") as f:
-            contenido = await foto.read()
             f.write(contenido)
 
         # Insertar registro de asistencia con ubicación y foto
@@ -5231,25 +5235,33 @@ async def marcar_entrada(
         )
         conn.commit()
         print(f"✅ Entrada registrada para usuario {usuario_id} a las {hora_entrada}")
-        
+
         return {
-            "status": "ok", 
-            "mensaje": "Entrada registrada exitosamente", 
+            "status": "ok",
+            "mensaje": "Entrada registrada exitosamente",
             "hora_entrada": str(hora_entrada),
             "latitud": latitud,
             "longitud": longitud,
             "foto_url": ruta_archivo,
             "descripcion": descripcion
         }
-        
+
     except HTTPException:
         raise
     except psycopg2.Error as e:
-        conn.rollback()
+        try:
+            if conn:
+                conn.rollback()
+        except Exception:
+            pass
         print(f"❌ Error de PostgreSQL en entrada: {e}")
         raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
     except Exception as e:
-        conn.rollback()
+        try:
+            if conn:
+                conn.rollback()
+        except Exception:
+            pass
         print(f"❌ Error general en entrada: {e}")
         raise HTTPException(status_code=500, detail=f"Error al registrar entrada: {str(e)}")
 
@@ -5270,10 +5282,15 @@ async def marcar_salida(
         print(f"   descripcion: {descripcion}")
         print(f"   foto: {foto.filename}")
         print(f"   timestamp_offline: {timestamp_offline}")
-        
-        if not conn:
+
+        # Leer el archivo PRIMERO (único punto de await) para evitar que otros requests
+        # corrompan el cursor global mientras esperamos el upload
+        contenido = await foto.read()
+
+        # Verificar/reconectar BD después del await - a partir de aquí todo es síncrono
+        if not verificar_conexion_db():
             raise HTTPException(status_code=500, detail="No hay conexión a la base de datos")
-        
+
         # Usar timestamp personalizado si viene de offline, sino usar tiempo actual
         fecha, hora_salida, timestamp_for_filename = obtener_fecha_hora_cdmx(timestamp_offline)
 
@@ -5289,12 +5306,12 @@ async def marcar_salida(
 
         if not registro:
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail=f"El usuario {usuario_id} no tiene registro de entrada para el día {fecha}"
             )
         if registro[1] is not None:
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail=f"El usuario {usuario_id} ya registró la salida para el día {fecha}"
             )
 
@@ -5302,9 +5319,8 @@ async def marcar_salida(
         ext = os.path.splitext(foto.filename)[1]
         nombre_archivo = f"salida_{usuario_id}_{timestamp_for_filename}{ext}"
         ruta_archivo = os.path.join(FOTOS_DIR, nombre_archivo)
-        
+
         with open(ruta_archivo, "wb") as f:
-            contenido = await foto.read()
             f.write(contenido)
 
         # Actualizar registro con salida, ubicación y foto
@@ -5314,25 +5330,33 @@ async def marcar_salida(
         )
         conn.commit()
         print(f"✅ Salida registrada para usuario {usuario_id} a las {hora_salida}")
-        
+
         return {
-            "status": "ok", 
-            "mensaje": "Salida registrada exitosamente", 
+            "status": "ok",
+            "mensaje": "Salida registrada exitosamente",
             "hora_salida": str(hora_salida),
             "latitud": latitud,
             "longitud": longitud,
             "foto_url": ruta_archivo,
             "descripcion": descripcion
         }
-        
+
     except HTTPException:
         raise
     except psycopg2.Error as e:
-        conn.rollback()
+        try:
+            if conn:
+                conn.rollback()
+        except Exception:
+            pass
         print(f"❌ Error de PostgreSQL en salida: {e}")
         raise HTTPException(status_code=500, detail=f"Error de base de datos: {str(e)}")
     except Exception as e:
-        conn.rollback()
+        try:
+            if conn:
+                conn.rollback()
+        except Exception:
+            pass
         print(f"❌ Error general en salida: {e}")
         raise HTTPException(status_code=500, detail=f"Error al registrar salida: {str(e)}")
 

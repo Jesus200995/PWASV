@@ -171,16 +171,18 @@ class AsistenciasService {
    * @returns {Error} Error con mensaje apropiado
    */
   _procesarError(error) {
-    // Si es un error de conexión
+    // Si es un error de red (SSL inválido, sin conexión, timeout, etc.)
     if (error.request && !error.response) {
-      return new Error('No se pudo conectar con el servidor. Verifica tu conexión a internet.');
+      const err = new Error('No se pudo conectar con el servidor. Verifica tu conexión a internet.');
+      err.isNetworkError = true;
+      return err;
     }
-    
-    // Si el backend responde con un error
+
+    // Si el backend responde con un error HTTP
     if (error.response && error.response.data) {
       return new Error(error.response.data.detail || 'Error en la operación');
     }
-    
+
     // Para cualquier otro tipo de error
     return error;
   }

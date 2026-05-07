@@ -1,7 +1,8 @@
 import axios from 'axios'
+import { API_URL } from '../utils/network.js'
 
-// Configuración de la API - Siempre usar producción
-const API_BASE_URL = 'https://apipwa.sembrandodatos.com'
+// URL base de la API (relativa en producción para usar el mismo dominio y certificado)
+const API_BASE_URL = API_URL
 
 // Crear instancia de axios con configuración
 const api = axios.create({

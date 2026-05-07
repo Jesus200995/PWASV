@@ -80,6 +80,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { API_URL } from '../utils/network.js'
 
 const props = defineProps({
   isVisible: {
@@ -94,7 +95,7 @@ const props = defineProps({
 
 const emit = defineEmits(['territorio-saved'])
 
-const API_URL = 'https://apipwa.sembrandodatos.com'
+// API_URL imported from network.js - uses /api in production (same domain/cert)
 
 const selectedTerritorio = ref('')
 const saving = ref(false)

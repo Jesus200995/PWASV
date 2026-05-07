@@ -29,9 +29,12 @@ export function getOfflineMessage() {
 }
 
 // Configuración de URLs de API
+// En producción usamos URL relativa (/api) para que las peticiones vayan por el mismo dominio
+// (app.sembrandodatos.com) y usen el certificado ZeroSSL (compatible Android 4.x+).
+// Esto elimina ERR_CERT_AUTHORITY_INVALID en redes privadas y dispositivos Android antiguos.
 const API_URLS = {
   development: ["http://localhost:8000", "http://localhost:8001"],
-  production: "https://apipwa.sembrandodatos.com"
+  production: "/api"
 };
 
 // Función para detectar automáticamente el entorno
@@ -80,9 +83,8 @@ async function testServerConnection(url) {
 // Función para obtener la mejor URL disponible
 export async function getBestApiUrl() {
   const environment = detectEnvironment();
-  
+
   if (environment === 'development') {
-    // Probar todas las URLs de desarrollo
     const devUrls = getAllDevelopmentUrls();
     for (const url of devUrls) {
       const works = await testServerConnection(url);
@@ -91,36 +93,10 @@ export async function getBestApiUrl() {
         return url;
       }
     }
-    
-    // Si ninguna URL de desarrollo funciona, probar producción
-    const productionWorks = await testServerConnection(API_URLS.production);
-    if (productionWorks) {
-      console.log(`✅ Conectado a servidor de producción: ${API_URLS.production}`);
-      return API_URLS.production;
-    }
-  } else {
-    // Probar producción primero
-    const productionWorks = await testServerConnection(API_URLS.production);
-    if (productionWorks) {
-      console.log(`✅ Conectado a servidor de producción: ${API_URLS.production}`);
-      return API_URLS.production;
-    }
-    
-    // Si producción falla, probar desarrollo
-    const devUrls = getAllDevelopmentUrls();
-    for (const url of devUrls) {
-      const works = await testServerConnection(url);
-      if (works) {
-        console.log(`✅ Conectado a servidor de desarrollo alternativo: ${url}`);
-        return url;
-      }
-    }
   }
-  
-  // Si todo falla, devolver la URL primaria
-  const primaryUrl = getApiUrl();
-  console.log(`❌ Ningún servidor disponible, usando ${primaryUrl} por defecto`);
-  return primaryUrl;
+
+  // En producción siempre usar la URL relativa /api (mismo dominio, cert ZeroSSL)
+  return getApiUrl();
 }
 
 // URL dinámica para casos donde se necesite la mejor conexión disponible (uso interno)

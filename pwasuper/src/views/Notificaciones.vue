@@ -518,6 +518,7 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import notificacionesService from '../services/notificacionesService.js'
 import { apiService } from '../services/apiService.js'
 import { useNotifications } from '../composables/useNotifications.js'
+import { API_URL } from '../utils/network.js'
 
 // Estados reactivos
 const notificaciones = ref([])
@@ -1251,7 +1252,7 @@ const abrirArchivoBackup = async (notificacionId) => {
         // ESTRATEGIA 3: Página de carga móvil elegante como último recurso
         try {
           console.log('🔄 Intento 3: Abriendo con página de carga móvil...')
-          const urlMobile = `${import.meta.env.PROD ? 'https://apipwa.sembrandodatos.com' : 'http://localhost:8000'}/notificaciones/${notificacionId}/archivo/mobile`
+          const urlMobile = `${API_URL}/notificaciones/${notificacionId}/archivo/mobile`
           
           const nuevaVentana = window.open(urlMobile, '_blank', 'noopener,noreferrer')
           

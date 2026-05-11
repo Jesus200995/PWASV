@@ -1,26 +1,33 @@
 // Utilidad para verificar conexión a internet
 export async function checkInternetConnection() {
+  // Si el OS/navegador dice que no hay red, no hay nada que verificar
+  if (!navigator.onLine) {
+    return false;
+  }
+
   const environment = detectEnvironment();
   const apiUrl = getApiUrl();
 
-  // Verificar el endpoint /health de la API directamente.
-  // Esto detecta correctamente redes con inspección SSL o certificados no confiados,
-  // ya que usa la misma conexión que los requests reales de la app.
+  // Intentar verificar el endpoint /health de la API.
+  // Si falla pero navigator.onLine es true, asumir online y dejar que
+  // el API call real maneje el error (guarda offline si realmente falla).
+  // Esto evita falsos "Sin conexión" en WiFi donde /health puede fallar
+  // por timeout, SSL inspection, o bloqueo de ruta específica.
   try {
     const response = await fetch(`${apiUrl}/health`, {
       method: 'GET',
       cache: 'no-store',
-      signal: AbortSignal.timeout(environment === 'development' ? 3000 : 6000)
+      signal: AbortSignal.timeout(environment === 'development' ? 3000 : 10000)
     });
-    if (response.ok) {
-      return true;
-    }
+    // Cualquier respuesta HTTP (incluso 4xx/5xx) significa que llegamos al servidor
+    return true;
   } catch (error) {
-    // API no alcanzable: SSL inválido, red bloqueada, timeout, etc.
-    console.warn('⚠️ API no disponible para checkInternetConnection:', error?.message || error);
+    // Fetch falló: timeout, SSL inválido, red bloqueada, etc.
+    console.warn('⚠️ API health check falló:', error?.message || error);
+    // Si el navegador confirma que hay internet, confiar en ello.
+    // Los uploads intentarán enviarse; si fallan, se guardan offline.
+    return navigator.onLine;
   }
-
-  return false;
 }
 
 // Mensaje de información cuando no hay conexión

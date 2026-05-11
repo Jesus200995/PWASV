@@ -395,15 +395,19 @@ const actualizarHoraCDMX = () => {
   fechaActual.value = now.toLocaleDateString('es-MX', opcionesFecha);
 };
 
-// Función para verificar conectividad más frecuentemente
+// Flag para evitar verificaciones solapadas
+let verificandoConectividad = false;
+
+// Función para verificar conectividad (con guard para evitar solapamiento)
 const verificarConectividad = async () => {
+  if (verificandoConectividad) return;
+  verificandoConectividad = true;
   try {
-    const estadoActual = await syncService.getConnectionStatus();
     const nuevaConexion = await checkInternetConnection();
-    
+
     // Actualizar timestamp de última verificación
     lastConnectionCheck.value = new Date();
-    
+
     // Solo actualizar si hay cambio para evitar renders innecesarios
     if (isOnline.value !== nuevaConexion) {
       isOnline.value = nuevaConexion;
@@ -411,6 +415,8 @@ const verificarConectividad = async () => {
     }
   } catch (error) {
     console.error('Error verificando conectividad:', error);
+  } finally {
+    verificandoConectividad = false;
   }
 };
 
@@ -418,31 +424,31 @@ const verificarConectividad = async () => {
 onMounted(async () => {
   // Configurar listener de sincronización
   syncService.addListener(handleSyncEvent);
-  
+
   // Obtener estado inicial
   const status = syncService.getConnectionStatus();
   isOnline.value = status.isOnline;
   isSyncing.value = status.isSyncing;
-  
+
   // Inicializar hora y fecha CDMX
   actualizarHoraCDMX();
-  
+
   // Actualizar pendientes inicialmente y cada 5 segundos
   await actualizarPendientes();
   pendientesInterval = setInterval(actualizarPendientes, 5000);
-  
-  // Verificar conectividad cada segundo
-  conectividadInterval = setInterval(verificarConectividad, 1000);
-  
+
+  // Verificar conectividad cada 20 segundos (el health check puede tardar hasta 10s)
+  await verificarConectividad();
+  conectividadInterval = setInterval(verificarConectividad, 20000);
+
   // Actualizar UI cada segundo para mostrar tiempo transcurrido
   uiUpdateInterval = setInterval(() => {
-    // Forzar reactividad del computed timeAgoText
     lastConnectionCheck.value = lastConnectionCheck.value;
   }, 1000);
-  
+
   // Actualizar reloj CDMX cada segundo
   relojInterval = setInterval(actualizarHoraCDMX, 1000);
-  
+
   // Limpiar intervalos al desmontar
   onUnmounted(() => {
     if (pendientesInterval) clearInterval(pendientesInterval);

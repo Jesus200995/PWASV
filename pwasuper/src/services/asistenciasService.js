@@ -171,20 +171,31 @@ class AsistenciasService {
    * @returns {Error} Error con mensaje apropiado
    */
   _procesarError(error) {
-    // Si es un error de red (SSL inválido, sin conexión, timeout, etc.)
-    if (error.request && !error.response) {
+    // Si el backend respondió con un error HTTP claro
+    if (error.response && error.response.data) {
+      return new Error(error.response.data.detail || 'Error en la operación');
+    }
+
+    // Error de red: sin respuesta del servidor (SSL, timeout, service worker, TypeError, etc.)
+    const esRedSinRespuesta = error.request && !error.response;
+    const esFetchFallido = !error.response && (
+      error.name === 'TypeError' ||
+      error.name === 'AbortError' ||
+      error.code === 'ERR_NETWORK' ||
+      error.code === 'ECONNABORTED' ||
+      error.code === 'ERR_CANCELED'
+    );
+
+    if (esRedSinRespuesta || esFetchFallido) {
       const err = new Error('No se pudo conectar con el servidor. Verifica tu conexión a internet.');
       err.isNetworkError = true;
       return err;
     }
 
-    // Si el backend responde con un error HTTP
-    if (error.response && error.response.data) {
-      return new Error(error.response.data.detail || 'Error en la operación');
-    }
-
-    // Para cualquier otro tipo de error
-    return error;
+    // Error desconocido — marcar como red para que el caller pueda salvar offline
+    const err = new Error(error.message || 'Error de conexión');
+    err.isNetworkError = true;
+    return err;
   }
 }
 

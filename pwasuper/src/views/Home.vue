@@ -1717,14 +1717,12 @@ async function confirmarAsistencia() {
   } catch (err) {
     console.error('Error al enviar asistencia:', err);
 
-    // Error de red (SSL inválido, sin conexión, proxy corporativo, etc.)
-    const esErrorDeRed = err.isNetworkError || (!err.response && !!err.request);
-
+    // Error HTTP explícito del servidor (4xx, 5xx con cuerpo)
     if (err.response) {
-      // El servidor respondió con un error HTTP (4xx, 5xx)
-      error.value = "Error del servidor: " + (err.response.data.detail || err.response.statusText);
+      const detalle = err.response.data?.detail || err.response.statusText || 'Error del servidor';
+      error.value = "Error del servidor: " + detalle;
 
-      if (err.response.data.detail && err.response.data.detail.includes('Ya existe')) {
+      if (detalle.includes('Ya existe') || detalle.includes('ya tiene registro')) {
         if (tipoAsistencia.value === 'entrada') {
           entradaMarcada.value = true;
         } else {
@@ -1732,59 +1730,58 @@ async function confirmarAsistencia() {
         }
         await verificarAsistenciaHoy();
       }
-    } else if (esErrorDeRed) {
-      // Error de red → guardar offline como fallback para no perder el registro
-      console.log('📴 Error de red detectado, guardando asistencia offline como fallback...');
-      try {
-        await offlineService.guardarAsistenciaOffline(
-          user.value.id,
-          tipoAsistencia.value,
-          latitud.value,
-          longitud.value,
-          descripcion.value,
-          archivoFoto.value
-        );
+      return;
+    }
 
-        const horaActual = new Date().toLocaleTimeString('es-MX', {
-          hour: '2-digit',
-          minute: '2-digit',
-          timeZone: 'America/Mexico_City'
-        });
+    // Cualquier otro error (red, service worker, timeout, SSL, desconocido) → guardar offline
+    console.log('📴 Error de conexión detectado, guardando asistencia offline como fallback...');
+    try {
+      await offlineService.guardarAsistenciaOffline(
+        user.value.id,
+        tipoAsistencia.value,
+        latitud.value,
+        longitud.value,
+        descripcion.value,
+        archivoFoto.value
+      );
 
-        if (tipoAsistencia.value === 'entrada') {
-          entradaMarcada.value = true;
-          datosEntrada.value = {
-            hora: horaActual,
-            descripcion: descripcion.value,
-            latitud: latitud.value,
-            longitud: longitud.value,
-            foto_url: foto.value
-          };
-        } else {
-          salidaMarcada.value = true;
-          datosSalida.value = {
-            hora: horaActual,
-            descripcion: descripcion.value,
-            latitud: latitud.value,
-            longitud: longitud.value,
-            foto_url: foto.value
-          };
-        }
+      const horaActual = new Date().toLocaleTimeString('es-MX', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'America/Mexico_City'
+      });
 
-        mensajeAsistencia.value = `Registro guardado localmente. Se sincronizará automáticamente cuando el servidor esté disponible.`;
-        modalMessage.value = `¡Registro guardado! Se sincronizará automáticamente.`;
-        showModal.value = true;
-        modoAsistencia.value = false;
-        tipoAsistencia.value = '';
-        limpiarDatosAsistencia();
-        guardarEstadoAsistencia();
-        setTimeout(() => { mensajeAsistencia.value = ''; }, 8000);
-      } catch (offlineErr) {
-        console.error('Error guardando offline como fallback:', offlineErr);
-        error.value = "No se pudo registrar. Verifica tu conexión a internet.";
+      if (tipoAsistencia.value === 'entrada') {
+        entradaMarcada.value = true;
+        datosEntrada.value = {
+          hora: horaActual,
+          descripcion: descripcion.value,
+          latitud: latitud.value,
+          longitud: longitud.value,
+          foto_url: foto.value
+        };
+      } else {
+        salidaMarcada.value = true;
+        datosSalida.value = {
+          hora: horaActual,
+          descripcion: descripcion.value,
+          latitud: latitud.value,
+          longitud: longitud.value,
+          foto_url: foto.value
+        };
       }
-    } else {
-      error.value = "Error al enviar datos: " + err.message;
+
+      mensajeAsistencia.value = `Registro guardado localmente. Se sincronizará automáticamente cuando el servidor esté disponible.`;
+      modalMessage.value = `¡Registro guardado! Se sincronizará automáticamente.`;
+      showModal.value = true;
+      modoAsistencia.value = false;
+      tipoAsistencia.value = '';
+      limpiarDatosAsistencia();
+      guardarEstadoAsistencia();
+      setTimeout(() => { mensajeAsistencia.value = ''; }, 8000);
+    } catch (offlineErr) {
+      console.error('Error guardando offline como fallback:', offlineErr);
+      error.value = "Sin conexión y no se pudo guardar localmente. Intenta de nuevo.";
     }
   } finally {
     enviandoAsistencia.value = false;
@@ -2411,66 +2408,64 @@ async function enviarRegistro() {
   } catch (err) {
     console.error("Error al enviar datos:", err);
 
-    const esErrorDeRed = (!err.response && !!err.request) || err.isNetworkError;
-
+    // Error HTTP explícito del servidor (4xx, 5xx con cuerpo)
     if (err.response) {
-      error.value = "Error del servidor: " + (err.response.data.detail || err.response.statusText);
-    } else if (esErrorDeRed) {
-      // Error de red → guardar offline como fallback para no perder el registro
-      console.log('📴 Error de red en actividad, guardando offline como fallback...');
-      try {
-        const timestampCDMX = obtenerTimestampCDMX();
-        const registroID = await offlineService.guardarRegistroOffline(
-          user.value.id,
-          latitudRegistro.value,
-          longitudRegistro.value,
-          descripcionRegistro.value,
-          archivoFotoRegistro.value,
-          tipoActividad.value,
-          timestampCDMX,
-          categoriaActividad.value,
-          categoriaActividad.value === 'Otro' ? categoriaActividadOtro.value.trim() : null
-        );
+      error.value = "Error del servidor: " + (err.response.data?.detail || err.response.statusText);
+      return;
+    }
 
-        historial.value.unshift({
-          fecha: new Date(timestampCDMX).toLocaleString('es-MX', {
-            timeZone: 'America/Mexico_City',
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
-          }),
-          latitud: latitudRegistro.value,
-          longitud: longitudRegistro.value,
-          descripcion: descripcionRegistro.value,
-          tipo_actividad: tipoActividad.value,
-          categoria_actividad: categoriaActividad.value,
-          categoria_actividad_otro: categoriaActividad.value === 'Otro' ? categoriaActividadOtro.value.trim() : null,
-          foto: fotoRegistro.value,
-          offline: true,
-          backend: null,
-          tipo: 'actividad',
-          id_offline: registroID
-        });
+    // Cualquier otro error (red, service worker, timeout, SSL, desconocido) → guardar offline
+    console.log('📴 Error de conexión en actividad, guardando offline como fallback...');
+    try {
+      const timestampCDMX = obtenerTimestampCDMX();
+      const registroID = await offlineService.guardarRegistroOffline(
+        user.value.id,
+        latitudRegistro.value,
+        longitudRegistro.value,
+        descripcionRegistro.value,
+        archivoFotoRegistro.value,
+        tipoActividad.value,
+        timestampCDMX,
+        categoriaActividad.value,
+        categoriaActividad.value === 'Otro' ? categoriaActividadOtro.value.trim() : null
+      );
 
-        descripcionRegistro.value = "";
-        tipoActividad.value = "";
-        categoriaActividad.value = "";
-        categoriaActividadOtro.value = "";
-        fotoRegistro.value = null;
-        archivoFotoRegistro.value = null;
-        latitudRegistro.value = null;
-        longitudRegistro.value = null;
-        if (fileInputRegistro.value) fileInputRegistro.value.value = "";
-        if (fileInputCameraRegistro.value) fileInputCameraRegistro.value.value = "";
-        if (fileInputGalleryRegistro.value) fileInputGalleryRegistro.value.value = "";
+      historial.value.unshift({
+        fecha: new Date(timestampCDMX).toLocaleString('es-MX', {
+          timeZone: 'America/Mexico_City',
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        }),
+        latitud: latitudRegistro.value,
+        longitud: longitudRegistro.value,
+        descripcion: descripcionRegistro.value,
+        tipo_actividad: tipoActividad.value,
+        categoria_actividad: categoriaActividad.value,
+        categoria_actividad_otro: categoriaActividad.value === 'Otro' ? categoriaActividadOtro.value.trim() : null,
+        foto: fotoRegistro.value,
+        offline: true,
+        backend: null,
+        tipo: 'actividad',
+        id_offline: registroID
+      });
 
-        modalMessage.value = "¡Registro guardado! Se sincronizará automáticamente cuando el servidor esté disponible.";
-        showModal.value = true;
-      } catch (offlineErr) {
-        console.error('Error guardando actividad offline como fallback:', offlineErr);
-        error.value = "No se pudo registrar. Verifica tu conexión a internet.";
-      }
-    } else {
-      error.value = "Error al enviar datos: " + err.message;
+      descripcionRegistro.value = "";
+      tipoActividad.value = "";
+      categoriaActividad.value = "";
+      categoriaActividadOtro.value = "";
+      fotoRegistro.value = null;
+      archivoFotoRegistro.value = null;
+      latitudRegistro.value = null;
+      longitudRegistro.value = null;
+      if (fileInputRegistro.value) fileInputRegistro.value.value = "";
+      if (fileInputCameraRegistro.value) fileInputCameraRegistro.value.value = "";
+      if (fileInputGalleryRegistro.value) fileInputGalleryRegistro.value.value = "";
+
+      modalMessage.value = "¡Registro guardado! Se sincronizará automáticamente cuando el servidor esté disponible.";
+      showModal.value = true;
+    } catch (offlineErr) {
+      console.error('Error guardando actividad offline como fallback:', offlineErr);
+      error.value = "Sin conexión y no se pudo guardar localmente. Intenta de nuevo.";
     }
   } finally {
     enviando.value = false;

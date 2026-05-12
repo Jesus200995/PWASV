@@ -15,15 +15,21 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/app\.sembrandodatos\.com\/.*/i,
+            // API calls bypass the service worker completely — no caching, no timeout interference
+            urlPattern: /\/api\//i,
+            handler: 'NetworkOnly',
+          },
+          {
+            // Static app assets only — exclude /api/ paths
+            urlPattern: /^https:\/\/app\.sembrandodatos\.com\/(?!api).*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'app-cache-v1.0.3',
+              cacheName: 'app-cache-v1.0.4',
               expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 // 1 hora
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 // 24 horas
               },
-              networkTimeoutSeconds: 10
+              networkTimeoutSeconds: 30
             }
           }
         ]

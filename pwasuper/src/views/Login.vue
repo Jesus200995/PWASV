@@ -134,10 +134,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import { API_URL, getBestApiUrl, checkInternetConnection, getOfflineMessage } from '../utils/network.js';
+import { API_URL } from '../utils/network.js';
 import SupportBubbleLogin from '../components/SupportBubbleLogin.vue';
 import { enviarInfoDispositivo } from '../services/dispositivoTrackingService.js';
 
@@ -148,114 +148,87 @@ const showPassword = ref(false);
 const loading = ref(false);
 const errorMessage = ref('');
 const formError = ref(false);
-const isOnline = ref(true);
-const currentApiUrl = ref(API_URL);
-
-// Verificar conexión a internet cuando carga el componente
-onMounted(async () => {
-  isOnline.value = await checkInternetConnection();
-  if (!isOnline.value) {
-    errorMessage.value = getOfflineMessage();
-  } else {
-    try {
-      currentApiUrl.value = await getBestApiUrl();
-      console.log(`🌐 Login usando servidor: ${currentApiUrl.value}`);
-    } catch (error) {
-      console.warn('Error detectando servidor, usando URL por defecto:', error);
-      currentApiUrl.value = API_URL;
-    }
-  }
-});
+const retryCount = ref(0);
+const MAX_RETRIES = 2;
 
 function togglePasswordVisibility() {
   showPassword.value = !showPassword.value;
 }
 
+async function intentarLogin(correo, contrasena) {
+  const response = await axios.post(`${API_URL}/login`, {
+    correo,
+    contrasena
+  }, {
+    timeout: 30000,
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.data;
+}
+
 async function login() {
-  loading.value = true;
-  errorMessage.value = '';
-  formError.value = false;
-  
-  // Verificar si hay campos vacíos
   if (!email.value || !password.value) {
     errorMessage.value = 'Por favor, completa todos los campos';
     formError.value = true;
-    loading.value = false;
     return;
   }
-  
-  // Verificar conexión a internet
-  const online = await checkInternetConnection();
-  if (!online) {
-    errorMessage.value = getOfflineMessage();
-    formError.value = true;
-    loading.value = false;
-    return;
-  }
-  
-  // Actualizar URL si es necesario
-  if (!currentApiUrl.value || currentApiUrl.value === API_URL) {
-    currentApiUrl.value = await getBestApiUrl();
-  }
-  
-  try {
-    // Conectar con la API real
-    const response = await axios.post(`${currentApiUrl.value}/login`, {
-      correo: email.value,
-      contrasena: password.value
-    }, {
-      timeout: 10000, // 10 segundos de timeout
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    // Obtener datos del usuario desde la respuesta
-    const userData = response.data;
-    
-    // Guardar datos del usuario en localStorage
-    localStorage.setItem('user', JSON.stringify(userData));
-    
-    // Enviar información del dispositivo al backend (no esperar respuesta)
-    enviarInfoDispositivo(userData.id).catch(err => 
-      console.warn('No se pudo registrar dispositivo:', err)
-    );
-    
-    // Establecer bandera para mostrar mensaje de bienvenida
-    sessionStorage.setItem('justLoggedIn', 'true');
-    
-    // Forzar recarga de la página para asegurar que el estado se actualice correctamente
-    window.location.href = '/';
-  } catch (error) {
-    console.error('Error de inicio de sesión:', error);
-    
-    if (error.response) {
-      // El servidor respondió con un estado de error
-      const status = error.response.status;
-      if (status === 401) {
-        errorMessage.value = 'Credenciales incorrectas. Verifica tu email y contraseña.';
-      } else if (status === 403) {
-        // Cuenta desactivada
-        errorMessage.value = error.response.data.detail || 'Tu cuenta ha sido desactivada. Contacta al administrador.';
-      } else if (status === 500) {
-        errorMessage.value = 'Error del servidor. Inténtalo de nuevo en unos minutos.';
-      } else {
-        errorMessage.value = error.response.data.detail || 'Error al iniciar sesión. Verifica tus credenciales.';
-      }
-    } else if (error.request) {
-      // La solicitud fue hecha pero no se recibió respuesta
-      errorMessage.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
-    } else if (error.code === 'ECONNABORTED') {
-      // Timeout
-      errorMessage.value = 'La conexión tardó demasiado. Verifica tu conexión a internet.';
-    } else {
-      // Algo ocurrió al configurar la solicitud
-      errorMessage.value = 'Error al iniciar sesión: ' + error.message;
+
+  loading.value = true;
+  errorMessage.value = '';
+  formError.value = false;
+  retryCount.value = 0;
+
+  let lastError = null;
+
+  // Intentar hasta MAX_RETRIES + 1 veces con espera entre intentos
+  for (let intento = 0; intento <= MAX_RETRIES; intento++) {
+    if (intento > 0) {
+      errorMessage.value = `Reintentando conexión (${intento}/${MAX_RETRIES})...`;
+      await new Promise(r => setTimeout(r, 3000 * intento));
     }
-    
-    formError.value = true;
-  } finally {
-    loading.value = false;
+
+    try {
+      const userData = await intentarLogin(email.value, password.value);
+
+      localStorage.setItem('user', JSON.stringify(userData));
+      enviarInfoDispositivo(userData.id).catch(() => {});
+      sessionStorage.setItem('justLoggedIn', 'true');
+      window.location.href = '/';
+      return;
+
+    } catch (error) {
+      lastError = error;
+      console.error(`Error de inicio de sesión (intento ${intento + 1}):`, error);
+
+      // Errores del servidor → no reintentar
+      if (error.response) {
+        const status = error.response.status;
+        if (status === 401) {
+          errorMessage.value = 'Credenciales incorrectas. Verifica tu email y contraseña.';
+        } else if (status === 403) {
+          errorMessage.value = error.response.data?.detail || 'Tu cuenta ha sido desactivada. Contacta al administrador.';
+        } else if (status === 500) {
+          errorMessage.value = 'Error del servidor. Inténtalo de nuevo en unos minutos.';
+        } else {
+          errorMessage.value = error.response.data?.detail || 'Error al iniciar sesión.';
+        }
+        formError.value = true;
+        loading.value = false;
+        return;
+      }
+
+      retryCount.value = intento + 1;
+    }
+  }
+
+  // Todos los reintentos fallaron por error de red
+  formError.value = true;
+  loading.value = false;
+
+  if (!navigator.onLine) {
+    errorMessage.value = 'Sin conexión a internet. Conéctate a una red y vuelve a intentar.';
+  } else {
+    errorMessage.value = 'No se pudo conectar con el servidor. La red puede ser lenta — intenta de nuevo en unos segundos.';
   }
 }
 </script>

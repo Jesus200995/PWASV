@@ -556,12 +556,21 @@ class SyncService {
       // ANDROID FIX: Procesar foto con compresión si es necesario
       let archivoAdjunto = false;
       if (registro.foto_base64) {
+        // Límite duro: foto > 10MB decodificada → usar placeholder (evita 413 de nginx)
+        const fotoTamanoMB = (registro.foto_base64.length * 0.75) / (1024 * 1024);
+        if (fotoTamanoMB > 10) {
+          console.error(`❌ Foto de registro demasiado grande (${fotoTamanoMB.toFixed(1)}MB), usando placeholder`);
+          registro.foto_base64 = null;
+        }
+      }
+
+      if (registro.foto_base64) {
         console.log('🖼️ Procesando imagen base64...');
         console.log(`🔍 Longitud original del string base64: ${registro.foto_base64.length}`);
-        
+
         // Verificar formato válido de base64
         let fotoBase64Procesada = registro.foto_base64;
-        
+
         // ANDROID FIX: Comprimir imagen si es muy grande para evitar timeouts
         try {
           fotoBase64Procesada = await this.comprimirImagenBase64(registro.foto_base64, 400, 0.5);
@@ -810,9 +819,19 @@ class SyncService {
       // ANDROID FIX: Procesar foto con compresión si es necesario
       if (asistencia.foto_base64) {
         console.log('🖼️ Procesando imagen de asistencia...');
-        
+
+        // Límite duro: si la foto es > 10MB decodificada, descartar y usar placeholder
+        // Evita envíos de 250MB que nginx rechaza con 413
+        const fotoTamanoMB = (asistencia.foto_base64.length * 0.75) / (1024 * 1024);
+        if (fotoTamanoMB > 10) {
+          console.error(`❌ Foto de asistencia demasiado grande (${fotoTamanoMB.toFixed(1)}MB > 10MB), usando placeholder`);
+          asistencia.foto_base64 = null;
+        }
+      }
+
+      if (asistencia.foto_base64) {
         let fotoBase64Procesada = asistencia.foto_base64;
-        
+
         // Comprimir imagen si es muy grande
         try {
           fotoBase64Procesada = await this.comprimirImagenBase64(asistencia.foto_base64, 400, 0.5);

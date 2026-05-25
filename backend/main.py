@@ -9352,6 +9352,7 @@ class EliminarImagenesPorFechaRequest(BaseModel):
     solo_mes: bool = True  # Si True, solo el mes especificado. Si False, todo el año
 
 @app.delete("/imagenes/eliminar-por-fecha")
+@app.post("/imagenes/eliminar-por-fecha")
 async def eliminar_imagenes_por_fecha(request: EliminarImagenesPorFechaRequest):
     """
     Endpoint para eliminar imágenes filtradas por mes/año.
@@ -9411,30 +9412,30 @@ async def eliminar_imagenes_por_fecha(request: EliminarImagenesPorFechaRequest):
             fotos_registros = cursor.fetchall()
             print(f"📸 Se encontraron {len(fotos_registros)} fotos de registros en el período")
             
+            # Eliminar archivos físicos
             for foto_row in fotos_registros:
-                registro_id = foto_row[0]
                 foto_path = foto_row[1]
                 if foto_path:
-                    # Intentar eliminar archivo físico
-                    if os.path.exists(foto_path):
-                        try:
+                    try:
+                        if os.path.exists(foto_path):
                             os.remove(foto_path)
                             archivos_eliminados += 1
-                        except Exception as e:
-                            errores += 1
-                            print(f"   ❌ Error eliminando {foto_path}: {e}")
-                    else:
-                        archivos_no_encontrados += 1
-                    
-                    # Limpiar referencia en BD
-                    try:
-                        cursor.execute("UPDATE registros SET foto_url = NULL WHERE id = %s", (registro_id,))
-                        fotos_registros_eliminadas += 1
+                        else:
+                            archivos_no_encontrados += 1
                     except Exception as e:
                         errores += 1
-                        print(f"   ❌ Error limpiando registro {registro_id}: {e}")
+                        print(f"   ❌ Error eliminando {foto_path}: {e}")
             
+            # Limpiar referencias en BD con una sola query batch
+            cursor.execute("""
+                UPDATE registros SET foto_url = NULL 
+                WHERE foto_url IS NOT NULL 
+                AND fecha_hora >= %s AND fecha_hora < %s
+            """, (fecha_inicio, fecha_fin))
+            fotos_registros_eliminadas = cursor.rowcount or 0
             conn.commit()
+            print(f"   ✅ {fotos_registros_eliminadas} registros limpiados en batch")
+            
         except Exception as e:
             conn.rollback()
             print(f"⚠️ Error al procesar fotos de registros: {e}")
@@ -9450,46 +9451,42 @@ async def eliminar_imagenes_por_fecha(request: EliminarImagenesPorFechaRequest):
             fotos_asistencias = cursor.fetchall()
             print(f"📸 Se encontraron {len(fotos_asistencias)} registros de asistencia con fotos en el período")
             
+            # Eliminar archivos físicos
             for foto_row in fotos_asistencias:
-                asistencia_id = foto_row[0]
                 foto_entrada = foto_row[1]
                 foto_salida = foto_row[2]
                 
-                # Procesar foto de entrada
                 if foto_entrada:
-                    if os.path.exists(foto_entrada):
-                        try:
+                    try:
+                        if os.path.exists(foto_entrada):
                             os.remove(foto_entrada)
                             archivos_eliminados += 1
-                        except Exception as e:
-                            errores += 1
-                    else:
-                        archivos_no_encontrados += 1
+                        else:
+                            archivos_no_encontrados += 1
+                    except Exception as e:
+                        errores += 1
                 
-                # Procesar foto de salida
                 if foto_salida:
-                    if os.path.exists(foto_salida):
-                        try:
+                    try:
+                        if os.path.exists(foto_salida):
                             os.remove(foto_salida)
                             archivos_eliminados += 1
-                        except Exception as e:
-                            errores += 1
-                    else:
-                        archivos_no_encontrados += 1
-                
-                # Limpiar referencias en BD
-                try:
-                    cursor.execute("""
-                        UPDATE asistencias 
-                        SET foto_entrada_url = NULL, foto_salida_url = NULL 
-                        WHERE id = %s
-                    """, (asistencia_id,))
-                    fotos_asistencias_eliminadas += 1
-                except Exception as e:
-                    errores += 1
-                    print(f"   ❌ Error limpiando asistencia {asistencia_id}: {e}")
+                        else:
+                            archivos_no_encontrados += 1
+                    except Exception as e:
+                        errores += 1
             
+            # Limpiar referencias en BD con una sola query batch
+            cursor.execute("""
+                UPDATE asistencias 
+                SET foto_entrada_url = NULL, foto_salida_url = NULL 
+                WHERE (foto_entrada_url IS NOT NULL OR foto_salida_url IS NOT NULL)
+                AND fecha >= %s AND fecha < %s
+            """, (fecha_inicio, fecha_fin))
+            fotos_asistencias_eliminadas = cursor.rowcount or 0
             conn.commit()
+            print(f"   ✅ {fotos_asistencias_eliminadas} asistencias limpiadas en batch")
+            
         except Exception as e:
             conn.rollback()
             print(f"⚠️ Error al procesar fotos de asistencias: {e}")

@@ -75,19 +75,19 @@ const imagenesService = {
       console.log(`📸 Iniciando eliminación de imágenes del período: ${periodo}`)
       console.log('🔗 URL del endpoint:', `${API_URL}/imagenes/eliminar-por-fecha`)
 
-      const response = await axios.delete(
+      const response = await axios.post(
         `${API_URL}/imagenes/eliminar-por-fecha`,
+        {
+          mes: parseInt(mes),
+          anio: parseInt(anio),
+          solo_mes: soloMes
+        },
         {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          data: {
-            mes: mes,
-            anio: anio,
-            solo_mes: soloMes
-          },
-          timeout: 120000 // 2 minutos de timeout
+          timeout: 300000 // 5 minutos de timeout para meses con muchas fotos
         }
       )
 

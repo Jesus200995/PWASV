@@ -1323,7 +1323,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar.vue'
@@ -2715,6 +2715,9 @@ const ejecutarEliminarPorFecha = async () => {
   
   try {
     console.log('🚀 Iniciando eliminación de imágenes por fecha...')
+    
+    // Esperar a que el DOM se actualice y el ref esté disponible
+    await nextTick()
     
     // Iniciar el progreso visual
     const detenerProgreso = await progressModalFechaRef.value.iniciarProgreso()

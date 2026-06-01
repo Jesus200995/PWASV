@@ -1,0 +1,144 @@
+============================================================
+>>> systemctl is-active apipwa 2>&1
+============================================================
+active
+Exit: 0
+
+============================================================
+>>> systemctl is-active nginx 2>&1
+============================================================
+active
+Exit: 0
+
+============================================================
+>>> ss -tlnp | grep -E '8000|80|443'
+============================================================
+LISTEN 0      2048                     127.0.0.1:8001       0.0.0.0:*    users:(("uvicorn",pid=759,fd=14))                                                                                                               
+LISTEN 0      4096                     127.0.0.1:8000       0.0.0.0:*    users:(("python3",pid=6483,fd=3),("python3",pid=6482,fd=3),("python3",pid=6481,fd=3),("python3",pid=6480,fd=3),("uvicorn",pid=6474,fd=3))       
+LISTEN 0      2048                     127.0.0.1:8002       0.0.0.0:*    users:(("uvicorn",pid=1765,fd=15))                                                                                                              
+LISTEN 0      2048                       0.0.0.0:8005       0.0.0.0:*    users:(("uvicorn",pid=1251,fd=13))                                                                                                              
+LISTEN 0      4096                       0.0.0.0:8080       0.0.0.0:*    users:(("docker-proxy",pid=8270,fd=7))                                                                                                          
+LISTEN 0      511                        0.0.0.0:443        0.0.0.0:*    users:(("nginx",pid=3216319,fd=12),("nginx",pid=3216318,fd=12),("nginx",pid=3216317,fd=12),("nginx",pid=3216316,fd=12),("nginx",pid=1095,fd=12))
+LISTEN 0      511                        0.0.0.0:80         0.0.0.0:*    users:(("nginx",pid=3216319,fd=13),("nginx",pid=3216318,fd=13),("nginx",pid=3216317,fd=13),("nginx",pid=3216316,fd=13),("nginx",pid=1095,fd=13))
+LISTEN 0      4096                          [::]:8080          [::]:*    users:(("docker-proxy",pid=8276,fd=7))                                                                                                          
+LISTEN 0      50                               *:8082             *:*    users:(("java",pid=1259,fd=308))                                                                                                                
+LISTEN 0      511                           [::]:443           [::]:*    users:(("nginx",pid=3216319,fd=14),("nginx",pid=3216318,fd=14),("nginx",pid=3216317,fd=14),("nginx",pid=3216316,fd=14),("nginx",pid=1095,fd=14))
+LISTEN 0      511                           [::]:80            [::]:*    users:(("nginx",pid=3216319,fd=15),("nginx",pid=3216318,fd=15),("nginx",pid=3216317,fd=15),("nginx",pid=3216316,fd=15),("nginx",pid=1095,fd=15))
+Exit: 0
+
+============================================================
+>>> journalctl -u apipwa --no-pager -n 30 2>&1 | tail -30
+============================================================
+Jun 01 03:32:14 srv824686 uvicorn[6482]: INFO:     201.138.213.120:0 - "GET /notificaciones/unread_count?usuario_id=1252 HTTP/1.1" 500 Internal Server Error
+Jun 01 03:32:14 srv824686 uvicorn[6480]: INFO:     201.138.213.120:0 - "GET /usuarios/1252 HTTP/1.1" 500 Internal Server Error
+Jun 01 03:32:14 srv824686 uvicorn[6483]: INFO:     200.68.161.81:0 - "GET /notificaciones/unread_count?usuario_id=3149 HTTP/1.1" 500 Internal Server Error
+Jun 01 03:32:14 srv824686 uvicorn[6480]: INFO:     189.129.5.11:0 - "GET /usuarios/767 HTTP/1.1" 500 Internal Server Error
+Jun 01 03:32:14 srv824686 uvicorn[6481]: INFO:     189.129.5.11:0 - "GET /notificaciones/unread_count?usuario_id=767 HTTP/1.1" 500 Internal Server Error
+Jun 01 03:32:14 srv824686 uvicorn[6481]: 🔄 Reestableciendo conexión cerrada...
+Jun 01 03:32:14 srv824686 uvicorn[6481]: ❌ Error conectando a la base de datos: connection to server at "31.97.8.51", port 5432 failed: FATAL:  password authentication failed for user "jesus"
+Jun 01 03:32:14 srv824686 uvicorn[6481]: connection to server at "31.97.8.51", port 5432 failed: FATAL:  password authentication failed for user "jesus"
+Jun 01 03:32:14 srv824686 uvicorn[6481]: INFO:     189.206.20.17:0 - "GET /health HTTP/1.1" 200 OK
+Jun 01 03:32:14 srv824686 uvicorn[6483]: INFO:     192.141.244.134:0 - "GET /notificaciones/unread_count?usuario_id=808 HTTP/1.1" 500 Internal Server Error
+Jun 01 03:32:14 srv824686 uvicorn[6481]: 🔄 Reestableciendo conexión cerrada...
+Jun 01 03:32:14 srv824686 uvicorn[6481]: ❌ Error conectando a la base de datos: connection to server at "31.97.8.51", port 5432 failed: FATAL:  password authentication failed for user "jesus"
+Jun 01 03:32:14 srv824686 uvicorn[6481]: connection to server at "31.97.8.51", port 5432 failed: FATAL:  password authentication failed for user "jesus"
+Jun 01 03:32:14 srv824686 uvicorn[6481]: INFO:     189.206.86.157:0 - "GET /health HTTP/1.1" 200 OK
+Jun 01 03:32:15 srv824686 uvicorn[6483]: 🔄 Reestableciendo conexión cerrada...
+Jun 01 03:32:15 srv824686 uvicorn[6483]: ❌ Error conectando a la base de datos: connection to server at "31.97.8.51", port 5432 failed: FATAL:  password authentication failed for user "jesus"
+Jun 01 03:32:15 srv824686 uvicorn[6483]: connection to server at "31.97.8.51", port 5432 failed: FATAL:  password authentication failed for user "jesus"
+Jun 01 03:32:15 srv824686 uvicorn[6483]: INFO:     177.246.93.42:0 - "GET /health HTTP/1.1" 200 OK
+Jun 01 03:32:15 srv824686 uvicorn[6483]: INFO:     200.68.172.53:0 - "GET /notificaciones/unread_count?usuario_id=1144 HTTP/1.1" 500 Internal Server Error
+Jun 01 03:32:15 srv824686 uvicorn[6482]: 🔍 ENTRADA - Datos recibidos:
+Jun 01 03:32:15 srv824686 uvicorn[6482]:    usuario_id: 1144 (tipo: <class 'int'>)
+Jun 01 03:32:15 srv824686 uvicorn[6482]:    latitud: 17.1958858
+Jun 01 03:32:15 srv824686 uvicorn[6482]:    longitud: -93.0100352
+Jun 01 03:32:15 srv824686 uvicorn[6482]:    descripcion: Inicio de actividad
+Jun 01 03:32:15 srv824686 uvicorn[6482]:    foto: entrada_1773194937534_fikh6k.jpg
+Jun 01 03:32:15 srv824686 uvicorn[6482]:    timestamp_offline: 2026-03-11T02:09:27.214Z
+Jun 01 03:32:15 srv824686 uvicorn[6482]: 🔄 Reestableciendo conexión cerrada...
+Jun 01 03:32:15 srv824686 uvicorn[6482]: ❌ Error conectando a la base de datos: connection to server at "31.97.8.51", port 5432 failed: FATAL:  password authentication failed for user "jesus"
+Jun 01 03:32:15 srv824686 uvicorn[6482]: connection to server at "31.97.8.51", port 5432 failed: FATAL:  password authentication failed for user "jesus"
+Jun 01 03:32:15 srv824686 uvicorn[6482]: INFO:     200.68.172.53:0 - "POST /asistencia/entrada HTTP/1.1" 500 Internal Server Error
+Exit: 0
+
+============================================================
+>>> df -h / | tail -1
+============================================================
+/dev/sda1       194G   95G  100G  49% /
+Exit: 0
+
+============================================================
+>>> free -h | head -2
+============================================================
+total        used        free      shared  buff/cache   available
+Mem:            15Gi       7.6Gi       182Mi       147Mi       7.8Gi       7.5Gi
+Exit: 0
+
+============================================================
+>>> ps aux | grep -E 'uvicorn|python|node' | grep -v grep | head -10
+============================================================
+www-data     759  0.1  0.1 204224 30924 ?        Ssl  May25  11:41 /var/www/DronApp/backend/venv/bin/python3 /var/www/DronApp/backend/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8001
+root         770  0.0  0.1 400396 20532 ?        Ssl  May25   3:19 /usr/bin/python3 /usr/bin/fail2ban-server -xf start
+root         775  0.0  0.0  33316 12800 ?        Ss   May25   0:05 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+root         786  0.0  0.0  37404  6528 ?        Ss   May25   1:29 /usr/bin/python3 /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
+root         917  0.0  0.0 110160 10948 ?        Ssl  May25   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+root        1251  0.1  0.0 201236  6984 ?        Sl   May25  11:32 /var/www/Simulador/backend-python/venv/bin/python3 /var/www/Simulador/backend-python/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8005
+root        1252  0.1  0.3 11527700 58836 ?      Ssl  May25  15:58 node /var/www/biblioteca/backend/index.js
+root        1253  0.0  0.0  31224  7756 ?        S    May25   1:01 /var/www/GeoportalSV/backend/venv/bin/python3 /var/www/GeoportalSV/backend/venv/bin/gunicorn -b 0.0.0.0:5000 app:create_app()
+root        1281  0.1  0.3 1595648 62212 ?       Ssl  May25  15:06 node /var/www/AppAdmin/backend/dist/index.js
+root        1289  0.1  0.0  90104 13960 ?        Ss   May25  14:54 /var/www/SistemaApp/BackendFastAPI/venv/bin/python3 venv/bin/uvicorn main:app --host 127.0.0.1 --port 9000
+Exit: 0
+
+============================================================
+>>> tail -20 /var/log/nginx/error.log 2>&1
+============================================================
+2026/06/01 00:38:16 [crit] 3216316#3216316: *9705113 SSL_do_handshake() failed (SSL: error:0A00006C:SSL routines::bad key share) while SSL handshaking, client: 167.71.84.32, server: 0.0.0.0:443
+2026/06/01 02:26:27 [error] 3216316#3216316: *9829159 open() "/var/www/Simulador/app-bodega/dist/apple-touch-icon-precomposed.png" failed (2: No such file or directory), client: 200.68.183.15, server: maiz.geodatos.com.mx, request: "GET /apple-touch-icon-precomposed.png HTTP/2.0", host: "maiz.geodatos.com.mx"
+2026/06/01 02:26:27 [error] 3216316#3216316: *9829159 open() "/var/www/Simulador/app-bodega/dist/apple-touch-icon.png" failed (2: No such file or directory), client: 200.68.183.15, server: maiz.geodatos.com.mx, request: "GET /apple-touch-icon.png HTTP/2.0", host: "maiz.geodatos.com.mx"
+2026/06/01 02:26:27 [error] 3216316#3216316: *9829159 open() "/var/www/Simulador/app-bodega/dist/favicon.ico" failed (2: No such file or directory), client: 200.68.183.15, server: maiz.geodatos.com.mx, request: "GET /favicon.ico HTTP/2.0", host: "maiz.geodatos.com.mx"
+2026/06/01 02:54:14 [error] 3216316#3216316: *9865662 rewrite or internal redirection cycle while internally redirecting to "/index.html", client: 74.7.230.9, server: sistemaapp.sembrandodatos.com, request: "GET /robots.txt HTTP/2.0", host: "sistemaapp.sembrandodatos.com"
+Exit: 0
+
+============================================================
+>>> ls -la /var/www/PWASV/backend/main.py 2>&1
+============================================================
+-rw-r--r-- 1 root root 475577 May 25 19:47 /var/www/PWASV/backend/main.py
+Exit: 0
+
+============================================================
+>>> cd /var/www/PWASV && git log -1 --oneline 2>&1
+============================================================
+32e5946 fix: delete photos by date - switch to POST, batch DB updates, add nextTick, increase timeout
+Exit: 0
+
+============================================================
+>>> curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/ 2>&1 || echo 'API_NO_RESPONDE'
+============================================================
+405
+Exit: 0
+
+============================================================
+>>> cat /etc/systemd/system/apipwa.service 2>&1
+============================================================
+[Unit]
+Description=FastAPI backend for PWA (apipwa.sembrandodatos.com)
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/var/www/PWASV/backend
+ExecStart=/var/www/PWASV/backend/venv/bin/uvicorn main:app --workers 4 --backlog 4096 --timeout-keep-alive 30 --host 127.0.0.1 --port 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+Exit: 0
+
+============================================================
+>>> nginx -t 2>&1
+============================================================
+nginx: [warn] conflicting server name "geoportal.sembrandodatos.com" on 0.0.0.0:443, ignored
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+Exit: 0
+

@@ -56,7 +56,7 @@ SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"
 DB_HOST = "31.97.8.51"
 DB_NAME = "app_registros"
 DB_USER = "jesus"
-DB_PASS = "2025"
+DB_PASS = "sa2026"
 
 # Variables globales para la conexión
 conn = None

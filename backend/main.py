@@ -11647,29 +11647,41 @@ def _classify_request(method, path):
                module, f"{verbo} en {path}", tid
     return None, None, None, None
 
+from urllib.parse import urlparse as _urlparse
+
 @app.middleware("http")
 async def _audit_middleware(request: Request, call_next):
     method = request.method
     path = request.url.path
+    # Normalizar si llega en forma absoluta (proxy): https://host/ruta -> /ruta
+    if "://" in path:
+        path = _urlparse(path).path or path
 
-    # Determinar si es candidato a registrarse ANTES de procesar
-    loggable = False
+    # ¿Es una operación candidata? (mutación o descarga/exportación)
+    candidate = False
     if not any(path.startswith(p) for p in _AUDIT_SKIP_PREFIXES) and method != "OPTIONS":
         if method in ("POST", "PUT", "PATCH", "DELETE"):
-            loggable = True
+            candidate = True
         elif method == "GET" and any(k in path for k in
               ("descargar", "exportar", "exportacion-completa", "estadisticas-pdf", "descargar-bd")):
-            loggable = True
+            candidate = True
+
+    # CLAVE: identificar al administrador ANTES de decidir si se registra.
+    # Solo se audita el tráfico del admin-pwa (que porta un JWT de admin válido).
+    # La app móvil de campo y el tráfico anónimo NO traen este token => se ignoran.
+    usr = usr_id = rol = territorio = None
+    if candidate:
+        auth = request.headers.get("authorization", "").replace("Bearer ", "").strip()
+        if auth:
+            usr, usr_id, rol, territorio = _decode_admin(auth)
 
     response = await call_next(request)
 
-    if loggable:
+    if candidate and usr:  # solo acciones de un admin autenticado
         try:
             action, module, label, tid = _classify_request(method, path)
             if action:
-                auth = request.headers.get("authorization", "").replace("Bearer ", "").strip()
-                usr, usr_id, rol, territorio = _decode_admin(auth) if auth else (None, None, None, None)
-                ident = _admin_identity(usr) if usr else {}
+                ident = _admin_identity(usr)
                 ip = (request.headers.get("x-forwarded-for") or request.headers.get("x-real-ip")
                       or (request.client.host if request.client else None))
                 if ip and "," in ip:

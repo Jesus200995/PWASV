@@ -11500,9 +11500,17 @@ def _tel_get_conn():
         _tel_conn = None
         return None
 
+def _tel_sanitize(v):
+    """Limpia backslashes espurios y espacios de valores cortos (IP, ruta)."""
+    if isinstance(v, str):
+        return v.replace("\\", "").strip() or None
+    return v
+
 def _tel_log(**kw):
     """Inserta un evento en la bitácora. Nunca lanza excepción (no debe afectar la app)."""
     try:
+        kw["ip_hint"] = _tel_sanitize(kw.get("ip_hint"))
+        kw["http_path"] = _tel_sanitize(kw.get("http_path"))
         with _tel_lock:
             c = _tel_get_conn()
             if c is None:

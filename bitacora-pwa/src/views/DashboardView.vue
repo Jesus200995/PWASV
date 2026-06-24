@@ -113,6 +113,12 @@
               <option v-for="m in filterOpts.modules" :key="m" :value="m">{{ m }}</option>
             </select>
 
+            <select v-model="filters.source" @change="load()" class="f-select" aria-label="Filtrar por origen">
+              <option value="">Todo origen</option>
+              <option value="backend">🔒 Verificado servidor</option>
+              <option value="frontend">○ Cliente</option>
+            </select>
+
             <div class="date-group">
               <input v-model="filters.date_from" @change="load()" type="date" class="f-date" aria-label="Desde" />
               <span class="date-sep" aria-hidden="true">→</span>
@@ -193,10 +199,13 @@
                     <span class="ts-time">{{ formatTime(row.ts) }}</span>
                   </td>
                   <td class="td-usr">
-                    <span class="usr-avatar" :style="usrColor(row.usr)" aria-hidden="true">
-                      {{ (row.usr || '?')[0].toUpperCase() }}
+                    <span class="usr-avatar" :style="usrColor(row.usr_nombre || row.usr)" aria-hidden="true">
+                      {{ ((row.usr_nombre || row.usr || '?')[0]).toUpperCase() }}
                     </span>
-                    <span class="usr-name">{{ row.usr || '—' }}</span>
+                    <span class="usr-block">
+                      <span class="usr-name">{{ row.usr_nombre || row.usr || '—' }}</span>
+                      <span class="usr-handle">@{{ row.usr || 'desconocido' }}<template v-if="row.usr_rol"> · {{ row.usr_rol }}</template></span>
+                    </span>
                   </td>
                   <td>
                     <span class="badge" :class="badgeClass(row.action_type)">
@@ -215,12 +224,27 @@
                   <tr v-if="expandedRow === row.id" class="expanded-row">
                     <td colspan="7">
                       <div class="expanded-body">
-                        <div class="exp-field"><span>ID</span> {{ row.id }}</div>
+                        <div class="exp-field"><span>Evento ID</span> {{ row.id }}</div>
+                        <div class="exp-field"><span>Fecha exacta</span> {{ formatFull(row.ts) }}</div>
+                        <div class="exp-field"><span>Administrador</span> {{ row.usr_nombre || '—' }} (@{{ row.usr || '?' }})</div>
+                        <div class="exp-field"><span>Rol</span> {{ row.usr_rol || '—' }}</div>
+                        <div class="exp-field" v-if="row.usr_cargo"><span>Cargo</span> {{ row.usr_cargo }}</div>
+                        <div class="exp-field" v-if="row.usr_territorio"><span>Territorio</span> {{ row.usr_territorio }}</div>
+                        <div class="exp-field"><span>Acción</span> {{ row.detail || labelAction(row.action_type) }}</div>
+                        <div class="exp-field"><span>Petición HTTP</span> <code v-if="row.http_method">{{ row.http_method }} {{ row.http_path }}</code><span v-else>—</span></div>
+                        <div class="exp-field"><span>Resultado</span>
+                          <span v-if="row.http_status" :class="statusClass(row.http_status)">{{ row.http_status }} {{ statusText(row.http_status) }}</span>
+                          <span v-else>—</span>
+                        </div>
+                        <div class="exp-field"><span>Dirección IP</span> {{ row.ip_hint || '—' }}</div>
+                        <div class="exp-field"><span>Origen del registro</span>
+                          <span :class="row.source === 'backend' ? 'src-verified' : 'src-client'">
+                            {{ row.source === 'backend' ? '🔒 Verificado en servidor' : '○ Reportado por cliente' }}
+                          </span>
+                        </div>
                         <div class="exp-field"><span>Sesión</span> {{ row.session_id || '—' }}</div>
-                        <div class="exp-field"><span>IP</span> {{ row.ip_hint || '—' }}</div>
-                        <div class="exp-field"><span>Detalle completo</span> {{ row.detail || '—' }}</div>
-                        <div class="exp-field" v-if="row.ua"><span>User Agent</span> <span class="ua-text">{{ row.ua }}</span></div>
-                        <div class="exp-field" v-if="row.extra"><span>Extra</span> <code>{{ JSON.stringify(row.extra) }}</code></div>
+                        <div class="exp-field" v-if="row.ua"><span>Dispositivo / navegador</span> <span class="ua-text">{{ row.ua }}</span></div>
+                        <div class="exp-field" v-if="row.extra"><span>Datos extra</span> <code>{{ JSON.stringify(row.extra) }}</code></div>
                       </div>
                     </td>
                   </tr>
@@ -272,11 +296,11 @@ const data = ref({ total: 0, data: [], stats: [], top_users: [] })
 const filterOpts = ref({ actions: [], modules: [] })
 const expandedRow = ref(null)
 const lastUpdate = ref(new Date())
-const filters = reactive({ usr: '', action_type: '', module: '', date_from: '', date_to: '' })
+const filters = reactive({ usr: '', action_type: '', module: '', source: '', date_from: '', date_to: '' })
 
 const totalPages = computed(() => Math.max(1, Math.ceil((data.value.total || 0) / limit)))
 const topStats = computed(() => (data.value.stats || []).slice(0, 3))
-const hasFilters = computed(() => !!(filters.usr || filters.action_type || filters.module || filters.date_from || filters.date_to))
+const hasFilters = computed(() => !!(filters.usr || filters.action_type || filters.module || filters.source || filters.date_from || filters.date_to))
 
 const lastUpdateLabel = computed(() => {
   const diff = Math.floor((Date.now() - lastUpdate.value) / 1000)
@@ -315,10 +339,11 @@ async function load() {
 }
 
 function setFilter(keyword) {
-  filters.action_type = ''
   filters.usr = ''
+  filters.module = ''
+  filters.action_type = ''
   const map = {
-    login: 'login', delete: 'delete_user', download: 'download_report', create: 'create_user'
+    login: 'login', delete: 'eliminar_usuario', download: 'descargar_reporte', create: 'crear_usuario'
   }
   filters.action_type = map[keyword] || ''
   page.value = 1
@@ -330,7 +355,7 @@ function nextPage() { if (page.value < totalPages.value) { page.value++; load() 
 function goToPage(p) { page.value = p; load() }
 
 function resetFilters() {
-  filters.usr = ''; filters.action_type = ''; filters.module = ''
+  filters.usr = ''; filters.action_type = ''; filters.module = ''; filters.source = ''
   filters.date_from = ''; filters.date_to = ''
   page.value = 1; load()
 }
@@ -349,6 +374,28 @@ function formatTime(ts) {
   return new Date(ts).toLocaleTimeString('es-MX', { timeZone: 'America/Mexico_City', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
 }
 
+function formatFull(ts) {
+  if (!ts) return '—'
+  return new Date(ts).toLocaleString('es-MX', { timeZone: 'America/Mexico_City', weekday: 'long',
+    day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    second: '2-digit', hour12: false }) + ' (hora CDMX)'
+}
+
+function statusClass(s) {
+  if (s >= 200 && s < 300) return 'st-ok'
+  if (s >= 400 && s < 500) return 'st-warn'
+  if (s >= 500) return 'st-err'
+  return 'st-neutral'
+}
+
+function statusText(s) {
+  if (s >= 200 && s < 300) return '· Exitoso'
+  if (s === 400 || s === 401 || s === 403) return '· Denegado'
+  if (s === 404) return '· No encontrado'
+  if (s >= 500) return '· Error servidor'
+  return ''
+}
+
 const USR_COLORS = ['#1a6ef5','#0ea5e9','#8b5cf6','#10b981','#f59e0b','#ef4444','#ec4899','#14b8a6']
 function usrColor(usr) {
   if (!usr) return 'background:#475569'
@@ -357,44 +404,91 @@ function usrColor(usr) {
 }
 
 const ACTION_LABELS = {
-  page_view:'Vista de página', login:'Login', logout:'Logout', login_failed:'Login fallido',
-  create_user:'Crear usuario', update_user:'Editar usuario', delete_user:'Eliminar usuario',
-  toggle_user:'Activar usuario', download_report:'Descargar reporte', view_report:'Ver reporte',
-  delete_report:'Eliminar reporte', delete_photo:'Eliminar foto', view_photo:'Ver foto',
-  view_record:'Ver registro', delete_record:'Eliminar registro', export_csv:'Exportar CSV',
-  change_permission:'Cambiar permiso', change_config:'Cambiar config',
-  send_notification:'Enviar notificación', delete_notification:'Eliminar notificación',
-  view_asistencia:'Ver asistencia', upload_manual:'Subir manual',
-  delete_manual:'Eliminar manual', download_manual:'Descargar manual',
+  // Acceso
+  login:'Inició sesión', logout:'Cerró sesión', login_fallido:'Acceso fallido',
+  login_bloqueado:'Acceso bloqueado', acceso_vista:'Accedió a vista',
+  // Administradores
+  crear_admin:'Creó administrador', editar_admin:'Editó administrador',
+  eliminar_admin:'Eliminó administrador', eliminar_todos_admin:'Eliminó TODOS los admin',
+  cambiar_rol_admin:'Cambió rol de admin', cambiar_pwd_admin:'Cambió contraseña de admin',
+  estado_admin:'Activó/desactivó admin',
+  // Usuarios
+  crear_usuario:'Creó usuario', editar_usuario:'Editó usuario', eliminar_usuario:'Eliminó usuario',
+  cambiar_rol:'Cambió rol', cambiar_pwd:'Cambió contraseña', cambiar_cargo:'Cambió cargo',
+  estado_usuario:'Activó/desactivó usuario', cambiar_territorio:'Cambió territorio',
+  cambiar_facilitador:'Cambió facilitador', transferir_activ:'Transfirió actividades',
+  exportar_usuarios:'Exportó usuarios',
+  // Reportes
+  eliminar_reporte:'Eliminó reporte', descargar_reporte:'Descargó reporte',
+  descargar_zip:'Descargó ZIP de reportes', descargar_pdf_stats:'Descargó PDF estadísticas',
+  firmar_reporte:'Firmó reporte', quitar_firma:'Quitó firma', guardar_reporte:'Guardó reporte',
+  // Facilitadores
+  asignar_tecnico:'Asignó técnico', desasignar_tecnico:'Desasignó técnico',
+  // Notificaciones
+  enviar_notif:'Envió notificación', editar_notif:'Editó notificación', eliminar_notif:'Eliminó notificación',
+  // Imágenes
+  eliminar_imgs_todas:'Eliminó TODAS las imágenes', eliminar_imgs_fecha:'Eliminó imágenes por fecha',
+  // Registros / asistencias
+  editar_registro:'Editó registro', eliminar_registro:'Eliminó registro', eliminar_regs_todos:'Eliminó TODOS los registros',
+  exportar_csv:'Exportó CSV', editar_asistencia:'Editó asistencia',
+  eliminar_asistencia:'Eliminó asistencia', eliminar_asis_todas:'Eliminó TODAS las asistencias',
+  // Sistema
+  descargar_bd:'Descargó base de datos', reset_territorios:'Reinició territorios',
+  // Fallback genérico
+  crear:'Creó', actualizar:'Actualizó', eliminar:'Eliminó',
 }
 function labelAction(a) { return ACTION_LABELS[a] || a }
 
 const ACTION_ICONS = {
-  page_view:'ti-eye', login:'ti-login', logout:'ti-logout', login_failed:'ti-alert-circle',
-  create_user:'ti-user-plus', update_user:'ti-user-edit', delete_user:'ti-user-minus',
-  toggle_user:'ti-toggle-right', download_report:'ti-download', view_report:'ti-file-text',
-  delete_report:'ti-trash', delete_photo:'ti-photo-off', view_photo:'ti-photo',
-  view_record:'ti-clipboard', delete_record:'ti-trash', export_csv:'ti-table-export',
-  change_permission:'ti-shield', change_config:'ti-settings', send_notification:'ti-bell',
-  delete_notification:'ti-bell-off', view_asistencia:'ti-calendar', upload_manual:'ti-upload',
-  delete_manual:'ti-trash', download_manual:'ti-download',
+  login:'ti-login', logout:'ti-logout', login_fallido:'ti-alert-triangle', login_bloqueado:'ti-lock',
+  acceso_vista:'ti-eye',
+  crear_admin:'ti-user-shield', editar_admin:'ti-user-cog', eliminar_admin:'ti-user-x',
+  eliminar_todos_admin:'ti-users-minus', cambiar_rol_admin:'ti-shield-cog',
+  cambiar_pwd_admin:'ti-key', estado_admin:'ti-toggle-right',
+  crear_usuario:'ti-user-plus', editar_usuario:'ti-user-edit', eliminar_usuario:'ti-user-minus',
+  cambiar_rol:'ti-id-badge', cambiar_pwd:'ti-key', cambiar_cargo:'ti-briefcase',
+  estado_usuario:'ti-toggle-right', cambiar_territorio:'ti-map-pin', cambiar_facilitador:'ti-arrows-exchange',
+  transferir_activ:'ti-transfer', exportar_usuarios:'ti-table-export',
+  eliminar_reporte:'ti-file-x', descargar_reporte:'ti-download', descargar_zip:'ti-file-zip',
+  descargar_pdf_stats:'ti-file-type-pdf', firmar_reporte:'ti-signature', quitar_firma:'ti-eraser',
+  guardar_reporte:'ti-file-text',
+  asignar_tecnico:'ti-user-check', desasignar_tecnico:'ti-user-off',
+  enviar_notif:'ti-bell', editar_notif:'ti-bell-cog', eliminar_notif:'ti-bell-off',
+  eliminar_imgs_todas:'ti-photo-off', eliminar_imgs_fecha:'ti-photo-minus',
+  editar_registro:'ti-edit', eliminar_registro:'ti-trash', eliminar_regs_todos:'ti-trash-x',
+  exportar_csv:'ti-table-export', editar_asistencia:'ti-calendar-cog',
+  eliminar_asistencia:'ti-calendar-minus', eliminar_asis_todas:'ti-calendar-x',
+  descargar_bd:'ti-database-export', reset_territorios:'ti-refresh-alert',
+  crear:'ti-plus', actualizar:'ti-edit', eliminar:'ti-trash',
 }
-function actionIcon(a) { return ACTION_ICONS[a] || 'ti-dots' }
+function actionIcon(a) { return ACTION_ICONS[a] || 'ti-point' }
+
+const _DANGER = new Set(['login_fallido','login_bloqueado','eliminar_admin','eliminar_todos_admin',
+  'eliminar_usuario','eliminar_reporte','eliminar_notif','eliminar_imgs_todas','eliminar_imgs_fecha',
+  'eliminar_registro','eliminar_regs_todos','eliminar_asistencia','eliminar_asis_todas',
+  'quitar_firma','descargar_bd','reset_territorios','eliminar'])
+const _SUCCESS = new Set(['login','crear_admin','crear_usuario','crear','firmar_reporte',
+  'asignar_tecnico','enviar_notif','guardar_reporte'])
+const _BLUE = new Set(['descargar_reporte','descargar_zip','descargar_pdf_stats','exportar_csv',
+  'exportar_usuarios'])
+const _AMBER = new Set(['editar_admin','editar_usuario','editar_registro','editar_asistencia',
+  'editar_notif','cambiar_rol','cambiar_rol_admin','cambiar_pwd','cambiar_pwd_admin','cambiar_cargo',
+  'cambiar_territorio','cambiar_facilitador','estado_admin','estado_usuario','actualizar','transferir_activ'])
 
 function actionColor(a) {
   if (!a) return 'gray'
-  if (a.includes('delete') || a === 'login_failed') return 'red'
-  if (a === 'login' || a.includes('create')) return 'green'
-  if (a.includes('download') || a.includes('export')) return 'blue'
-  if (a.includes('update') || a.includes('change') || a === 'toggle_user') return 'amber'
+  if (_DANGER.has(a)) return 'red'
+  if (_SUCCESS.has(a)) return 'green'
+  if (_BLUE.has(a)) return 'blue'
+  if (_AMBER.has(a)) return 'amber'
   return 'gray'
 }
 
 function badgeClass(a) { return `badge-${actionColor(a)}` }
 
 function rowClass(a) {
-  if (a?.startsWith('delete_') || a === 'login_failed') return 'tr-danger'
-  if (a === 'login' || a?.includes('create')) return 'tr-success'
+  if (_DANGER.has(a)) return 'tr-danger'
+  if (_SUCCESS.has(a)) return 'tr-success'
   return ''
 }
 
@@ -905,7 +999,16 @@ onUnmounted(() => clearInterval(interval))
   flex-shrink: 0;
 }
 
-.usr-name { vertical-align: middle; font-weight: 500; color: #93c5fd; }
+.usr-block { display: inline-flex; flex-direction: column; vertical-align: middle; line-height: 1.25; }
+.usr-name { font-weight: 500; color: #93c5fd; }
+.usr-handle { font-size: 0.68rem; color: #475569; }
+
+.src-verified { color: #4ade80; font-weight: 500; }
+.src-client { color: #8b949e; }
+.st-ok { color: #4ade80; font-weight: 500; }
+.st-warn { color: #fbbf24; font-weight: 500; }
+.st-err { color: #f87171; font-weight: 500; }
+.st-neutral { color: #8b949e; }
 
 .td-module { color: #a78bfa; font-size: 0.8rem; }
 .td-clip { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

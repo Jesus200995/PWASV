@@ -81,7 +81,6 @@ class AuthService {
         // Iniciar verificación en tiempo real de sesión (estado, rol, permisos)
         this.startSessionCheck()
 
-        analytics.login(credentials.username)
         console.log('✅ Usuario logueado:', userData)
         return { success: true, user: userData }
       }

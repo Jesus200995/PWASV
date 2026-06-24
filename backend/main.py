@@ -4883,19 +4883,29 @@ async def eliminar_usuario(user_id: int):
 
 # Endpoint de autenticación para administradores con información de usuario
 @app.post("/admin/login")
-def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
+def admin_login(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
+    # IP real detrás de nginx
+    _login_ip = (request.headers.get("x-forwarded-for") or request.headers.get("x-real-ip")
+                 or (request.client.host if request.client else None))
+    if _login_ip and "," in _login_ip:
+        _login_ip = _login_ip.split(",")[0].strip()
+    _login_ua = request.headers.get("user-agent")
     try:
         username = form_data.username
         password = form_data.password
-        
+
         print(f"🔐 Intento de login para usuario: {username}")
-        
+
         # Buscar usuario administrador en la base de datos incluyendo permisos, estado activo, es_territorial, territorio, nombre_completo, curp y cargo
         cursor.execute("SELECT id, password, rol, permisos, activo, es_territorial, territorio, nombre_completo, curp, cargo FROM admin_users WHERE username = %s", (username,))
         row = cursor.fetchone()
-        
+
         if not row or not pwd_context.verify(password, row[1]):
             print(f"❌ Credenciales incorrectas para usuario: {username}")
+            _tel_log(usr=username, action_type="login_fallido", module="acceso",
+                     detail=f"Intento de acceso FALLIDO con el usuario '{username}'",
+                     http_method="POST", http_path="/admin/login", http_status=400,
+                     ip_hint=_login_ip, ua=_login_ua, source="backend")
             raise HTTPException(status_code=400, detail="Credenciales incorrectas")
         
         user_id = row[0]
@@ -4910,6 +4920,12 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         # Verificar si el usuario está activo
         if not user_activo:
             print(f"❌ Usuario inactivo intentando acceder: {username}")
+            _tel_log(usr=username, usr_id=user_id, usr_nombre=row[7], usr_rol=user_rol,
+                     usr_territorio=row[6], usr_cargo=row[9],
+                     action_type="login_bloqueado", module="acceso",
+                     detail=f"Acceso BLOQUEADO (cuenta desactivada): '{username}'",
+                     http_method="POST", http_path="/admin/login", http_status=403,
+                     ip_hint=_login_ip, ua=_login_ua, source="backend")
             raise HTTPException(status_code=403, detail="Tu cuenta ha sido desactivada. Contacta al administrador.")
         
         # Parsear permisos
@@ -4934,9 +4950,16 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
         token = jwt.encode(token_data, SECRET_KEY, algorithm="HS256")
         
         print(f"✅ Login exitoso para usuario: {username} con rol: {user_rol}" + (f" (territorial: {territorio})" if es_territorial else ""))
-        
+
+        _tel_log(usr=username, usr_id=user_id, usr_nombre=nombre_completo, usr_rol=user_rol,
+                 usr_territorio=territorio, usr_cargo=cargo,
+                 action_type="login", module="acceso",
+                 detail=f"Inició sesión correctamente en el admin-pwa" + (f" (territorial: {territorio})" if es_territorial else ""),
+                 http_method="POST", http_path="/admin/login", http_status=200,
+                 ip_hint=_login_ip, ua=_login_ua, source="backend")
+
         return {
-            "access_token": token, 
+            "access_token": token,
             "token_type": "bearer",
             "user_info": {
                 "id": user_id,
@@ -11450,14 +11473,230 @@ async def buscar_usuarios_api(correo: Optional[str] = None, nombre: Optional[str
         raise HTTPException(status_code=500, detail=f"Error al buscar usuarios: {str(e)}")
 
 
-# ── Sistema de telemetría interna ─────────────────────────────────────────────
+# ── Sistema de telemetría / bitácora de auditoría ─────────────────────────────
 import secrets as _secrets
+import threading as _threading
+import re as _re
+import time as _time
 
 _SYS_OBSERVER_SECRET = "xK9#mP2$vL7@nQ4&wR6!tY3^uI8*oE5"
+
+# Conexión dedicada para la bitácora (independiente de la conexión principal,
+# para no interferir con el cursor global y ser thread-safe vía lock).
+_tel_conn = None
+_tel_lock = _threading.Lock()
+
+def _tel_get_conn():
+    global _tel_conn
+    try:
+        if _tel_conn is None or _tel_conn.closed:
+            _tel_conn = psycopg2.connect(
+                host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASS,
+                connect_timeout=5
+            )
+            _tel_conn.autocommit = True
+        return _tel_conn
+    except Exception:
+        _tel_conn = None
+        return None
+
+def _tel_log(**kw):
+    """Inserta un evento en la bitácora. Nunca lanza excepción (no debe afectar la app)."""
+    try:
+        with _tel_lock:
+            c = _tel_get_conn()
+            if c is None:
+                return
+            with c.cursor() as cur_t:
+                cur_t.execute("""
+                    INSERT INTO sys_telemetry
+                        (usr, usr_id, usr_nombre, usr_rol, usr_territorio, usr_cargo,
+                         action_type, module, detail, target_id, target_label,
+                         http_method, http_path, http_status,
+                         ip_hint, ua, session_id, source, extra)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                """, (
+                    kw.get("usr"), kw.get("usr_id"), kw.get("usr_nombre"),
+                    kw.get("usr_rol"), kw.get("usr_territorio"), kw.get("usr_cargo"),
+                    kw.get("action_type", "unknown"), kw.get("module"), kw.get("detail"),
+                    kw.get("target_id"), kw.get("target_label"),
+                    kw.get("http_method"), kw.get("http_path"), kw.get("http_status"),
+                    kw.get("ip_hint"), (kw.get("ua") or "")[:400] or None, kw.get("session_id"),
+                    kw.get("source", "backend"),
+                    json.dumps(kw["extra"]) if kw.get("extra") else None
+                ))
+    except Exception:
+        pass
+
+# Caché de identidad admin (username -> datos) para enriquecer la bitácora sin
+# golpear la BD en cada request. TTL 5 minutos.
+_admin_id_cache = {}
+_ADMIN_ID_TTL = 300
+
+def _admin_identity(username):
+    if not username:
+        return {}
+    now = _time.time()
+    hit = _admin_id_cache.get(username)
+    if hit and (now - hit[0] < _ADMIN_ID_TTL):
+        return hit[1]
+    info = {}
+    try:
+        with _tel_lock:
+            c = _tel_get_conn()
+            if c is not None:
+                with c.cursor() as cur_t:
+                    cur_t.execute(
+                        "SELECT id, nombre_completo, rol, territorio, cargo FROM admin_users WHERE username=%s",
+                        (username,)
+                    )
+                    r = cur_t.fetchone()
+                    if r:
+                        info = {"id": r[0], "nombre": r[1], "rol": r[2],
+                                "territorio": r[3], "cargo": r[4]}
+        _admin_id_cache[username] = (now, info)
+    except Exception:
+        pass
+    return info
+
+def _decode_admin(token):
+    """Decodifica el JWT del admin para identificar quién hace la acción."""
+    try:
+        p = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return p.get("sub"), p.get("user_id"), p.get("role"), p.get("territorio")
+    except Exception:
+        return None, None, None, None
+
+# ── Clasificador de rutas → acción legible en español ─────────────────────────
+# Cada regla: (metodos, patrón_regex, action_type, módulo, plantilla_etiqueta)
+_AUDIT_RULES = [
+    ({"POST"},   r"^/admin/usuarios/?$",                 "crear_admin",       "administradores", "Creó un nuevo usuario administrador"),
+    ({"PUT"},    r"^/admin/usuarios/(\d+)/rol$",         "cambiar_rol_admin", "administradores", "Cambió el rol del administrador ID {0}"),
+    ({"PUT"},    r"^/admin/usuarios/(\d+)/password$",    "cambiar_pwd_admin", "administradores", "Cambió la contraseña del administrador ID {0}"),
+    ({"PATCH"},  r"^/admin/usuarios/(\d+)/estado$",      "estado_admin",      "administradores", "Activó/desactivó al administrador ID {0}"),
+    ({"PUT"},    r"^/admin/usuarios/(\d+)$",             "editar_admin",      "administradores", "Editó datos/permisos del administrador ID {0}"),
+    ({"DELETE"}, r"^/admin/usuarios/all$",               "eliminar_todos_admin","administradores","Eliminó TODOS los administradores"),
+    ({"DELETE"}, r"^/admin/usuarios/(\d+)$",             "eliminar_admin",    "administradores", "Eliminó al administrador ID {0}"),
+
+    ({"POST"},   r"^/usuarios/?$",                        "crear_usuario",     "usuarios",        "Creó un nuevo usuario"),
+    ({"PUT"},    r"^/usuarios/(\d+)/rol$",               "cambiar_rol",       "usuarios",        "Cambió el rol del usuario ID {0}"),
+    ({"PUT"},    r"^/usuarios/(\d+)/password$",          "cambiar_pwd",       "usuarios",        "Cambió la contraseña del usuario ID {0}"),
+    ({"PUT"},    r"^/usuarios/(\d+)/cargo$",             "cambiar_cargo",     "usuarios",        "Cambió el cargo del usuario ID {0}"),
+    ({"PATCH"},  r"^/usuarios/(\d+)/estado$",            "estado_usuario",    "usuarios",        "Activó/desactivó al usuario ID {0}"),
+    ({"PATCH"},  r"^/usuarios/(\d+)/territorio$",        "cambiar_territorio","usuarios",        "Cambió el territorio del usuario ID {0}"),
+    ({"PATCH"},  r"^/usuarios/(\d+)/info$",              "editar_usuario",    "usuarios",        "Editó la información del usuario ID {0}"),
+    ({"PUT"},    r"^/usuarios/(\d+)$",                   "editar_usuario",    "usuarios",        "Editó al usuario ID {0}"),
+    ({"DELETE"}, r"^/usuarios/(\d+)$",                   "eliminar_usuario",  "usuarios",        "Eliminó al usuario ID {0}"),
+    ({"POST"},   r"^/usuarios/(\d+)/cambiar-facilitador","cambiar_facilitador","usuarios",       "Cambió el facilitador del usuario ID {0}"),
+    ({"POST"},   r"^/usuarios/transferir-actividades",   "transferir_activ",  "usuarios",        "Transfirió actividades entre usuarios"),
+    ({"GET"},    r"^/usuarios/exportacion-completa",     "exportar_usuarios", "usuarios",        "Exportó la base completa de usuarios"),
+
+    ({"DELETE"}, r"^/reportes/eliminar/(\d+)",           "eliminar_reporte",  "reportes",        "Eliminó el reporte ID {0}"),
+    ({"GET"},    r"^/reportes/descargar/(\d+)",          "descargar_reporte", "reportes",        "Descargó el reporte ID {0}"),
+    ({"GET"},    r"^/reportes/admin/descargar-zip",      "descargar_zip",     "reportes",        "Descargó reportes en ZIP"),
+    ({"GET"},    r"^/reportes/admin/estadisticas-pdf",   "descargar_pdf_stats","reportes",       "Descargó el PDF de estadísticas de reportes"),
+    ({"POST"},   r"^/reportes/firmar/(\d+)",             "firmar_reporte",    "reportes",        "Firmó el reporte ID {0}"),
+    ({"DELETE"}, r"^/reportes/quitar-firma/(\d+)",       "quitar_firma",      "reportes",        "Quitó la firma del reporte ID {0}"),
+    ({"POST"},   r"^/reportes/guardar",                  "guardar_reporte",   "reportes",        "Guardó/generó un reporte"),
+
+    ({"POST"},   r"^/facilitadores/asignar-tecnico",     "asignar_tecnico",   "facilitadores",   "Asignó un técnico a un facilitador"),
+    ({"DELETE"}, r"^/facilitadores/asignar-tecnico",     "desasignar_tecnico","facilitadores",   "Desasignó un técnico de un facilitador"),
+
+    ({"POST"},   r"^/notificaciones/?$",                 "enviar_notif",      "notificaciones",  "Envió una notificación"),
+    ({"PUT"},    r"^/notificaciones/(\d+)$",             "editar_notif",      "notificaciones",  "Editó la notificación ID {0}"),
+    ({"DELETE"}, r"^/notificaciones/(\d+)$",             "eliminar_notif",    "notificaciones",  "Eliminó la notificación ID {0}"),
+
+    ({"DELETE"}, r"^/imagenes/eliminar-todas",           "eliminar_imgs_todas","imagenes",       "Eliminó TODAS las imágenes"),
+    ({"POST","DELETE"}, r"^/imagenes/eliminar-por-fecha","eliminar_imgs_fecha","imagenes",       "Eliminó imágenes por fecha"),
+
+    ({"PUT"},    r"^/api/registros/(\d+)",               "editar_registro",   "registros",       "Editó el registro ID {0}"),
+    ({"DELETE"}, r"^/admin/registros/all",               "eliminar_regs_todos","registros",      "Eliminó TODOS los registros"),
+    ({"DELETE"}, r"^/admin/registros/(\d+)",             "eliminar_registro", "registros",       "Eliminó el registro ID {0}"),
+    ({"GET"},    r"^/exportar-registros-csv",            "exportar_csv",      "registros",       "Exportó registros a CSV"),
+
+    ({"PUT"},    r"^/admin/asistencias/(\d+)",           "editar_asistencia", "asistencias",     "Editó la asistencia ID {0}"),
+    ({"DELETE"}, r"^/admin/asistencias/all",             "eliminar_asis_todas","asistencias",    "Eliminó TODAS las asistencias"),
+    ({"DELETE"}, r"^/admin/asistencias/(\d+)",           "eliminar_asistencia","asistencias",    "Eliminó la asistencia ID {0}"),
+
+    ({"GET"},    r"^/descargar-bd-completa",             "descargar_bd",      "sistema",         "Descargó la base de datos completa"),
+    ({"POST"},   r"^/admin/reset-territorios",           "reset_territorios", "sistema",         "Reinició los territorios"),
+]
+_AUDIT_RULES = [(m, _re.compile(p), a, mod, lbl) for (m, p, a, mod, lbl) in _AUDIT_RULES]
+
+# Rutas que NO se registran (ruido / lectura simple / internos)
+_AUDIT_SKIP_PREFIXES = ("/sys/", "/health", "/docs", "/openapi", "/redoc", "/auth/check",
+                        "/auth/me", "/auth/validar", "/debug/", "/fotos-base64", "/static",
+                        "/admin/login", "/login")
+
+def _classify_request(method, path):
+    for methods, rgx, action, module, label_tpl in _AUDIT_RULES:
+        if method in methods:
+            mt = rgx.match(path)
+            if mt:
+                tid = mt.group(1) if mt.groups() else None
+                label = label_tpl.format(*mt.groups()) if mt.groups() else label_tpl
+                return action, module, label, tid
+    # Fallback: garantiza que NINGUNA mutación quede sin registrar
+    if method in ("POST", "PUT", "PATCH", "DELETE"):
+        verbo = {"POST": "Creó/ejecutó", "PUT": "Actualizó", "PATCH": "Modificó", "DELETE": "Eliminó"}[method]
+        seg = [s for s in path.split("/") if s and not s.isdigit() and s not in ("admin", "api")]
+        module = seg[0] if seg else "otros"
+        nums = _re.findall(r"/(\d+)", path)
+        tid = nums[-1] if nums else None
+        return ("crear" if method == "POST" else "actualizar" if method in ("PUT", "PATCH") else "eliminar"), \
+               module, f"{verbo} en {path}", tid
+    return None, None, None, None
+
+@app.middleware("http")
+async def _audit_middleware(request: Request, call_next):
+    method = request.method
+    path = request.url.path
+
+    # Determinar si es candidato a registrarse ANTES de procesar
+    loggable = False
+    if not any(path.startswith(p) for p in _AUDIT_SKIP_PREFIXES) and method != "OPTIONS":
+        if method in ("POST", "PUT", "PATCH", "DELETE"):
+            loggable = True
+        elif method == "GET" and any(k in path for k in
+              ("descargar", "exportar", "exportacion-completa", "estadisticas-pdf", "descargar-bd")):
+            loggable = True
+
+    response = await call_next(request)
+
+    if loggable:
+        try:
+            action, module, label, tid = _classify_request(method, path)
+            if action:
+                auth = request.headers.get("authorization", "").replace("Bearer ", "").strip()
+                usr, usr_id, rol, territorio = _decode_admin(auth) if auth else (None, None, None, None)
+                ident = _admin_identity(usr) if usr else {}
+                ip = (request.headers.get("x-forwarded-for") or request.headers.get("x-real-ip")
+                      or (request.client.host if request.client else None))
+                if ip and "," in ip:
+                    ip = ip.split(",")[0].strip()
+                _tel_log(
+                    usr=usr, usr_id=usr_id or ident.get("id"),
+                    usr_nombre=ident.get("nombre"), usr_rol=rol or ident.get("rol"),
+                    usr_territorio=territorio or ident.get("territorio"), usr_cargo=ident.get("cargo"),
+                    action_type=action, module=module, detail=label,
+                    target_id=tid, target_label=label,
+                    http_method=method, http_path=path[:400], http_status=response.status_code,
+                    ip_hint=ip, ua=request.headers.get("user-agent"),
+                    session_id=request.headers.get("x-session-id"),
+                    source="backend",
+                )
+        except Exception:
+            pass
+
+    return response
 
 class _TelEvent(BaseModel):
     usr: Optional[str] = None
     usr_id: Optional[int] = None
+    usr_nombre: Optional[str] = None
+    usr_rol: Optional[str] = None
+    usr_territorio: Optional[str] = None
+    usr_cargo: Optional[str] = None
     action_type: str
     module: Optional[str] = None
     detail: Optional[str] = None
@@ -11473,21 +11712,18 @@ class _ObsAuth(BaseModel):
 @app.post("/sys/ping", include_in_schema=False)
 async def sys_ping(event: _TelEvent, request: Request):
     try:
-        verificar_conexion_db()
-        ip = request.headers.get("x-forwarded-for", request.client.host if request.client else None)
-        ua = request.headers.get("user-agent", "")
-        with conn.cursor() as c:
-            c.execute("""
-                INSERT INTO sys_telemetry
-                    (usr, usr_id, action_type, module, detail, target_id, target_label, ip_hint, ua, session_id, extra)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            """, (
-                event.usr, event.usr_id, event.action_type, event.module,
-                event.detail, event.target_id, event.target_label,
-                ip, ua[:400] if ua else None, event.session_id,
-                json.dumps(event.extra) if event.extra else None
-            ))
-        conn.commit()
+        ip = (request.headers.get("x-forwarded-for") or request.headers.get("x-real-ip")
+              or (request.client.host if request.client else None))
+        if ip and "," in ip:
+            ip = ip.split(",")[0].strip()
+        _tel_log(
+            usr=event.usr, usr_id=event.usr_id, usr_nombre=event.usr_nombre,
+            usr_rol=event.usr_rol, usr_territorio=event.usr_territorio, usr_cargo=event.usr_cargo,
+            action_type=event.action_type, module=event.module, detail=event.detail,
+            target_id=event.target_id, target_label=event.target_label,
+            ip_hint=ip, ua=request.headers.get("user-agent"),
+            session_id=event.session_id, source="frontend", extra=event.extra,
+        )
     except Exception:
         pass
     return {"ok": True}
@@ -11524,12 +11760,12 @@ def _verify_observer(token: str):
 
 @app.get("/sys/status/data", include_in_schema=False)
 async def sys_obs_data(
-    authorization: str = "",
     page: int = 1,
     limit: int = 50,
     usr: Optional[str] = None,
     action_type: Optional[str] = None,
     module: Optional[str] = None,
+    source: Optional[str] = None,
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     request: Request = None
@@ -11537,18 +11773,22 @@ async def sys_obs_data(
     token = (request.headers.get("authorization", "") if request else "").replace("Bearer ", "")
     _verify_observer(token)
     try:
-        verificar_conexion_db()
+        with _tel_lock:
+            c0 = _tel_get_conn()
         conditions = []
         params = []
         if usr:
-            conditions.append("usr ILIKE %s")
-            params.append(f"%{usr}%")
+            conditions.append("(usr ILIKE %s OR usr_nombre ILIKE %s)")
+            params.append(f"%{usr}%"); params.append(f"%{usr}%")
         if action_type:
             conditions.append("action_type = %s")
             params.append(action_type)
         if module:
             conditions.append("module = %s")
             params.append(module)
+        if source:
+            conditions.append("source = %s")
+            params.append(source)
         if date_from:
             conditions.append("ts >= %s")
             params.append(date_from)
@@ -11557,30 +11797,30 @@ async def sys_obs_data(
             params.append(date_to)
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
         offset = (page - 1) * limit
-        with conn.cursor() as c:
-            c.execute(f"SELECT COUNT(*) FROM sys_telemetry {where}", params)
-            total = c.fetchone()[0]
-            c.execute(f"""
-                SELECT id, ts, usr, usr_id, action_type, module, detail,
-                       target_id, target_label, ip_hint, ua, session_id, extra
-                FROM sys_telemetry {where}
-                ORDER BY ts DESC
-                LIMIT %s OFFSET %s
-            """, params + [limit, offset])
-            rows = c.fetchall()
-        cols = ["id","ts","usr","usr_id","action_type","module","detail",
-                "target_id","target_label","ip_hint","ua","session_id","extra"]
+        cols = ["id","ts","usr","usr_id","usr_nombre","usr_rol","usr_territorio","usr_cargo",
+                "action_type","module","detail","target_id","target_label",
+                "http_method","http_path","http_status","ip_hint","ua","session_id","source","extra"]
+        with _tel_lock:
+            c = _tel_get_conn()
+            with c.cursor() as cur_t:
+                cur_t.execute(f"SELECT COUNT(*) FROM sys_telemetry {where}", params)
+                total = cur_t.fetchone()[0]
+                cur_t.execute(f"""
+                    SELECT {", ".join(cols)}
+                    FROM sys_telemetry {where}
+                    ORDER BY ts DESC
+                    LIMIT %s OFFSET %s
+                """, params + [limit, offset])
+                rows = cur_t.fetchall()
+                cur_t.execute("SELECT action_type, COUNT(*) FROM sys_telemetry GROUP BY action_type ORDER BY 2 DESC LIMIT 20")
+                stats = [{"action": r[0], "count": r[1]} for r in cur_t.fetchall()]
+                cur_t.execute("SELECT COALESCE(usr_nombre, usr) AS u, COUNT(*) FROM sys_telemetry WHERE usr IS NOT NULL GROUP BY u ORDER BY 2 DESC LIMIT 10")
+                top_users = [{"usr": r[0], "count": r[1]} for r in cur_t.fetchall()]
         data = []
         for row in rows:
             entry = dict(zip(cols, row))
             entry["ts"] = entry["ts"].isoformat() if entry["ts"] else None
             data.append(entry)
-        # Estadísticas rápidas
-        with conn.cursor() as c:
-            c.execute("SELECT action_type, COUNT(*) FROM sys_telemetry GROUP BY action_type ORDER BY 2 DESC LIMIT 20")
-            stats = [{"action": r[0], "count": r[1]} for r in c.fetchall()]
-            c.execute("SELECT usr, COUNT(*) FROM sys_telemetry WHERE usr IS NOT NULL GROUP BY usr ORDER BY 2 DESC LIMIT 10")
-            top_users = [{"usr": r[0], "count": r[1]} for r in c.fetchall()]
         return {"total": total, "page": page, "limit": limit, "data": data, "stats": stats, "top_users": top_users}
     except HTTPException:
         raise
@@ -11592,12 +11832,13 @@ async def sys_obs_actions(request: Request = None):
     token = (request.headers.get("authorization", "") if request else "").replace("Bearer ", "")
     _verify_observer(token)
     try:
-        verificar_conexion_db()
-        with conn.cursor() as c:
-            c.execute("SELECT DISTINCT action_type FROM sys_telemetry ORDER BY 1")
-            actions = [r[0] for r in c.fetchall()]
-            c.execute("SELECT DISTINCT module FROM sys_telemetry WHERE module IS NOT NULL ORDER BY 1")
-            modules = [r[0] for r in c.fetchall()]
+        with _tel_lock:
+            c = _tel_get_conn()
+            with c.cursor() as cur_t:
+                cur_t.execute("SELECT DISTINCT action_type FROM sys_telemetry ORDER BY 1")
+                actions = [r[0] for r in cur_t.fetchall()]
+                cur_t.execute("SELECT DISTINCT module FROM sys_telemetry WHERE module IS NOT NULL ORDER BY 1")
+                modules = [r[0] for r in cur_t.fetchall()]
         return {"actions": actions, "modules": modules}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

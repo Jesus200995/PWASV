@@ -1,6 +1,8 @@
-// Servicio de métricas y telemetría de la plataforma
+// Servicio de telemetría de la plataforma.
+// Captura eventos que ocurren solo del lado del cliente (navegación entre vistas
+// y cierre de sesión). Las acciones de datos (crear/editar/eliminar/descargar)
+// se registran de forma autoritativa en el backend mediante middleware.
 import { API_URL } from '../config/api.js'
-import authService from './authService.js'
 
 const _ep = `${API_URL}/sys/ping`
 
@@ -10,82 +12,78 @@ if (!_sid) {
   sessionStorage.setItem('_asid', _sid)
 }
 
-function _getCtx() {
-  const u = authService.user
-  return {
-    usr: u?.username || u?.correo || null,
-    usr_id: u?.id || null,
-    session_id: _sid,
+function _identity() {
+  try {
+    const raw = localStorage.getItem('admin_user_data')
+    if (!raw) {
+      const u = localStorage.getItem('admin_user')
+      return { usr: u || null }
+    }
+    const d = JSON.parse(raw)
+    return {
+      usr: d.username || d.correo || null,
+      usr_id: d.id || null,
+      usr_nombre: d.nombre_completo || null,
+      usr_rol: d.rol || null,
+      usr_territorio: d.territorio || null,
+      usr_cargo: d.cargo || null,
+    }
+  } catch (_) {
+    return { usr: null }
   }
 }
 
 async function track(action_type, module, detail = null, opts = {}) {
   try {
-    const ctx = _getCtx()
     await fetch(_ep, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        ...ctx,
+        ..._identity(),
         action_type,
         module,
         detail,
-        target_id: opts.target_id ? String(opts.target_id) : null,
+        target_id: opts.target_id != null ? String(opts.target_id) : null,
         target_label: opts.target_label || null,
+        session_id: _sid,
         extra: opts.extra || null,
       }),
       keepalive: true,
     })
   } catch (_) {
-    // silencioso
+    // silencioso: la telemetría nunca debe romper la app
   }
 }
 
+// Nombres legibles de cada vista para la bitácora
+const VIEW_LABELS = {
+  'Dashboard': 'Panel principal',
+  'Usuarios': 'Gestión de usuarios',
+  'Historiales': 'Historiales',
+  'Reportes': 'Reportes',
+  'Registros': 'Registros',
+  'Configuracion': 'Configuración',
+  'Asistencia': 'Asistencias',
+  'VisorMap': 'Visor de mapa',
+  'Notificaciones': 'Notificaciones',
+  'Permisos': 'Permisos de administradores',
+  'Manuales': 'Manuales',
+  'Estadisticas': 'Estadísticas',
+}
+
 export default {
-  // Navegación
-  pageView: (route, label) => track('page_view', route, label),
+  // Acceso/navegación a una vista (solo visible del lado cliente)
+  pageView: (route, label) => {
+    const nombre = VIEW_LABELS[route] || label || route
+    return track('acceso_vista', 'navegacion', `Accedió a la vista: ${nombre}`, {
+      target_label: nombre,
+      extra: { route },
+    })
+  },
 
-  // Autenticación
-  login: (usr) => track('login', 'auth', `Login: ${usr}`),
-  logout: (usr) => track('logout', 'auth', `Logout: ${usr}`),
-  loginFailed: (usr) => track('login_failed', 'auth', `Intento fallido: ${usr}`),
+  // Cierre de sesión (no existe endpoint backend, es 100% cliente)
+  logout: (usr) => track('logout', 'acceso', `Cerró sesión${usr ? `: ${usr}` : ''}`),
 
-  // Usuarios
-  createUser: (label) => track('create_user', 'usuarios', label, { target_label: label }),
-  updateUser: (id, label) => track('update_user', 'usuarios', label, { target_id: id, target_label: label }),
-  deleteUser: (id, label) => track('delete_user', 'usuarios', label, { target_id: id, target_label: label }),
-  toggleUser: (id, label, active) => track('toggle_user', 'usuarios', `${label} → ${active ? 'activo' : 'inactivo'}`, { target_id: id }),
-
-  // Reportes
-  downloadReport: (id, label) => track('download_report', 'reportes', label, { target_id: id, target_label: label }),
-  viewReport: (id, label) => track('view_report', 'reportes', label, { target_id: id, target_label: label }),
-  deleteReport: (id, label) => track('delete_report', 'reportes', label, { target_id: id, target_label: label }),
-
-  // Fotos / imágenes
-  deletePhoto: (id, label) => track('delete_photo', 'imagenes', label, { target_id: id, target_label: label }),
-  viewPhoto: (label) => track('view_photo', 'imagenes', label),
-
-  // Registros / historiales
-  viewRecord: (id, label) => track('view_record', 'registros', label, { target_id: id }),
-  deleteRecord: (id, label) => track('delete_record', 'registros', label, { target_id: id }),
-  exportCSV: (module, label) => track('export_csv', module, label),
-
-  // Configuración / permisos
-  changePermission: (usr, detail) => track('change_permission', 'permisos', `${usr}: ${detail}`),
-  changeConfig: (key, val) => track('change_config', 'configuracion', `${key}=${val}`),
-
-  // Notificaciones
-  sendNotification: (label) => track('send_notification', 'notificaciones', label),
-  deleteNotification: (id) => track('delete_notification', 'notificaciones', null, { target_id: id }),
-
-  // Asistencias
-  viewAsistencia: (label) => track('view_asistencia', 'asistencia', label),
-
-  // Manuales
-  uploadManual: (label) => track('upload_manual', 'manuales', label),
-  deleteManual: (id, label) => track('delete_manual', 'manuales', label, { target_id: id }),
-  downloadManual: (id, label) => track('download_manual', 'manuales', label, { target_id: id }),
-
-  // Genérico
+  // Genérico para uso futuro
   action: (action_type, module, detail, opts) => track(action_type, module, detail, opts),
 }

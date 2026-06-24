@@ -1,4 +1,4 @@
-"""Script de inicialización del sistema de telemetría. Ejecutar una sola vez en el VPS."""
+"""Script de inicialización del sistema de telemetría. Idempotente: se puede correr varias veces."""
 import psycopg2
 import bcrypt
 
@@ -28,9 +28,25 @@ CREATE TABLE IF NOT EXISTS sys_telemetry (
 );
 """)
 
+# Columnas adicionales para auditoría grado legal (idempotente)
+extra_cols = [
+    ("usr_nombre",    "VARCHAR(255)"),
+    ("usr_rol",       "VARCHAR(50)"),
+    ("usr_territorio","VARCHAR(120)"),
+    ("usr_cargo",     "VARCHAR(255)"),
+    ("http_method",   "VARCHAR(10)"),
+    ("http_path",     "VARCHAR(400)"),
+    ("http_status",   "INTEGER"),
+    ("source",        "VARCHAR(20) DEFAULT 'frontend'"),
+]
+for name, ctype in extra_cols:
+    cur.execute(f"ALTER TABLE sys_telemetry ADD COLUMN IF NOT EXISTS {name} {ctype};")
+
 cur.execute("CREATE INDEX IF NOT EXISTS idx_sys_telemetry_ts ON sys_telemetry(ts DESC);")
 cur.execute("CREATE INDEX IF NOT EXISTS idx_sys_telemetry_usr ON sys_telemetry(usr);")
 cur.execute("CREATE INDEX IF NOT EXISTS idx_sys_telemetry_action ON sys_telemetry(action_type);")
+cur.execute("CREATE INDEX IF NOT EXISTS idx_sys_telemetry_module ON sys_telemetry(module);")
+cur.execute("CREATE INDEX IF NOT EXISTS idx_sys_telemetry_source ON sys_telemetry(source);")
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS sys_observers (
@@ -50,4 +66,4 @@ cur.execute(
 conn.commit()
 cur.close()
 conn.close()
-print("✅ Telemetría inicializada correctamente")
+print("✅ Telemetría inicializada/actualizada correctamente")

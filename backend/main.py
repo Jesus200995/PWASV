@@ -11723,6 +11723,22 @@ async def _audit_middleware(request: Request, call_next):
 
     return response
 
+# Agrupación de acciones en categorías para las vistas separadas de la bitácora
+_AUDIT_CATEGORIES = {
+    "accesos": ["login", "logout", "login_fallido", "login_bloqueado", "acceso_vista"],
+    "creaciones": ["crear_admin", "crear_usuario", "enviar_notif", "guardar_reporte",
+                   "firmar_reporte", "asignar_tecnico", "transferir_activ", "reset_territorios", "crear"],
+    "ediciones": ["editar_admin", "editar_usuario", "editar_registro", "editar_asistencia",
+                  "editar_notif", "cambiar_rol", "cambiar_rol_admin", "cambiar_pwd", "cambiar_pwd_admin",
+                  "cambiar_cargo", "cambiar_territorio", "cambiar_facilitador", "estado_admin",
+                  "estado_usuario", "quitar_firma", "desasignar_tecnico", "actualizar"],
+    "borrados": ["eliminar_admin", "eliminar_todos_admin", "eliminar_usuario", "eliminar_reporte",
+                 "eliminar_notif", "eliminar_imgs_todas", "eliminar_imgs_fecha", "eliminar_registro",
+                 "eliminar_regs_todos", "eliminar_asistencia", "eliminar_asis_todas", "eliminar"],
+    "descargas": ["descargar_reporte", "descargar_zip", "descargar_pdf_stats",
+                  "exportar_csv", "exportar_usuarios", "descargar_bd"],
+}
+
 class _TelEvent(BaseModel):
     usr: Optional[str] = None
     usr_id: Optional[int] = None
@@ -11797,6 +11813,7 @@ async def sys_obs_data(
     limit: int = 50,
     usr: Optional[str] = None,
     action_type: Optional[str] = None,
+    category: Optional[str] = None,
     module: Optional[str] = None,
     source: Optional[str] = None,
     date_from: Optional[str] = None,
@@ -11806,8 +11823,6 @@ async def sys_obs_data(
     token = (request.headers.get("authorization", "") if request else "").replace("Bearer ", "")
     _verify_observer(token)
     try:
-        with _tel_lock:
-            c0 = _tel_get_conn()
         conditions = []
         params = []
         if usr:
@@ -11816,6 +11831,9 @@ async def sys_obs_data(
         if action_type:
             conditions.append("action_type = %s")
             params.append(action_type)
+        elif category and category in _AUDIT_CATEGORIES:
+            conditions.append("action_type = ANY(%s)")
+            params.append(_AUDIT_CATEGORIES[category])
         if module:
             conditions.append("module = %s")
             params.append(module)
@@ -11845,7 +11863,7 @@ async def sys_obs_data(
                     LIMIT %s OFFSET %s
                 """, params + [limit, offset])
                 rows = cur_t.fetchall()
-                cur_t.execute("SELECT action_type, COUNT(*) FROM sys_telemetry GROUP BY action_type ORDER BY 2 DESC LIMIT 20")
+                cur_t.execute("SELECT action_type, COUNT(*) FROM sys_telemetry GROUP BY action_type ORDER BY 2 DESC LIMIT 100")
                 stats = [{"action": r[0], "count": r[1]} for r in cur_t.fetchall()]
                 cur_t.execute("SELECT COALESCE(usr_nombre, usr) AS u, COUNT(*) FROM sys_telemetry WHERE usr IS NOT NULL GROUP BY u ORDER BY 2 DESC LIMIT 10")
                 top_users = [{"usr": r[0], "count": r[1]} for r in cur_t.fetchall()]

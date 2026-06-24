@@ -2,7 +2,7 @@
 import psycopg2
 import bcrypt
 
-DB_HOST = "31.97.8.51"
+DB_HOST = "localhost"
 DB_NAME = "app_registros"
 DB_USER = "jesus"
 DB_PASS = "sa2026"

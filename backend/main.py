@@ -54,7 +54,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = "cambia-esto-por-una-clave-muy-larga-y-unica-para-admin-2025"
 
 # Conexión a PostgreSQL con manejo robusto
-DB_HOST = "31.97.8.51"
+DB_HOST = "localhost"
 DB_NAME = "app_registros"
 DB_USER = "jesus"
 DB_PASS = "sa2026"

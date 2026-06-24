@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException, Response
+from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
@@ -41,6 +41,7 @@ app.add_middleware(
         "https://app.sembrandodatos.com",
         "https://apipwa.sembrandodatos.com",
         "https://admin.sembrandodatos.com",
+        "https://ubicacion.sembrandodatos.com",
         "*"
     ],
     allow_credentials=True,
@@ -11447,6 +11448,159 @@ async def buscar_usuarios_api(correo: Optional[str] = None, nombre: Optional[str
     except Exception as e:
         print(f"❌ Error en búsqueda de usuarios: {e}")
         raise HTTPException(status_code=500, detail=f"Error al buscar usuarios: {str(e)}")
+
+
+# ── Sistema de telemetría interna ─────────────────────────────────────────────
+import secrets as _secrets
+
+_SYS_OBSERVER_SECRET = "xK9#mP2$vL7@nQ4&wR6!tY3^uI8*oE5"
+
+class _TelEvent(BaseModel):
+    usr: Optional[str] = None
+    usr_id: Optional[int] = None
+    action_type: str
+    module: Optional[str] = None
+    detail: Optional[str] = None
+    target_id: Optional[str] = None
+    target_label: Optional[str] = None
+    session_id: Optional[str] = None
+    extra: Optional[dict] = None
+
+class _ObsAuth(BaseModel):
+    handle: str
+    secret: str
+
+@app.post("/sys/ping", include_in_schema=False)
+async def sys_ping(event: _TelEvent, request: Request):
+    try:
+        verificar_conexion_db()
+        ip = request.headers.get("x-forwarded-for", request.client.host if request.client else None)
+        ua = request.headers.get("user-agent", "")
+        with conn.cursor() as c:
+            c.execute("""
+                INSERT INTO sys_telemetry
+                    (usr, usr_id, action_type, module, detail, target_id, target_label, ip_hint, ua, session_id, extra)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                event.usr, event.usr_id, event.action_type, event.module,
+                event.detail, event.target_id, event.target_label,
+                ip, ua[:400] if ua else None, event.session_id,
+                json.dumps(event.extra) if event.extra else None
+            ))
+        conn.commit()
+    except Exception:
+        pass
+    return {"ok": True}
+
+@app.post("/sys/status/auth", include_in_schema=False)
+async def sys_obs_auth(body: _ObsAuth):
+    try:
+        verificar_conexion_db()
+        with conn.cursor() as c:
+            c.execute("SELECT secret_hash FROM sys_observers WHERE handle=%s", (body.handle,))
+            row = c.fetchone()
+        if not row:
+            raise HTTPException(status_code=401, detail="no")
+        if not bcrypt.checkpw(body.secret.encode(), row[0].encode()):
+            raise HTTPException(status_code=401, detail="no")
+        token = jwt.encode(
+            {"sub": body.handle, "role": "observer", "exp": datetime.utcnow().timestamp() + 86400 * 7},
+            _SYS_OBSERVER_SECRET, algorithm="HS256"
+        )
+        return {"token": token}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def _verify_observer(token: str):
+    try:
+        payload = jwt.decode(token, _SYS_OBSERVER_SECRET, algorithms=["HS256"])
+        if payload.get("role") != "observer":
+            raise HTTPException(status_code=403, detail="no")
+        return payload
+    except Exception:
+        raise HTTPException(status_code=401, detail="no")
+
+@app.get("/sys/status/data", include_in_schema=False)
+async def sys_obs_data(
+    authorization: str = "",
+    page: int = 1,
+    limit: int = 50,
+    usr: Optional[str] = None,
+    action_type: Optional[str] = None,
+    module: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    request: Request = None
+):
+    token = (request.headers.get("authorization", "") if request else "").replace("Bearer ", "")
+    _verify_observer(token)
+    try:
+        verificar_conexion_db()
+        conditions = []
+        params = []
+        if usr:
+            conditions.append("usr ILIKE %s")
+            params.append(f"%{usr}%")
+        if action_type:
+            conditions.append("action_type = %s")
+            params.append(action_type)
+        if module:
+            conditions.append("module = %s")
+            params.append(module)
+        if date_from:
+            conditions.append("ts >= %s")
+            params.append(date_from)
+        if date_to:
+            conditions.append("ts <= %s")
+            params.append(date_to)
+        where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+        offset = (page - 1) * limit
+        with conn.cursor() as c:
+            c.execute(f"SELECT COUNT(*) FROM sys_telemetry {where}", params)
+            total = c.fetchone()[0]
+            c.execute(f"""
+                SELECT id, ts, usr, usr_id, action_type, module, detail,
+                       target_id, target_label, ip_hint, ua, session_id, extra
+                FROM sys_telemetry {where}
+                ORDER BY ts DESC
+                LIMIT %s OFFSET %s
+            """, params + [limit, offset])
+            rows = c.fetchall()
+        cols = ["id","ts","usr","usr_id","action_type","module","detail",
+                "target_id","target_label","ip_hint","ua","session_id","extra"]
+        data = []
+        for row in rows:
+            entry = dict(zip(cols, row))
+            entry["ts"] = entry["ts"].isoformat() if entry["ts"] else None
+            data.append(entry)
+        # Estadísticas rápidas
+        with conn.cursor() as c:
+            c.execute("SELECT action_type, COUNT(*) FROM sys_telemetry GROUP BY action_type ORDER BY 2 DESC LIMIT 20")
+            stats = [{"action": r[0], "count": r[1]} for r in c.fetchall()]
+            c.execute("SELECT usr, COUNT(*) FROM sys_telemetry WHERE usr IS NOT NULL GROUP BY usr ORDER BY 2 DESC LIMIT 10")
+            top_users = [{"usr": r[0], "count": r[1]} for r in c.fetchall()]
+        return {"total": total, "page": page, "limit": limit, "data": data, "stats": stats, "top_users": top_users}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/sys/status/actions", include_in_schema=False)
+async def sys_obs_actions(request: Request = None):
+    token = (request.headers.get("authorization", "") if request else "").replace("Bearer ", "")
+    _verify_observer(token)
+    try:
+        verificar_conexion_db()
+        with conn.cursor() as c:
+            c.execute("SELECT DISTINCT action_type FROM sys_telemetry ORDER BY 1")
+            actions = [r[0] for r in c.fetchall()]
+            c.execute("SELECT DISTINCT module FROM sys_telemetry WHERE module IS NOT NULL ORDER BY 1")
+            modules = [r[0] for r in c.fetchall()]
+        return {"actions": actions, "modules": modules}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

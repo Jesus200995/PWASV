@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { API_URL, API_CONFIG } from '../config/api.js'
 import healthCheckService from './healthCheckService.js'
+import analytics from './analyticsService.js'
 
 class AuthService {
   constructor() {
@@ -80,6 +81,7 @@ class AuthService {
         // Iniciar verificación en tiempo real de sesión (estado, rol, permisos)
         this.startSessionCheck()
 
+        analytics.login(credentials.username)
         console.log('✅ Usuario logueado:', userData)
         return { success: true, user: userData }
       }
@@ -148,9 +150,10 @@ class AuthService {
    * Cerrar sesión
    */
   logout() {
+    analytics.logout(this.user?.username || this.user?.correo)
     // Detener verificación de sesión
     this.stopSessionCheck()
-    
+
     this.token = null
     this.user = null
     localStorage.removeItem('admin_token')

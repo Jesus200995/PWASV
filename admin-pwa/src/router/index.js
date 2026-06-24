@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import authService from '../services/authService'
+import analytics from '../services/analyticsService'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import UsuariosView from '../views/UsuariosView.vue'
@@ -231,5 +232,9 @@ if (typeof window !== 'undefined') {
     }
   })
 }
+
+router.afterEach((to) => {
+  analytics.pageView(to.name || to.path, to.meta?.title || to.name)
+})
 
 export default router

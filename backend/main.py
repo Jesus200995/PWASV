@@ -11649,13 +11649,26 @@ def _classify_request(method, path):
 
 from urllib.parse import urlparse as _urlparse
 
+def _clean_path(raw):
+    """Extrae una ruta limpia '/...' aunque venga en forma absoluta o con
+    backslashes espurios (algunos clientes/escáneres envían '\\https://\\host/ruta')."""
+    try:
+        p = (raw or "").replace("\\", "")
+        m = _re.search(r"https?://[^/]+(/.*)$", p)
+        if m:
+            p = m.group(1)
+        # quitar query string para clasificar
+        p = p.split("?", 1)[0]
+        if not p.startswith("/"):
+            p = "/" + p
+        return p
+    except Exception:
+        return raw or "/"
+
 @app.middleware("http")
 async def _audit_middleware(request: Request, call_next):
     method = request.method
-    path = request.url.path
-    # Normalizar si llega en forma absoluta (proxy): https://host/ruta -> /ruta
-    if "://" in path:
-        path = _urlparse(path).path or path
+    path = _clean_path(request.url.path)
 
     # ¿Es una operación candidata? (mutación o descarga/exportación)
     candidate = False

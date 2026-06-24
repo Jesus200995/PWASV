@@ -1,29 +1,70 @@
 <template>
-  <div class="login-wrap">
-    <form class="login-card" @submit.prevent="doLogin">
-      <div class="logo-area">
-        <div class="logo-icon">📍</div>
-        <h1>Sistema de Ubicación</h1>
-        <p>Acceso restringido</p>
+  <div class="page">
+    <div class="card">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="10" fill="#1a6ef5"/>
+            <path d="M16 7l7 4v10l-7 4-7-4V11l7-4z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" fill="none"/>
+            <circle cx="16" cy="16" r="2.5" fill="#fff"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Panel de control</h1>
+          <p class="sub">Acceso privado · PWASV</p>
+        </div>
       </div>
 
-      <div class="field">
-        <label>Usuario</label>
-        <input v-model="handle" type="text" autocomplete="username" required />
-      </div>
+      <form @submit.prevent="doLogin" novalidate>
+        <div class="field">
+          <label for="handle">
+            <i class="ti ti-user" aria-hidden="true"></i> Usuario
+          </label>
+          <input
+            id="handle"
+            v-model="handle"
+            type="text"
+            placeholder="Ingresa tu usuario"
+            autocomplete="username"
+            :class="{ error: !!errMsg }"
+            required
+          />
+        </div>
 
-      <div class="field">
-        <label>Contraseña</label>
-        <input v-model="secret" type="password" autocomplete="current-password" required />
-      </div>
+        <div class="field">
+          <label for="secret">
+            <i class="ti ti-lock" aria-hidden="true"></i> Contraseña
+          </label>
+          <div class="pass-wrap">
+            <input
+              id="secret"
+              v-model="secret"
+              :type="showPass ? 'text' : 'password'"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              :class="{ error: !!errMsg }"
+              required
+            />
+            <button type="button" class="eye-btn" @click="showPass = !showPass" :aria-label="showPass ? 'Ocultar' : 'Mostrar'">
+              <i :class="showPass ? 'ti ti-eye-off' : 'ti ti-eye'" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
 
-      <p v-if="error" class="error">{{ error }}</p>
+        <transition name="fade">
+          <div v-if="errMsg" class="err-banner" role="alert">
+            <i class="ti ti-alert-circle" aria-hidden="true"></i> {{ errMsg }}
+          </div>
+        </transition>
 
-      <button :disabled="loading" type="submit">
-        <span v-if="loading">Verificando...</span>
-        <span v-else>Entrar</span>
-      </button>
-    </form>
+        <button type="submit" class="submit-btn" :disabled="loading || !handle || !secret">
+          <span v-if="loading" class="spinner" aria-hidden="true"></span>
+          <span>{{ loading ? 'Verificando...' : 'Iniciar sesión' }}</span>
+        </button>
+      </form>
+
+      <p class="footer-note">Sistema restringido — uso exclusivo administrativo</p>
+    </div>
   </div>
 </template>
 
@@ -35,73 +76,234 @@ import { obsLogin } from '../services/api.js'
 const router = useRouter()
 const handle = ref('')
 const secret = ref('')
-const error = ref('')
+const showPass = ref(false)
+const errMsg = ref('')
 const loading = ref(false)
 
 async function doLogin() {
-  error.value = ''
+  errMsg.value = ''
   loading.value = true
   try {
-    await obsLogin(handle.value, secret.value)
+    await obsLogin(handle.value.trim(), secret.value)
     router.push('/dashboard')
   } catch (e) {
-    error.value = e.message || 'Error de acceso'
+    errMsg.value = e.message || 'Credenciales inválidas'
+    secret.value = ''
   } finally {
     loading.value = false
   }
 }
 </script>
 
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #06090f;
+  color: #e2e8f0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root {
+  --blue: #1a6ef5;
+  --blue-hover: #1558d6;
+  --surface: #0d1117;
+  --surface2: #161b22;
+  --border: rgba(255,255,255,0.08);
+  --border-focus: rgba(26,110,245,0.6);
+  --text: #e2e8f0;
+  --muted: #8b949e;
+  --danger: #f85149;
+  --danger-bg: rgba(248,81,73,0.12);
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+</style>
+
 <style scoped>
-.login-wrap {
+.page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  padding: 1.5rem;
+  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(26,110,245,0.12) 0%, transparent 70%), #06090f;
 }
-.login-card {
-  background: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 16px;
-  padding: 2.5rem 2rem;
+
+.card {
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem 2rem 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  gap: 1.5rem;
 }
-.logo-area { text-align: center; }
-.logo-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-h1 { font-size: 1.3rem; color: #f1f5f9; font-weight: 700; }
-p { color: #64748b; font-size: 0.85rem; margin-top: 0.25rem; }
-.field { display: flex; flex-direction: column; gap: 0.4rem; }
-label { font-size: 0.8rem; color: #94a3b8; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.brand-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(26,110,245,0.12);
+  border: 1px solid rgba(26,110,245,0.3);
+}
+
+h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  letter-spacing: 0.02em;
+}
+
+label i { font-size: 14px; }
+
 input {
-  background: #0f172a;
-  border: 1px solid #334155;
-  border-radius: 8px;
-  padding: 0.65rem 0.9rem;
-  color: #e2e8f0;
-  font-size: 0.95rem;
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.875rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  font-family: inherit;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.18s;
 }
-input:focus { border-color: #3b82f6; }
-button {
-  background: #3b82f6;
+
+input::placeholder { color: var(--muted); opacity: 0.6; }
+
+input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(26,110,245,0.12);
+}
+
+input.error { border-color: var(--danger); }
+
+.pass-wrap { position: relative; }
+
+.pass-wrap input { padding-right: 2.75rem; }
+
+.eye-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  transition: color 0.15s;
+}
+
+.eye-btn:hover { color: var(--text); }
+
+.err-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--danger-bg);
+  border: 1px solid rgba(248,81,73,0.3);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.875rem;
+  font-size: 0.82rem;
+  color: var(--danger);
+}
+
+.err-banner i { font-size: 15px; flex-shrink: 0; }
+
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--blue);
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 0.75rem;
-  font-size: 0.95rem;
+  border-radius: var(--radius);
+  padding: 0.72rem 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  transition: background 0.2s;
-  margin-top: 0.4rem;
+  transition: background 0.18s, opacity 0.18s, transform 0.1s;
+  margin-top: 0.25rem;
 }
-button:hover:not(:disabled) { background: #2563eb; }
-button:disabled { opacity: 0.6; cursor: not-allowed; }
-.error { color: #f87171; font-size: 0.85rem; text-align: center; }
+
+.submit-btn:hover:not(:disabled) { background: var(--blue-hover); }
+.submit-btn:active:not(:disabled) { transform: scale(0.98); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.footer-note {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+  opacity: 0.6;
+}
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s, transform 0.2s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-4px); }
+
+@media (max-width: 480px) {
+  .card { padding: 1.75rem 1.25rem 1.5rem; }
+}
 </style>

@@ -2,74 +2,98 @@
   <div class="login-page">
 
     <!-- ═══ PANEL IZQUIERDO — imagen de campo (solo desktop) ═══ -->
-    <div class="image-panel" aria-hidden="true">
+    <aside class="image-panel" aria-hidden="true">
       <div class="image-overlay"></div>
+
       <div class="image-content">
-        <div class="image-logo">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="hero-leaf">
+        <div class="brand-mark">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="mark-icon">
             <defs>
-              <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient id="lgLeft" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" style="stop-color:#bbf7d0"/>
                 <stop offset="100%" style="stop-color:#4ade80"/>
               </linearGradient>
             </defs>
             <path d="M50 12 C28 22, 16 46, 22 68 C28 86, 44 92, 50 92 C56 92, 72 86, 78 68 C84 46, 72 22, 50 12"
-              fill="none" stroke="url(#lg1)" stroke-width="2.5" stroke-linecap="round"/>
-            <path d="M50 18 L50 84" stroke="url(#lg1)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-            <path d="M50 30 L36 42 M50 46 L32 58 M50 60 L36 70" stroke="url(#lg1)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-            <path d="M50 30 L64 42 M50 46 L68 58 M50 60 L64 70" stroke="url(#lg1)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+              fill="none" stroke="url(#lgLeft)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M50 18 L50 84" stroke="url(#lgLeft)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <path d="M50 30 L36 42 M50 46 L32 58 M50 60 L36 70" stroke="url(#lgLeft)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+            <path d="M50 30 L64 42 M50 46 L68 58 M50 60 L64 70" stroke="url(#lgLeft)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
           </svg>
         </div>
+
         <h1 class="hero-title">Sembrando Vida</h1>
         <p class="hero-subtitle">Subsecretaría de Inclusión Productiva<br>y Desarrollo Rural</p>
+
         <div class="hero-divider"></div>
-        <p class="hero-tagline">Sistema de Seguimiento<br>y Monitoreo de Campo</p>
+
+        <p class="hero-tagline">Panel de Administración<br>App de Seguimiento</p>
+
         <div class="hero-stats">
           <div class="stat">
-            <span class="stat-icon">🌱</span>
+            <span class="stat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+            </span>
             <span class="stat-label">Seguimiento en tiempo real</span>
           </div>
           <div class="stat">
-            <span class="stat-icon">📍</span>
+            <span class="stat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+            </span>
             <span class="stat-label">Geolocalización precisa</span>
           </div>
           <div class="stat">
-            <span class="stat-icon">📊</span>
+            <span class="stat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </span>
             <span class="stat-label">Reportes y estadísticas</span>
           </div>
         </div>
       </div>
-      <!-- Decoraciones flotantes -->
+
       <div class="float-circle fc-1"></div>
       <div class="float-circle fc-2"></div>
       <div class="float-circle fc-3"></div>
-    </div>
+    </aside>
 
     <!-- ═══ PANEL DERECHO — formulario ═══ -->
-    <div class="form-panel">
-      <!-- Logo pequeño visible solo en móvil -->
-      <div class="mobile-brand">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="mobile-leaf">
-          <defs>
-            <linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#15803d"/>
-              <stop offset="100%" style="stop-color:#4ade80"/>
-            </linearGradient>
-          </defs>
-          <path d="M50 12 C28 22, 16 46, 22 68 C28 86, 44 92, 50 92 C56 92, 72 86, 78 68 C84 46, 72 22, 50 12"
-            fill="none" stroke="url(#lg2)" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M50 18 L50 84" stroke="url(#lg2)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-          <path d="M50 30 L36 42 M50 46 L32 58 M50 60 L36 70" stroke="url(#lg2)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-          <path d="M50 30 L64 42 M50 46 L68 58 M50 60 L64 70" stroke="url(#lg2)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-        </svg>
-        <span class="mobile-brand-name">Sembrando Vida</span>
-      </div>
-
+    <main class="form-panel">
       <div class="form-box">
+
+        <!-- Logo + rol, siempre visible -->
+        <div class="brand-row">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="brand-row-icon">
+            <defs>
+              <linearGradient id="lgRight" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#15803d"/>
+                <stop offset="100%" style="stop-color:#4ade80"/>
+              </linearGradient>
+            </defs>
+            <path d="M50 12 C28 22, 16 46, 22 68 C28 86, 44 92, 50 92 C56 92, 72 86, 78 68 C84 46, 72 22, 50 12"
+              fill="none" stroke="url(#lgRight)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M50 18 L50 84" stroke="url(#lgRight)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <path d="M50 30 L36 42 M50 46 L32 58 M50 60 L36 70" stroke="url(#lgRight)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+            <path d="M50 30 L64 42 M50 46 L68 58 M50 60 L64 70" stroke="url(#lgRight)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+          </svg>
+          <div class="brand-row-text">
+            <span class="brand-row-name">Sembrando Vida</span>
+            <span class="brand-row-role">Administrador · App de Seguimiento</span>
+          </div>
+        </div>
+
         <!-- Encabezado del formulario -->
         <div class="form-header">
           <h2 class="form-title">Iniciar sesión</h2>
-          <p class="form-desc">Ingresa tus credenciales para acceder</p>
+          <p class="form-desc">Ingresa tus credenciales para acceder al panel</p>
         </div>
 
         <!-- Formulario -->
@@ -79,7 +103,7 @@
             <label for="username" class="form-label">Correo electrónico</label>
             <div class="input-wrap">
               <span class="input-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                   <polyline points="22,6 12,13 2,6"/>
                 </svg>
@@ -101,7 +125,7 @@
             <label for="password" class="form-label">Contraseña</label>
             <div class="input-wrap">
               <span class="input-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
@@ -122,11 +146,11 @@
                 :disabled="loading"
                 :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
               >
-                <svg v-if="!showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg v-if="!showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
-                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
                   <line x1="1" y1="1" x2="23" y2="23"/>
                 </svg>
@@ -137,23 +161,22 @@
           <!-- Botón submit -->
           <button type="submit" class="submit-btn" :disabled="loading">
             <span v-if="!loading" class="btn-inner">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-icon">
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                <polyline points="10 17 15 12 10 7"/>
-                <line x1="15" y1="12" x2="3" y2="12"/>
+              Iniciar sesión
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
               </svg>
-              Iniciar Sesión
             </span>
             <span v-else class="btn-inner">
-              <div class="spinner"></div>
-              Verificando...
+              <span class="spinner"></span>
+              Verificando
             </span>
           </button>
 
           <!-- Error -->
           <transition name="err">
             <div v-if="error" class="error-box" role="alert">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="err-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="err-icon">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="12" y1="8" x2="12" y2="12"/>
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -163,9 +186,9 @@
           </transition>
         </form>
 
-        <p class="footer-copy">© 2026 Sembrando Vida · Administración</p>
+        <p class="footer-copy">© 2026 Sembrando Vida · Panel de Administración</p>
       </div>
-    </div>
+    </main>
 
   </div>
 </template>
@@ -208,20 +231,25 @@ const login = async () => {
 /* ── Reset / base ── */
 *, *::before, *::after { box-sizing: border-box; }
 
+/*
+ * Tipografía estilo Apple: system-ui prioriza San Francisco en macOS/iOS,
+ * con pesos intermedios (500/590) y tracking negativo sutil en títulos.
+ */
 .login-page {
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   display: flex;
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  overflow: hidden; /* sin scroll a ningún zoom: todo escala con vh/clamp */
+  font-family: -apple-system, 'SF Pro Display', 'Inter', system-ui, 'Segoe UI', sans-serif;
   color-scheme: light only;
-  background: #f0fdf4;
+  background: #fff;
 }
 
 /* ════════════════════════════════════════
    PANEL IZQUIERDO — imagen de cosecha
    ════════════════════════════════════════ */
 .image-panel {
-  display: none; /* oculto en móvil */
+  display: none;
   position: relative;
   overflow: hidden;
   background:
@@ -229,21 +257,19 @@ const login = async () => {
     center/cover no-repeat;
 }
 
-/* Filtro verde sobre la imagen */
 .image-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     160deg,
-    rgba(5, 46, 22, 0.82) 0%,
-    rgba(20, 83, 45, 0.75) 35%,
-    rgba(21, 128, 61, 0.68) 65%,
-    rgba(34, 197, 94, 0.55) 100%
+    rgba(5, 46, 22, 0.85) 0%,
+    rgba(20, 83, 45, 0.78) 35%,
+    rgba(21, 128, 61, 0.70) 65%,
+    rgba(34, 197, 94, 0.56) 100%
   );
   z-index: 1;
 }
 
-/* Contenido sobre la imagen */
 .image-content {
   position: relative;
   z-index: 2;
@@ -252,17 +278,18 @@ const login = async () => {
   align-items: center;
   justify-content: center;
   height: 100%;
-  padding: 48px 40px;
+  padding: clamp(24px, 5vh, 48px) clamp(28px, 4vw, 44px);
   text-align: center;
   color: #fff;
+  overflow: hidden;
 }
 
-.hero-leaf {
-  width: 72px;
-  height: 72px;
-  margin-bottom: 20px;
-  filter: drop-shadow(0 0 12px rgba(74, 222, 128, 0.6));
-  animation: leafSway 4s ease-in-out infinite;
+.brand-mark { margin-bottom: clamp(10px, 2vh, 22px); flex-shrink: 0; }
+.mark-icon {
+  width: clamp(48px, 7.5vh, 72px);
+  height: clamp(48px, 7.5vh, 72px);
+  filter: drop-shadow(0 0 14px rgba(74, 222, 128, 0.55));
+  animation: leafSway 4.5s ease-in-out infinite;
 }
 @keyframes leafSway {
   0%, 100% { transform: rotate(-3deg); }
@@ -270,70 +297,100 @@ const login = async () => {
 }
 
 .hero-title {
-  font-size: clamp(26px, 2.8vw, 38px);
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  margin: 0 0 10px;
-  text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+  font-size: clamp(24px, 4.4vh, 38px);
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  margin: 0 0 clamp(6px, 1.2vh, 10px);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.35);
   background: linear-gradient(135deg, #fff 40%, #bbf7d0);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  flex-shrink: 0;
 }
 
 .hero-subtitle {
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
-  margin: 0 0 28px;
-  line-height: 1.6;
+  font-size: clamp(11px, 1.6vh, 13px);
+  font-weight: 400;
+  color: rgba(255,255,255,0.68);
+  margin: 0 0 clamp(14px, 2.6vh, 28px);
+  line-height: 1.55;
+  flex-shrink: 0;
 }
 
 .hero-divider {
-  width: 48px;
-  height: 3px;
+  width: 44px;
+  height: 2.5px;
   background: linear-gradient(90deg, #4ade80, #86efac);
   border-radius: 99px;
-  margin: 0 auto 24px;
+  margin: 0 auto clamp(12px, 2.2vh, 24px);
+  flex-shrink: 0;
 }
 
 .hero-tagline {
-  font-size: 15px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.9);
+  font-size: clamp(13px, 1.9vh, 15.5px);
+  font-weight: 590;
+  letter-spacing: -0.2px;
+  color: rgba(255,255,255,0.92);
   line-height: 1.5;
-  margin: 0 0 36px;
+  margin: 0 0 clamp(18px, 3.4vh, 36px);
+  flex-shrink: 0;
 }
 
 .hero-stats {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: clamp(6px, 1.2vh, 12px);
   width: 100%;
-  max-width: 260px;
+  max-width: 270px;
+  flex-shrink: 0;
 }
 
 .stat {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 12px;
-  padding: 10px 16px;
+  gap: clamp(8px, 1.4vw, 12px);
+  background: rgba(255,255,255,0.09);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: clamp(10px, 1.4vh, 13px);
+  padding: clamp(8px, 1.4vh, 11px) clamp(12px, 1.8vw, 16px);
   text-align: left;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.stat:hover {
+  background: rgba(255,255,255,0.14);
+  transform: translateX(3px);
 }
 
-.stat-icon { font-size: 18px; }
-.stat-label { font-size: 13px; color: rgba(255,255,255,0.9); font-weight: 500; }
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(26px, 4vh, 32px);
+  height: clamp(26px, 4vh, 32px);
+  flex-shrink: 0;
+  background: rgba(74,222,128,0.16);
+  border-radius: 8px;
+  color: #86efac;
+}
+.stat-icon svg { width: 55%; height: 55%; }
+.stat-label {
+  font-size: clamp(11px, 1.5vh, 13px);
+  color: rgba(255,255,255,0.92);
+  font-weight: 500;
+  letter-spacing: -0.1px;
+}
 
 /* Círculos decorativos flotantes */
 .float-circle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.055);
   border: 1px solid rgba(255,255,255,0.1);
   z-index: 1;
+  pointer-events: none;
 }
 .fc-1 { width: 280px; height: 280px; top: -80px;  left: -80px;  animation: floatA 18s ease-in-out infinite; }
 .fc-2 { width: 180px; height: 180px; bottom: 60px; right: -60px; animation: floatB 14s ease-in-out infinite; }
@@ -349,7 +406,7 @@ const login = async () => {
 }
 
 /* ════════════════════════════════════════
-   PANEL DERECHO — formulario
+   PANEL DERECHO — formulario, sin scroll
    ════════════════════════════════════════ */
 .form-panel {
   flex: 1;
@@ -357,106 +414,135 @@ const login = async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
-  background: #fff;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  padding: clamp(12px, 3vw, 40px);
+  background: #ffffff;
+  position: relative;
 }
 
-/* Logo visible solo en móvil */
-.mobile-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 32px;
-}
-.mobile-leaf { width: 36px; height: 36px; }
-.mobile-brand-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: #15803d;
-  letter-spacing: -0.3px;
+/* Halo sutil de luz — detalle premium discreto */
+.form-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 55% 45% at 82% 12%, rgba(74,222,128,0.06) 0%, transparent 60%);
+  pointer-events: none;
 }
 
 /* Caja del formulario */
 .form-box {
+  position: relative;
   width: 100%;
-  max-width: 400px;
-  animation: slideUp 0.5s ease-out;
+  max-width: 420px;
+  max-height: calc(100vh - clamp(16px, 4vh, 60px));
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(24px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.form-header { margin-bottom: 32px; }
+/* Fila de marca — logo + nombre + rol, siempre visible arriba del form */
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.4vw, 12px);
+  margin-bottom: clamp(14px, 3vh, 30px);
+  flex-shrink: 0;
+}
+.brand-row-icon {
+  width: clamp(30px, 4.5vh, 40px);
+  height: clamp(30px, 4.5vh, 40px);
+  flex-shrink: 0;
+}
+.brand-row-text { display: flex; flex-direction: column; line-height: 1.25; }
+.brand-row-name {
+  font-size: clamp(13px, 1.9vh, 16px);
+  font-weight: 700;
+  color: #14532d;
+  letter-spacing: -0.3px;
+}
+.brand-row-role {
+  font-size: clamp(10px, 1.3vh, 12px);
+  font-weight: 500;
+  color: #6b8f7a;
+  letter-spacing: 0.1px;
+}
+
+.form-header {
+  margin-bottom: clamp(14px, 2.8vh, 30px);
+  flex-shrink: 0;
+}
 
 .form-title {
-  font-size: 26px;
-  font-weight: 800;
-  color: #111827;
-  margin: 0 0 6px;
-  letter-spacing: -0.5px;
+  font-size: clamp(19px, 3.2vh, 28px);
+  font-weight: 700;
+  color: #0b1120;
+  margin: 0 0 clamp(3px, 0.6vh, 7px);
+  letter-spacing: -0.6px;
 }
 
 .form-desc {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: clamp(11px, 1.5vh, 14px);
+  font-weight: 400;
+  color: #8a9a92;
   margin: 0;
+  letter-spacing: -0.1px;
 }
 
 /* ── Campos ── */
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: clamp(10px, 1.8vh, 20px);
+  flex-shrink: 0;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+.form-group { display: flex; flex-direction: column; gap: clamp(3px, 0.7vh, 6px); }
 
 .form-label {
-  font-size: 13px;
+  font-size: clamp(11px, 1.5vh, 13px);
   font-weight: 600;
-  color: #374151;
-  letter-spacing: 0.2px;
+  color: #3a4a42;
+  letter-spacing: 0.1px;
 }
 
-.input-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
+.input-wrap { position: relative; display: flex; align-items: center; }
 
 .input-icon {
   position: absolute;
   left: 14px;
-  color: #9ca3af;
+  color: #9aa8a1;
   display: flex;
   align-items: center;
   pointer-events: none;
+  transition: color 0.2s ease;
 }
-.input-icon svg { width: 18px; height: 18px; }
+.input-icon svg { width: 17px; height: 17px; }
 
 .input-wrap input {
   width: 100%;
-  padding: 13px 44px;
-  font-size: 15px;
-  color: #111827;
-  background: #f9fafb;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 12px;
+  padding: clamp(9px, 1.6vh, 13px) 44px;
+  font-size: clamp(13px, 1.7vh, 15px);
+  font-family: inherit;
+  color: #0b1120;
+  background: #f7f9f8;
+  border: 1.5px solid #e8ede9;
+  border-radius: 13px;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
-.input-wrap input::placeholder { color: #9ca3af; }
+.input-wrap input::placeholder { color: #b3bfb8; }
 .input-wrap input:focus {
   background: #fff;
   border-color: #16a34a;
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.10);
 }
+.input-wrap input:focus ~ .input-icon,
+.input-wrap:focus-within .input-icon { color: #16a34a; }
 .input-wrap input:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .eye-btn {
@@ -465,49 +551,44 @@ const login = async () => {
   background: none;
   border: none;
   cursor: pointer;
-  color: #9ca3af;
+  color: #9aa8a1;
   display: flex;
   align-items: center;
   padding: 4px;
-  border-radius: 6px;
-  transition: color 0.2s;
+  border-radius: 7px;
+  transition: color 0.2s ease, background 0.2s ease;
 }
-.eye-btn:hover:not(:disabled) { color: #16a34a; }
+.eye-btn:hover:not(:disabled) { color: #16a34a; background: rgba(22,163,74,0.07); }
 .eye-btn:disabled { cursor: not-allowed; opacity: 0.5; }
-.eye-btn svg { width: 20px; height: 20px; }
+.eye-btn svg { width: 18px; height: 18px; }
 
-/* ── Botón submit ── */
+/* ── Botón submit — estilo Apple: sólido, sutil, con micro-interacción ── */
 .submit-btn {
   width: 100%;
-  padding: 14px 24px;
-  margin-top: 4px;
-  font-size: 15px;
-  font-weight: 700;
+  padding: clamp(10px, 1.8vh, 14px) 24px;
+  margin-top: clamp(2px, 0.5vh, 6px);
+  font-size: clamp(13px, 1.8vh, 15px);
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: -0.1px;
   color: #fff;
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  background: #16a34a;
   border: none;
-  border-radius: 12px;
+  border-radius: 13px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(21, 128, 61, 0.35);
-  overflow: hidden;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 8px 20px rgba(21,128,61,0.28);
   position: relative;
-}
-.submit-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0);
-  transition: background 0.2s;
+  overflow: hidden;
 }
 .submit-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(21, 128, 61, 0.45);
+  background: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 12px 28px rgba(21,128,61,0.36);
 }
-.submit-btn:hover:not(:disabled)::after { background: rgba(255,255,255,0.08); }
-.submit-btn:active:not(:disabled) { transform: translateY(0); }
+.submit-btn:active:not(:disabled) { transform: translateY(0) scale(0.99); }
 .submit-btn:disabled {
-  background: #d1d5db;
+  background: #d7dedb;
   box-shadow: none;
   cursor: not-allowed;
 }
@@ -516,19 +597,19 @@ const login = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   position: relative;
   z-index: 1;
 }
-.btn-icon { width: 20px; height: 20px; transition: transform 0.2s; }
+.btn-icon { width: 17px; height: 17px; transition: transform 0.2s ease; }
 .submit-btn:hover:not(:disabled) .btn-icon { transform: translateX(3px); }
 
 .spinner {
-  width: 20px; height: 20px;
-  border: 2.5px solid rgba(255,255,255,0.35);
+  width: 15px; height: 15px;
+  border: 2px solid rgba(255,255,255,0.35);
   border-top-color: #fff;
   border-radius: 50%;
-  animation: spin 0.75s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -536,16 +617,16 @@ const login = async () => {
 .error-box {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
+  gap: 9px;
+  padding: 11px 14px;
   background: #fef2f2;
   border: 1px solid #fecaca;
-  border-radius: 10px;
+  border-radius: 11px;
   color: #dc2626;
-  font-size: 14px;
+  font-size: clamp(11px, 1.5vh, 13.5px);
   font-weight: 500;
 }
-.err-icon { width: 18px; height: 18px; flex-shrink: 0; }
+.err-icon { width: 16px; height: 16px; flex-shrink: 0; }
 
 .err-enter-active, .err-leave-active { transition: all 0.25s ease; }
 .err-enter-from, .err-leave-to { opacity: 0; transform: translateY(-6px); }
@@ -553,9 +634,10 @@ const login = async () => {
 /* ── Footer ── */
 .footer-copy {
   text-align: center;
-  font-size: 12px;
-  color: #9ca3af;
-  margin: 28px 0 0;
+  font-size: clamp(9.5px, 1.2vh, 11.5px);
+  color: #a9b8b0;
+  margin: clamp(14px, 2.4vh, 26px) 0 0;
+  flex-shrink: 0;
 }
 
 /* ════════════════════════════════════════
@@ -566,66 +648,52 @@ const login = async () => {
     display: flex;
     width: 52%;
     flex-shrink: 0;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
   }
-  .form-panel {
-    width: 48%;
-    padding: 60px 64px;
-  }
-  .mobile-brand { display: none; }
-  .form-box { max-width: 420px; }
-  .form-title { font-size: 30px; }
+  .form-panel { width: 48%; }
 }
 
-/* Pantallas grandes */
 @media (min-width: 1440px) {
   .image-panel { width: 56%; }
-  .form-panel  { width: 44%; padding: 60px 80px; }
+  .form-panel  { width: 44%; }
 }
 
 /* ════════════════════════════════════════
-   TABLET (768–1023px)
+   MÓVIL (< 1024px) — tarjeta sobre fondo de campo
    ════════════════════════════════════════ */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .form-panel { padding: 60px 80px; }
-  .form-box   { max-width: 440px; }
-}
-
-/* ════════════════════════════════════════
-   MÓVIL (< 768px) — fondo verde
-   ════════════════════════════════════════ */
-@media (max-width: 767px) {
-  .login-page { background: linear-gradient(160deg, #14532d 0%, #15803d 50%, #16a34a 100%); }
-
-  .form-panel {
-    background: transparent;
-    padding: 40px 20px;
+@media (max-width: 1023px) {
+  .login-page {
+    background:
+      linear-gradient(160deg, rgba(5,46,22,0.93) 0%, rgba(20,83,45,0.88) 45%, rgba(21,128,61,0.82) 100%),
+      url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80') center/cover no-repeat;
   }
-
-  .mobile-brand { display: flex; }
-  .mobile-brand-name { color: #bbf7d0; }
+  .form-panel { background: transparent; }
+  .form-panel::before { display: none; }
 
   .form-box {
-    background: #fff;
-    border-radius: 24px;
-    padding: 32px 24px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(20px) saturate(1.3);
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    border-radius: clamp(18px, 3vw, 26px);
+    padding: clamp(22px, 4.5vw, 36px) clamp(20px, 4vw, 30px);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.4) inset;
   }
 
-  .form-title { font-size: 22px; }
-  .footer-copy { color: rgba(255,255,255,0.5); margin-top: 20px; }
+  .brand-row-name { color: #14532d; }
+  /* Input font-size mínimo 16px evita zoom automático de iOS */
+  .input-wrap input { font-size: max(16px, clamp(13px, 1.7vh, 15px)); }
 }
 
-/* Móvil pequeño */
 @media (max-width: 380px) {
-  .form-panel { padding: 32px 16px; }
-  .form-box   { padding: 28px 20px; }
+  .form-box { padding: 20px 16px; }
 }
 
-/* Altura baja (landscape móvil) */
-@media (max-height: 600px) and (orientation: landscape) {
-  .form-panel { padding: 24px 20px; justify-content: flex-start; }
-  .mobile-brand { margin-bottom: 16px; }
-  .login-form { gap: 14px; }
+/* Landscape móvil */
+@media (max-height: 560px) and (orientation: landscape) {
+  .brand-row { margin-bottom: 10px; }
+  .form-header { margin-bottom: 12px; }
+  .login-form { gap: 10px; }
+  .footer-copy { margin-top: 12px; }
 }
 </style>

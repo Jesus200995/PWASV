@@ -409,31 +409,24 @@ async function login() {
 @keyframes spin-slow { to { transform: rotate(360deg); } }
 
 /* ════════════════════════════════════════
-   PANEL DERECHO
+   PANEL DERECHO — sin scroll, todo encaja
    ════════════════════════════════════════ */
 .right-panel {
   flex: 1;
-  /*
-   * Centrado seguro: en lugar de justify-content:center (que parte
-   * el overflow en dos mitades no scrolleables) usamos flex-column
-   * con padding auto en el inner-wrapper.
-   * El panel en sí hace scroll cuando el contenido no cabe.
-   */
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
-  padding: 48px 32px;   /* padding vertical = aire cuando hay scroll */
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
+  padding: clamp(10px, 2.5vw, 36px);
   position: relative;
   background: linear-gradient(145deg, #052e16 0%, #14532d 40%, #166534 70%, #15803d 100%);
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
-/* Orbes decorativos fijos — no afectan al scroll */
 .right-panel::before {
   content: '';
-  position: fixed;
+  position: absolute;
   inset: 0;
   background:
     radial-gradient(ellipse 60% 50% at 20% 20%, rgba(74,222,128,0.15) 0%, transparent 60%),
@@ -442,63 +435,67 @@ async function login() {
   z-index: 0;
 }
 
-/* ── TARJETA BLANCA — totalmente fluida ── */
+/* ── TARJETA BLANCA — escala con vh para caber siempre ── */
 .form-card {
   position: relative;
   z-index: 1;
   width: 100%;
   max-width: 440px;
-  /*
-   * margin: auto en el eje de bloque centra la tarjeta cuando sobra
-   * espacio en el panel. Cuando no hay espacio el panel hace scroll
-   * y los 48px de padding del panel dan aire arriba y abajo.
-   */
-  margin: auto;
+  /* La tarjeta nunca supera el espacio disponible */
+  max-height: calc(100vh - clamp(20px, 5vh, 72px));
 
   background: #ffffff;
-  border-radius: 28px;
-  padding: clamp(28px, 4vw, 52px) clamp(24px, 3.5vw, 48px);
+  border-radius: clamp(14px, 2vw, 28px);
+  /* Padding vertical escala con vh: achica al aumentar zoom */
+  padding: clamp(14px, 2.8vh, 48px) clamp(18px, 3vw, 44px);
   border: none;
+  /* Flex para distribuir hijos uniformemente */
+  display: flex;
+  flex-direction: column;
 
   box-shadow:
-    0 32px 64px rgba(0, 0, 0, 0.40),
-    0 8px 24px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(0, 0, 0, 0.06);
+    0 24px 56px rgba(0,0,0,0.38),
+    0 6px 20px rgba(0,0,0,0.22),
+    0 0 0 1px rgba(0,0,0,0.06);
 
-  animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1);
 }
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(24px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity:0; transform: translateY(20px) scale(0.97); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
 }
 
-/* Logo — muy grande, centrado */
+/* Logo — grande, se reduce con vh */
 .brand {
   text-align: center;
-  margin-bottom: 22px;
+  margin-bottom: clamp(6px, 1.4vh, 20px);
+  flex-shrink: 0;
 }
 .brand-logo {
-  /* clamp: mínimo 100px, preferible 18vw, máximo 150px */
-  height: clamp(100px, 18vw, 150px);
+  height: clamp(56px, 11vh, 140px);
   width: auto;
   max-width: 100%;
   object-fit: contain;
   display: block;
   margin: 0 auto;
-  filter: drop-shadow(0 4px 12px rgba(21,128,61,0.20));
+  filter: drop-shadow(0 3px 10px rgba(21,128,61,0.20));
 }
 
 /* Encabezado */
-.form-header { text-align: center; margin-bottom: 28px; }
+.form-header {
+  text-align: center;
+  margin-bottom: clamp(8px, 1.8vh, 26px);
+  flex-shrink: 0;
+}
 .form-title {
-  font-size: 22px;
+  font-size: clamp(14px, 2.4vh, 22px);
   font-weight: 800;
   color: #0f172a;
-  letter-spacing: -0.5px;
-  margin-bottom: 6px;
+  letter-spacing: -0.4px;
+  margin-bottom: clamp(2px, 0.5vh, 6px);
 }
 .form-sub {
-  font-size: 13.5px;
+  font-size: clamp(10px, 1.4vh, 13.5px);
   color: #94a3b8;
 }
 
@@ -524,9 +521,9 @@ async function login() {
 .slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translateY(-8px); }
 
 /* Form */
-.form { display: flex; flex-direction: column; gap: 18px; }
+.form { display: flex; flex-direction: column; gap: clamp(8px, 1.6vh, 18px); flex-shrink: 0; }
 
-.field { display: flex; flex-direction: column; gap: 6px; }
+.field { display: flex; flex-direction: column; gap: clamp(3px, 0.7vh, 6px); }
 
 .label {
   font-size: 13px;
@@ -549,8 +546,8 @@ async function login() {
 
 .inp {
   width: 100%;
-  padding: 13px 42px;
-  font-size: 14.5px;
+  padding: clamp(8px, 1.5vh, 13px) 42px;
+  font-size: clamp(12px, 1.7vh, 14.5px);
   color: #0f172a;
   background: #f8fafc;
   border: 1.5px solid #e2e8f0;
@@ -596,9 +593,9 @@ async function login() {
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 14px 24px;
-  margin-top: 4px;
-  font-size: 15px;
+  padding: clamp(9px, 1.6vh, 14px) 24px;
+  margin-top: clamp(2px, 0.5vh, 4px);
+  font-size: clamp(13px, 1.8vh, 15px);
   font-weight: 700;
   color: #fff;
   background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
@@ -623,18 +620,19 @@ async function login() {
 /* Links */
 .form-links {
   text-align: center;
-  margin-top: 22px;
+  margin-top: clamp(8px, 1.5vh, 22px);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: clamp(3px, 0.7vh, 8px);
+  flex-shrink: 0;
 }
-.form-links p { font-size: 13px; color: #64748b; }
+.form-links p { font-size: clamp(10px, 1.4vh, 13px); color: #64748b; }
 
 .flink {
   color: #16a34a;
   font-weight: 600;
   text-decoration: none;
-  font-size: 13px;
+  font-size: clamp(10px, 1.4vh, 13px);
   position: relative;
   transition: color 0.15s;
 }
@@ -653,41 +651,28 @@ async function login() {
 
 .copy {
   text-align: center;
-  font-size: 11px;
+  font-size: clamp(9px, 1.1vh, 11px);
   color: #cbd5e1;
-  margin-top: 28px;
+  margin-top: clamp(6px, 1.2vh, 28px);
   letter-spacing: 0.2px;
+  flex-shrink: 0;
 }
 
 /* ════════════════════════════════════════
    DESKTOP ≥ 1024px — split-screen
    ════════════════════════════════════════ */
 @media (min-width: 1024px) {
-  /* La raíz ocupa exactamente el viewport */
-  .root {
-    height: 100vh;
-    overflow: hidden; /* el scroll ocurre DENTRO de cada panel */
-  }
+  .root { height: 100vh; overflow: hidden; }
 
-  /* Panel izquierdo: fijo, no scrollea */
   .left-panel {
     display: flex;
     width: 54%;
     flex-shrink: 0;
     height: 100vh;
     overflow: hidden;
-    position: relative;
   }
 
-  /* Panel derecho: scrolleable de forma independiente */
-  .right-panel {
-    width: 46%;
-    height: 100vh;        /* altura fija = viewport */
-    min-height: unset;
-    overflow-y: auto;     /* ESTE panel scrollea */
-    overflow-x: hidden;
-    padding: 48px 40px;
-  }
+  .right-panel { width: 46%; }
 }
 
 @media (min-width: 1280px) {
@@ -696,32 +681,19 @@ async function login() {
 }
 
 /* ════════════════════════════════════════
-   TABLET 768–1023px — solo panel derecho
+   TABLET 768–1023px
    ════════════════════════════════════════ */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .root { height: auto; overflow: visible; }
-  .right-panel { padding: 52px 64px; }
+  .root { height: 100vh; overflow: hidden; }
 }
 
 /* ════════════════════════════════════════
    MÓVIL < 768px
    ════════════════════════════════════════ */
 @media (max-width: 767px) {
-  .root { height: auto; overflow: visible; }
-  .right-panel { padding: 40px 20px; }
-  .form-card { border-radius: 24px; }
-  .inp { font-size: 16px; } /* evita zoom automático iOS */
-}
-
-@media (max-width: 400px) {
-  .right-panel { padding: 28px 14px; }
-  .form-card { border-radius: 20px; }
-}
-
-/* Landscape móvil */
-@media (max-height: 600px) and (orientation: landscape) {
-  .right-panel { padding: 24px 20px; }
-  .form { gap: 12px; }
-  .copy { margin-top: 14px; }
+  .root { height: 100vh; overflow: hidden; }
+  /* En móvil el input no debe disparar zoom de iOS:
+     el font-size mínimo de 16px evita que Safari haga zoom */
+  .inp { font-size: max(16px, clamp(12px, 1.7vh, 14.5px)); }
 }
 </style>

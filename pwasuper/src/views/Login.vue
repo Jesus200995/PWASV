@@ -119,7 +119,6 @@
           <p>¿No tienes cuenta? <router-link to="/register" class="link">Crear cuenta</router-link></p>
           <p><router-link to="/forgot-password" class="link">¿Olvidaste tu contraseña?</router-link></p>
         </div>
-      </div>
 
         <p class="footer-copy">© 2025 Sembrando Vida</p>
       </div><!-- /form-box -->

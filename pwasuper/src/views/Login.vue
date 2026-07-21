@@ -262,6 +262,7 @@ async function login() {
    ════════════════════════════════════════ */
 .root {
   display: flex;
+  align-items: stretch;   /* paneles estiran al alto real del contenido */
   min-height: 100vh;
   width: 100%;
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -412,22 +413,27 @@ async function login() {
    ════════════════════════════════════════ */
 .right-panel {
   flex: 1;
+  /*
+   * Centrado seguro: en lugar de justify-content:center (que parte
+   * el overflow en dos mitades no scrolleables) usamos flex-column
+   * con padding auto en el inner-wrapper.
+   * El panel en sí hace scroll cuando el contenido no cabe.
+   */
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  /* NO min-height fijo: el panel crece con el contenido */
   min-height: 100vh;
-  padding: 48px 32px;
+  padding: 48px 32px;   /* padding vertical = aire cuando hay scroll */
   position: relative;
   background: linear-gradient(145deg, #052e16 0%, #14532d 40%, #166534 70%, #15803d 100%);
-  /* overflow visible para que la tarjeta no quede recortada en zoom */
-  overflow: visible;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* Orbes decorativos — pointer-events none, no afectan layout */
+/* Orbes decorativos fijos — no afectan al scroll */
 .right-panel::before {
   content: '';
-  position: fixed;  /* fixed para que no sumen al scroll */
+  position: fixed;
   inset: 0;
   background:
     radial-gradient(ellipse 60% 50% at 20% 20%, rgba(74,222,128,0.15) 0%, transparent 60%),
@@ -442,11 +448,16 @@ async function login() {
   z-index: 1;
   width: 100%;
   max-width: 440px;
+  /*
+   * margin: auto en el eje de bloque centra la tarjeta cuando sobra
+   * espacio en el panel. Cuando no hay espacio el panel hace scroll
+   * y los 48px de padding del panel dan aire arriba y abajo.
+   */
+  margin: auto;
 
   background: #ffffff;
   border-radius: 28px;
-  /* padding en clamp: se achica en pantallas pequeñas o zoom alto */
-  padding: clamp(28px, 5vw, 52px) clamp(24px, 4.5vw, 48px);
+  padding: clamp(28px, 4vw, 52px) clamp(24px, 3.5vw, 48px);
   border: none;
 
   box-shadow:
@@ -649,29 +660,33 @@ async function login() {
 }
 
 /* ════════════════════════════════════════
-   DESKTOP ≥ 1024px
+   DESKTOP ≥ 1024px — split-screen
    ════════════════════════════════════════ */
 @media (min-width: 1024px) {
-  .root { min-height: 100vh; }
+  /* La raíz ocupa exactamente el viewport */
+  .root {
+    height: 100vh;
+    overflow: hidden; /* el scroll ocurre DENTRO de cada panel */
+  }
 
+  /* Panel izquierdo: fijo, no scrollea */
   .left-panel {
     display: flex;
     width: 54%;
     flex-shrink: 0;
-    /* panel izquierdo cubre el viewport pero no más */
-    position: sticky;
-    top: 0;
     height: 100vh;
     overflow: hidden;
+    position: relative;
   }
 
+  /* Panel derecho: scrolleable de forma independiente */
   .right-panel {
     width: 46%;
-    /* permite scroll si el contenido supera la pantalla (ej. zoom alto) */
-    min-height: 100vh;
-    height: auto;
-    padding: 52px 40px;
-    overflow-y: auto;
+    height: 100vh;        /* altura fija = viewport */
+    min-height: unset;
+    overflow-y: auto;     /* ESTE panel scrollea */
+    overflow-x: hidden;
+    padding: 48px 40px;
   }
 }
 
@@ -681,42 +696,31 @@ async function login() {
 }
 
 /* ════════════════════════════════════════
-   TABLET 768–1023px
+   TABLET 768–1023px — solo panel derecho
    ════════════════════════════════════════ */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .right-panel {
-    padding: 52px 64px;
-    min-height: 100vh;
-    height: auto;
-    overflow-y: auto;
-  }
+  .root { height: auto; overflow: visible; }
+  .right-panel { padding: 52px 64px; }
 }
 
 /* ════════════════════════════════════════
    MÓVIL < 768px
    ════════════════════════════════════════ */
 @media (max-width: 767px) {
-  .right-panel {
-    padding: 40px 20px;
-    min-height: 100vh;
-    height: auto;
-    overflow-y: auto;
-  }
+  .root { height: auto; overflow: visible; }
+  .right-panel { padding: 40px 20px; }
   .form-card { border-radius: 24px; }
-  .inp { font-size: 16px; } /* evita zoom iOS */
+  .inp { font-size: 16px; } /* evita zoom automático iOS */
 }
 
 @media (max-width: 400px) {
-  .right-panel { padding: 32px 14px; }
+  .right-panel { padding: 28px 14px; }
   .form-card { border-radius: 20px; }
 }
 
-/* Landscape móvil — pantalla baja, permitir scroll */
+/* Landscape móvil */
 @media (max-height: 600px) and (orientation: landscape) {
-  .right-panel {
-    align-items: flex-start;
-    padding: 24px 20px;
-  }
+  .right-panel { padding: 24px 20px; }
   .form { gap: 12px; }
   .copy { margin-top: 14px; }
 }

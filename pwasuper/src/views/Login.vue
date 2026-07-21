@@ -84,7 +84,7 @@
 
         <!-- Encabezado -->
         <div class="form-header">
-          <h2 class="form-title" aria-label="Bienvenido de vuelta">
+          <h2 class="form-title" aria-label="App de Seguimiento">
             <span
               v-for="(char, i) in titleChars"
               :key="i"
@@ -208,7 +208,7 @@ const errorMessage = ref('');
 const formError = ref(false);
 const MAX_RETRIES = 2;
 
-const titleChars = 'Bienvenido de vuelta'.split('');
+const titleChars = 'App de Seguimiento'.split('');
 
 function togglePasswordVisibility() { showPassword.value = !showPassword.value; }
 
@@ -530,13 +530,13 @@ async function login() {
 /* Cada letra: animación de pulso de luz de izquierda a derecha */
 .title-char {
   display: inline-block;
-  color: #16a34a;
+  color: #14532d;
   animation: letterShine 2.4s ease-in-out infinite;
   animation-fill-mode: both;
 }
 @keyframes letterShine {
-  0%, 55%, 100% { color: #16a34a; }
-  27%            { color: #bbf7d0; }
+  0%, 55%, 100% { color: #14532d; }
+  27%            { color: #4ade80; }
 }
 
 .form-sub {
@@ -733,12 +733,48 @@ async function login() {
 }
 
 /* ════════════════════════════════════════
-   MÓVIL < 768px
+   MÓVIL < 768px — diseño dedicado
    ════════════════════════════════════════ */
 @media (max-width: 767px) {
   .root { height: 100vh; overflow: hidden; }
-  /* En móvil el input no debe disparar zoom de iOS:
-     el font-size mínimo de 16px evita que Safari haga zoom */
-  .inp { font-size: max(16px, clamp(12px, 1.7vh, 14.5px)); }
+
+  /* Fondo con imagen de campo + overlay verde oscuro */
+  .right-panel {
+    background:
+      linear-gradient(160deg, rgba(2,44,18,0.92) 0%, rgba(10,68,30,0.85) 45%, rgba(21,128,61,0.80) 100%),
+      url('https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+    padding: clamp(16px, 5vw, 28px);
+    justify-content: center;
+  }
+
+  /* Tarjeta: blanca, con sombra generosa y borde sutil */
+  .form-card {
+    border-radius: 24px;
+    padding: clamp(20px, 5vw, 32px) clamp(18px, 5vw, 28px);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.12),
+      0 8px 32px rgba(0,0,0,0.45),
+      0 32px 64px rgba(0,0,0,0.30);
+    max-width: 380px;
+  }
+
+  /* Logo más contenido en móvil */
+  .brand-logo { height: clamp(72px, 18vw, 110px); }
+  .brand { margin-bottom: -4px; }
+
+  /* Título más grande en proporción de pantalla chica */
+  .form-title { font-size: clamp(17px, 5vw, 22px); }
+  .form-sub   { font-size: clamp(11px, 3.2vw, 13px); }
+
+  /* Inputs: font-size mínimo 16px evita zoom automático en iOS */
+  .inp { font-size: 16px; }
+
+  /* Labels y links */
+  .label       { font-size: clamp(12px, 3.5vw, 13px); }
+  .form-links p, .flink, .flink-sm { font-size: clamp(11px, 3.2vw, 13px); }
+  .copy        { font-size: clamp(9px, 2.5vw, 11px); }
+
+  /* Botón con más presencia táctil */
+  .btn-submit { padding: 14px 24px; font-size: 15px; border-radius: 14px; }
 }
 </style>

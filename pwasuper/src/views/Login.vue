@@ -185,7 +185,7 @@
           <router-link to="/forgot-password" class="flink flink-sm">¿Olvidaste tu contraseña?</router-link>
         </div>
 
-        <p class="copy">© 2025 Sembrando Vida · Todos los derechos reservados</p>
+        <p class="copy">© 2026 Sembrando Vida · Todos los derechos reservados</p>
 
       </div><!-- /form-card -->
     </main>
@@ -580,7 +580,7 @@ async function login() {
 
 .form-sub {
   font-size: clamp(10px, 1.4vh, 13.5px);
-  color: #94a3b8;
+  color: #4b7a5a;
 }
 
 /* Error */
@@ -710,7 +710,7 @@ async function login() {
   gap: clamp(3px, 0.7vh, 8px);
   flex-shrink: 0;
 }
-.form-links p { font-size: clamp(10px, 1.4vh, 13px); color: #64748b; }
+.form-links p { font-size: clamp(10px, 1.4vh, 13px); color: #3f5f4c; }
 
 .flink {
   color: #16a34a;
@@ -730,13 +730,13 @@ async function login() {
 }
 .flink:hover { color: #15803d; }
 .flink:hover::after { width: 100%; }
-.flink-sm { font-size: 12.5px; color: #475569; font-weight: 500; }
+.flink-sm { font-size: 12.5px; color: #2f5540; font-weight: 600; }
 .flink-sm:hover { color: #16a34a; }
 
 .copy {
   text-align: center;
   font-size: clamp(9px, 1.1vh, 11px);
-  color: #cbd5e1;
+  color: #5a7a68;
   margin-top: clamp(6px, 1.2vh, 28px);
   letter-spacing: 0.2px;
   flex-shrink: 0;

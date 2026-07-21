@@ -163,7 +163,7 @@
           </transition>
         </form>
 
-        <p class="footer-copy">© 2025 Sembrando Vida · Administración</p>
+        <p class="footer-copy">© 2026 Sembrando Vida · Administración</p>
       </div>
     </div>
 

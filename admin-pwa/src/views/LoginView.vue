@@ -423,6 +423,11 @@ const login = async () => {
 /* ════════════════════════════════════════
    PANEL DERECHO — formulario, sin scroll
    ════════════════════════════════════════ */
+/*
+ * Fondo "canvas fluido": tres manchas radiales verdes que se
+ * desplazan y respiran en bucle, evocando hojas/campo en movimiento
+ * sin ser literales — un fondo vivo y moderno detrás de la tarjeta.
+ */
 .form-panel {
   flex: 1;
   display: flex;
@@ -432,27 +437,68 @@ const login = async () => {
   height: 100vh;
   overflow: hidden;
   padding: clamp(12px, 3vw, 40px);
-  background: #ffffff;
+  background: #f4faf6;
   position: relative;
 }
 
-/* Halo sutil de luz — detalle premium discreto */
-.form-panel::before {
+.form-panel::before,
+.form-panel::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 55% 45% at 82% 12%, rgba(74,222,128,0.06) 0%, transparent 60%);
+  border-radius: 50%;
+  filter: blur(60px);
   pointer-events: none;
+  z-index: 0;
+}
+.form-panel::before {
+  width: 55vw;
+  height: 55vw;
+  max-width: 640px;
+  max-height: 640px;
+  top: -18%;
+  right: -14%;
+  background: radial-gradient(circle, rgba(74,222,128,0.35) 0%, rgba(74,222,128,0) 70%);
+  animation: canvasDrift1 16s ease-in-out infinite;
+}
+.form-panel::after {
+  width: 46vw;
+  height: 46vw;
+  max-width: 520px;
+  max-height: 520px;
+  bottom: -16%;
+  left: -12%;
+  background: radial-gradient(circle, rgba(21,128,61,0.28) 0%, rgba(21,128,61,0) 70%);
+  animation: canvasDrift2 20s ease-in-out infinite;
+}
+@keyframes canvasDrift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(-30px, 40px) scale(1.12); }
+}
+@keyframes canvasDrift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(25px, -35px) scale(1.08); }
 }
 
-/* Caja del formulario */
+/* Caja del formulario — tarjeta verde fuerte */
 .form-box {
   position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 420px;
   max-height: calc(100vh - clamp(16px, 4vh, 60px));
   display: flex;
   flex-direction: column;
+
+  background: linear-gradient(155deg, #166534 0%, #14532d 55%, #0f3d22 100%);
+  border-radius: clamp(18px, 2.4vw, 28px);
+  padding: clamp(22px, 3.6vh, 44px) clamp(20px, 3.2vw, 40px);
+  border: 1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.12) inset,
+    0 30px 60px rgba(6,40,20,0.35),
+    0 10px 26px rgba(6,40,20,0.25);
+
   animation: slideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @keyframes slideUp {
@@ -477,13 +523,13 @@ const login = async () => {
 .brand-row-name {
   font-size: clamp(13px, 1.9vh, 16px);
   font-weight: 700;
-  color: #14532d;
+  color: #f0fdf4;
   letter-spacing: -0.3px;
 }
 .brand-row-role {
   font-size: clamp(10px, 1.3vh, 12px);
   font-weight: 500;
-  color: #6b8f7a;
+  color: #a7d9b8;
   letter-spacing: 0.1px;
 }
 
@@ -495,7 +541,7 @@ const login = async () => {
 .form-title {
   font-size: clamp(19px, 3.2vh, 28px);
   font-weight: 700;
-  color: #0b1120;
+  color: #ffffff;
   margin: 0 0 clamp(3px, 0.6vh, 7px);
   letter-spacing: -0.6px;
 }
@@ -503,7 +549,7 @@ const login = async () => {
 .form-desc {
   font-size: clamp(11px, 1.5vh, 14px);
   font-weight: 400;
-  color: #8a9a92;
+  color: #bcdec9;
   margin: 0;
   letter-spacing: -0.1px;
 }
@@ -521,7 +567,7 @@ const login = async () => {
 .form-label {
   font-size: clamp(11px, 1.5vh, 13px);
   font-weight: 600;
-  color: #3a4a42;
+  color: #d7ecdf;
   letter-spacing: 0.1px;
 }
 
@@ -530,7 +576,7 @@ const login = async () => {
 .input-icon {
   position: absolute;
   left: 14px;
-  color: #9aa8a1;
+  color: #7fae8e;
   display: flex;
   align-items: center;
   pointer-events: none;
@@ -544,17 +590,17 @@ const login = async () => {
   font-size: clamp(13px, 1.7vh, 15px);
   font-family: inherit;
   color: #0b1120;
-  background: #f7f9f8;
-  border: 1.5px solid #e8ede9;
+  background: rgba(255,255,255,0.92);
+  border: 1.5px solid rgba(255,255,255,0.15);
   border-radius: 13px;
   outline: none;
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
-.input-wrap input::placeholder { color: #b3bfb8; }
+.input-wrap input::placeholder { color: #9aa8a1; }
 .input-wrap input:focus {
   background: #fff;
-  border-color: #16a34a;
-  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.10);
+  border-color: #4ade80;
+  box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.22);
 }
 .input-wrap input:focus ~ .input-icon,
 .input-wrap:focus-within .input-icon { color: #16a34a; }
@@ -566,44 +612,45 @@ const login = async () => {
   background: none;
   border: none;
   cursor: pointer;
-  color: #9aa8a1;
+  color: #7fae8e;
   display: flex;
   align-items: center;
   padding: 4px;
   border-radius: 7px;
   transition: color 0.2s ease, background 0.2s ease;
 }
-.eye-btn:hover:not(:disabled) { color: #16a34a; background: rgba(22,163,74,0.07); }
+.eye-btn:hover:not(:disabled) { color: #16a34a; background: rgba(22,163,74,0.1); }
 .eye-btn:disabled { cursor: not-allowed; opacity: 0.5; }
 .eye-btn svg { width: 18px; height: 18px; }
 
-/* ── Botón submit — estilo Apple: sólido, sutil, con micro-interacción ── */
+/* ── Botón submit — blanco sólido, contraste máximo sobre la tarjeta verde ── */
 .submit-btn {
   width: 100%;
   padding: clamp(10px, 1.8vh, 14px) 24px;
   margin-top: clamp(2px, 0.5vh, 6px);
   font-size: clamp(13px, 1.8vh, 15px);
-  font-weight: 600;
+  font-weight: 700;
   font-family: inherit;
   letter-spacing: -0.1px;
-  color: #fff;
-  background: #16a34a;
+  color: #14532d;
+  background: #ffffff;
   border: none;
   border-radius: 13px;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 8px 20px rgba(21,128,61,0.28);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 10px 24px rgba(0,0,0,0.22);
   position: relative;
   overflow: hidden;
 }
 .submit-btn:hover:not(:disabled) {
-  background: #15803d;
+  background: #f0fdf4;
   transform: translateY(-1px);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 12px 28px rgba(21,128,61,0.36);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.12), 0 14px 30px rgba(0,0,0,0.28);
 }
 .submit-btn:active:not(:disabled) { transform: translateY(0) scale(0.99); }
 .submit-btn:disabled {
-  background: #d7dedb;
+  background: rgba(255,255,255,0.35);
+  color: rgba(20,83,45,0.5);
   box-shadow: none;
   cursor: not-allowed;
 }
@@ -634,7 +681,7 @@ const login = async () => {
   align-items: center;
   gap: 9px;
   padding: 11px 14px;
-  background: #fef2f2;
+  background: rgba(254,242,242,0.95);
   border: 1px solid #fecaca;
   border-radius: 11px;
   color: #dc2626;
@@ -650,7 +697,7 @@ const login = async () => {
 .footer-copy {
   text-align: center;
   font-size: clamp(9.5px, 1.2vh, 11.5px);
-  color: #a9b8b0;
+  color: #8fbb9e;
   margin: clamp(14px, 2.4vh, 26px) 0 0;
   flex-shrink: 0;
 }
@@ -684,18 +731,17 @@ const login = async () => {
       url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80') center/cover no-repeat;
   }
   .form-panel { background: transparent; }
-  .form-panel::before { display: none; }
+  .form-panel::before,
+  .form-panel::after { display: none; }
 
   .form-box {
-    background: rgba(255,255,255,0.94);
-    backdrop-filter: blur(20px) saturate(1.3);
-    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border-radius: clamp(18px, 3vw, 26px);
     padding: clamp(22px, 4.5vw, 36px) clamp(20px, 4vw, 30px);
-    box-shadow: 0 24px 64px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.4) inset;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 1px 0 0 rgba(255,255,255,0.15) inset;
   }
 
-  .brand-row-name { color: #14532d; }
   /* Input font-size mínimo 16px evita zoom automático de iOS */
   .input-wrap input { font-size: max(16px, clamp(13px, 1.7vh, 15px)); }
 }

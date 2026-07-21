@@ -296,7 +296,7 @@ async function login() {
   z-index: 1;
 }
 
-/* Contenido */
+/* Contenido izquierdo — flex column, distribuye el espacio disponible */
 .left-body {
   position: relative;
   z-index: 2;
@@ -304,8 +304,10 @@ async function login() {
   flex-direction: column;
   justify-content: center;
   height: 100%;
-  padding: 56px 52px;
+  /* Padding escala con vh igual que el panel derecho */
+  padding: clamp(28px, 5vh, 64px) clamp(24px, 4vw, 56px);
   color: #fff;
+  overflow: hidden;
 }
 
 /* Badge */
@@ -317,16 +319,18 @@ async function login() {
   border: 1px solid rgba(255,255,255,0.2);
   backdrop-filter: blur(8px);
   border-radius: 100px;
-  padding: 6px 16px;
-  font-size: 12px;
+  padding: clamp(4px, 0.7vh, 6px) clamp(10px, 1.5vw, 16px);
+  font-size: clamp(10px, 1.3vh, 12px);
   font-weight: 600;
   letter-spacing: 0.4px;
   color: rgba(255,255,255,0.9);
   width: fit-content;
-  margin-bottom: 36px;
+  margin-bottom: clamp(14px, 3vh, 36px);
+  flex-shrink: 0;
 }
 .badge-dot {
-  width: 7px; height: 7px;
+  width: clamp(5px, 0.8vh, 7px);
+  height: clamp(5px, 0.8vh, 7px);
   background: #4ade80;
   border-radius: 50%;
   box-shadow: 0 0 8px rgba(74,222,128,0.8);
@@ -334,15 +338,16 @@ async function login() {
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-/* Título enorme */
+/* Título — escala con vh */
 .left-heading {
-  font-size: clamp(42px, 5vw, 68px);
+  font-size: clamp(28px, 6.5vh, 68px);
   font-weight: 900;
   line-height: 1.0;
-  letter-spacing: -2px;
+  letter-spacing: clamp(-1px, -0.2vw, -2px);
   color: #fff;
-  margin-bottom: 20px;
+  margin-bottom: clamp(8px, 1.8vh, 20px);
   text-shadow: 0 4px 30px rgba(0,0,0,0.25);
+  flex-shrink: 0;
 }
 .left-heading-accent {
   background: linear-gradient(135deg, #4ade80 0%, #bbf7d0 100%);
@@ -352,48 +357,59 @@ async function login() {
 }
 
 .left-desc {
-  font-size: 14px;
+  font-size: clamp(11px, 1.5vh, 14px);
   color: rgba(255,255,255,0.65);
-  line-height: 1.7;
-  margin-bottom: 36px;
+  line-height: 1.6;
+  margin-bottom: clamp(12px, 2.5vh, 36px);
+  flex-shrink: 0;
 }
 
 /* Separador */
 .left-sep {
-  width: 48px; height: 3px;
+  width: 48px;
+  height: 3px;
   background: linear-gradient(90deg, #4ade80, transparent);
   border-radius: 99px;
-  margin-bottom: 36px;
+  margin-bottom: clamp(12px, 2.5vh, 36px);
+  flex-shrink: 0;
 }
 
 /* Pilares */
 .pillars {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: clamp(8px, 1.4vh, 16px);
+  flex-shrink: 0;
 }
 .pillar {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: clamp(10px, 1.5vw, 16px);
   background: rgba(255,255,255,0.07);
   border: 1px solid rgba(255,255,255,0.12);
   backdrop-filter: blur(6px);
-  border-radius: 14px;
-  padding: 14px 18px;
+  border-radius: clamp(10px, 1.5vh, 14px);
+  padding: clamp(8px, 1.5vh, 14px) clamp(12px, 1.8vw, 18px);
   transition: background 0.2s;
 }
 .pillar:hover { background: rgba(255,255,255,0.12); }
 .pillar-ico {
   display: flex; align-items: center; justify-content: center;
-  width: 38px; height: 38px; flex-shrink: 0;
+  width: clamp(28px, 4.5vh, 38px);
+  height: clamp(28px, 4.5vh, 38px);
+  flex-shrink: 0;
   background: rgba(74,222,128,0.15);
   border: 1px solid rgba(74,222,128,0.25);
-  border-radius: 10px;
+  border-radius: clamp(7px, 1.2vh, 10px);
   color: #4ade80;
 }
-.pillar-ico svg { width: 18px; height: 18px; }
-.pillar-text { font-size: 13px; color: rgba(255,255,255,0.88); font-weight: 500; line-height: 1.5; }
+.pillar-ico svg { width: clamp(14px, 2.2vh, 18px); height: clamp(14px, 2.2vh, 18px); }
+.pillar-text {
+  font-size: clamp(10px, 1.4vh, 13px);
+  color: rgba(255,255,255,0.88);
+  font-weight: 500;
+  line-height: 1.4;
+}
 
 /* Círculos decorativos */
 .deco {

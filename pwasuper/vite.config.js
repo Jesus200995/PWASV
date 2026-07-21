@@ -14,6 +14,14 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
         cleanupOutdatedCaches: true,
+        /*
+         * Sin esto, cualquier navegación de ruta (ej. /historial, /profile)
+         * que no coincida con un asset precacheado exacto cae al navegador
+         * nativo "sin conexión" en vez de servir el app shell cacheado.
+         * Es la causa de que la app no abra sin internet.
+         */
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
           {
             urlPattern: /\/api\//i,
@@ -23,12 +31,12 @@ export default defineConfig({
             urlPattern: /^https:\/\/app\.sembrandodatos\.com\/(?!api).*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'app-cache-v1.0.5',
+              cacheName: 'app-cache-v1.0.6',
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24
               },
-              networkTimeoutSeconds: 30
+              networkTimeoutSeconds: 5
             }
           }
         ]

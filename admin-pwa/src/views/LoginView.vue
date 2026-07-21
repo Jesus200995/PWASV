@@ -437,7 +437,9 @@ const login = async () => {
   height: 100vh;
   overflow: hidden;
   padding: clamp(12px, 3vw, 40px);
-  background: #f4faf6;
+  /* Degradado verde oscuro — continúa la paleta del panel izquierdo,
+     así ambos lados se sienten como una sola escena, no dos fondos distintos */
+  background: linear-gradient(200deg, #0a2e1a 0%, #0f3d22 45%, #12472a 100%);
   position: relative;
 }
 
@@ -446,7 +448,7 @@ const login = async () => {
   content: '';
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
+  filter: blur(70px);
   pointer-events: none;
   z-index: 0;
 }
@@ -457,7 +459,7 @@ const login = async () => {
   max-height: 640px;
   top: -18%;
   right: -14%;
-  background: radial-gradient(circle, rgba(74,222,128,0.35) 0%, rgba(74,222,128,0) 70%);
+  background: radial-gradient(circle, rgba(74,222,128,0.22) 0%, rgba(74,222,128,0) 70%);
   animation: canvasDrift1 16s ease-in-out infinite;
 }
 .form-panel::after {
@@ -467,7 +469,7 @@ const login = async () => {
   max-height: 520px;
   bottom: -16%;
   left: -12%;
-  background: radial-gradient(circle, rgba(21,128,61,0.28) 0%, rgba(21,128,61,0) 70%);
+  background: radial-gradient(circle, rgba(21,128,61,0.30) 0%, rgba(21,128,61,0) 70%);
   animation: canvasDrift2 20s ease-in-out infinite;
 }
 @keyframes canvasDrift1 {
@@ -489,15 +491,17 @@ const login = async () => {
   display: flex;
   flex-direction: column;
 
-  background: linear-gradient(155deg, #166534 0%, #14532d 55%, #0f3d22 100%);
+  background: linear-gradient(155deg, #1b7a3d 0%, #166534 55%, #124d29 100%);
   border-radius: clamp(18px, 2.4vw, 28px);
   padding: clamp(22px, 3.6vh, 44px) clamp(20px, 3.2vw, 40px);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
 
   box-shadow:
-    0 1px 0 0 rgba(255,255,255,0.12) inset,
-    0 30px 60px rgba(6,40,20,0.35),
-    0 10px 26px rgba(6,40,20,0.25);
+    0 1px 0 0 rgba(255,255,255,0.16) inset,
+    0 0 0 1px rgba(74,222,128,0.08),
+    0 30px 70px rgba(0,0,0,0.5),
+    0 10px 28px rgba(0,0,0,0.35),
+    0 0 60px rgba(34,197,94,0.10);
 
   animation: slideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }

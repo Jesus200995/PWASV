@@ -495,11 +495,11 @@ async function login() {
 /* Logo — grande, se reduce con vh, menos margen inferior */
 .brand {
   text-align: center;
-  margin-bottom: clamp(4px, 0.8vh, 10px);
+  margin-bottom: clamp(0px, 0.3vh, 4px);
   flex-shrink: 0;
 }
 .brand-logo {
-  height: clamp(90px, 18vh, 200px);
+  height: clamp(108px, 21vh, 220px);
   width: auto;
   max-width: 100%;
   object-fit: contain;
@@ -511,7 +511,7 @@ async function login() {
 /* Encabezado */
 .form-header {
   text-align: center;
-  margin-bottom: clamp(8px, 1.8vh, 26px);
+  margin-bottom: clamp(6px, 1.4vh, 20px);
   flex-shrink: 0;
 }
 

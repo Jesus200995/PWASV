@@ -84,7 +84,14 @@
 
         <!-- Encabezado -->
         <div class="form-header">
-          <h2 class="form-title">Bienvenido de vuelta</h2>
+          <h2 class="form-title" aria-label="Bienvenido de vuelta">
+            <span
+              v-for="(char, i) in titleChars"
+              :key="i"
+              class="title-char"
+              :style="{ animationDelay: `${i * 0.06}s` }"
+            >{{ char === ' ' ? ' ' : char }}</span>
+          </h2>
           <p class="form-sub">Ingresa tus credenciales para continuar</p>
         </div>
 
@@ -201,6 +208,8 @@ const errorMessage = ref('');
 const formError = ref(false);
 const MAX_RETRIES = 2;
 
+const titleChars = 'Bienvenido de vuelta'.split('');
+
 function togglePasswordVisibility() { showPassword.value = !showPassword.value; }
 
 async function intentarLogin(correo, contrasena) {
@@ -254,6 +263,8 @@ async function login() {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600&display=swap');
+
 /* ── reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -481,14 +492,14 @@ async function login() {
   to   { opacity:1; transform: translateY(0) scale(1); }
 }
 
-/* Logo — grande, se reduce con vh */
+/* Logo — grande, se reduce con vh, menos margen inferior */
 .brand {
   text-align: center;
-  margin-bottom: clamp(6px, 1.4vh, 20px);
+  margin-bottom: clamp(4px, 0.8vh, 10px);
   flex-shrink: 0;
 }
 .brand-logo {
-  height: clamp(56px, 11vh, 140px);
+  height: clamp(70px, 14vh, 160px);
   width: auto;
   max-width: 100%;
   object-fit: contain;
@@ -503,13 +514,40 @@ async function login() {
   margin-bottom: clamp(8px, 1.8vh, 26px);
   flex-shrink: 0;
 }
+
+/* Título con fuente circular delgada */
 .form-title {
-  font-size: clamp(14px, 2.4vh, 22px);
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: -0.4px;
+  font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  font-size: clamp(15px, 2.6vh, 24px);
+  font-weight: 300;
+  letter-spacing: 0.3px;
   margin-bottom: clamp(2px, 0.5vh, 6px);
+  /* Espacio para que los spans inline-block no se corten */
+  line-height: 1.3;
+  white-space: nowrap;
 }
+
+/* Cada letra: animación de pulso de luz de izquierda a derecha */
+.title-char {
+  display: inline-block;
+  color: #16a34a;
+  animation: letterShine 3s ease-in-out infinite;
+  /* La animación se repite cada 3s; el delay escalonado crea el efecto barrido */
+  animation-fill-mode: both;
+}
+@keyframes letterShine {
+  0%, 60%, 100% {
+    color: #16a34a;
+    text-shadow: none;
+  }
+  30% {
+    color: #4ade80;
+    text-shadow:
+      0 0 8px rgba(74,222,128,0.9),
+      0 0 20px rgba(74,222,128,0.5);
+  }
+}
+
 .form-sub {
   font-size: clamp(10px, 1.4vh, 13.5px);
   color: #94a3b8;

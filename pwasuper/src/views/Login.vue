@@ -495,7 +495,8 @@ async function login() {
 /* Logo — grande, se reduce con vh, menos margen inferior */
 .brand {
   text-align: center;
-  margin-bottom: -28px;
+  line-height: 0;       /* elimina espacio inline bajo la imagen */
+  margin-bottom: 4px;
   flex-shrink: 0;
 }
 .brand-logo {
@@ -518,11 +519,10 @@ async function login() {
 /* Título con fuente circular delgada */
 .form-title {
   font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
-  font-size: clamp(15px, 2.6vh, 24px);
-  font-weight: 300;
-  letter-spacing: 0.3px;
+  font-size: clamp(13px, 2vh, 18px);
+  font-weight: 500;
+  letter-spacing: 0.4px;
   margin-bottom: clamp(2px, 0.5vh, 6px);
-  /* Espacio para que los spans inline-block no se corten */
   line-height: 1.3;
   white-space: nowrap;
 }
@@ -760,10 +760,9 @@ async function login() {
 
   /* Logo grande en móvil */
   .brand-logo { height: clamp(120px, 32vw, 180px); }
-  .brand { margin-bottom: -4px; }
+  .brand { line-height: 0; margin-bottom: 4px; }
 
-  /* Título más grande en proporción de pantalla chica */
-  .form-title { font-size: clamp(17px, 5vw, 22px); }
+  .form-title { font-size: clamp(13px, 4vw, 17px); font-weight: 500; }
   .form-sub   { font-size: clamp(11px, 3.2vw, 13px); }
 
   /* Inputs: font-size mínimo 16px evita zoom automático en iOS */

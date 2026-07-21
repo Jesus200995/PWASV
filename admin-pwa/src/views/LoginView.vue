@@ -10,7 +10,10 @@
         <p class="hero-brand">Sembrando Vida</p>
 
         <!-- Título principal del panel: más grande que la marca -->
-        <h1 class="hero-title">Administrador</h1>
+        <h1 class="hero-title">
+          <span class="hero-title-glow" aria-hidden="true"></span>
+          <span class="hero-title-text">Panel de Administrador</span>
+        </h1>
 
         <p class="hero-subtitle">Subsecretaría de Inclusión Productiva<br>y Desarrollo Rural</p>
 
@@ -266,16 +269,44 @@ const login = async () => {
   background-clip: text;
 }
 
-/* Título principal "Administrador" — más grande que la marca */
+/*
+ * Título "Panel de Administrador" — estilo logo moderno:
+ * texto en degradado verde + halo difuso animado detrás (canvas fluido)
+ * que respira suavemente, dando profundidad sin ser literal.
+ */
 .hero-title {
-  font-size: clamp(30px, 5.6vh, 48px);
+  position: relative;
+  display: inline-block;
+  font-size: clamp(26px, 4.6vh, 42px);
   font-weight: 800;
-  letter-spacing: -1.2px;
+  letter-spacing: -1px;
   margin: 0 0 clamp(6px, 1.2vh, 10px);
   flex-shrink: 0;
-  line-height: 1.05;
-  color: #fff;
-  text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+  line-height: 1.12;
+}
+
+.hero-title-glow {
+  position: absolute;
+  inset: -30% -14%;
+  background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(74,222,128,0.35) 0%, transparent 72%);
+  filter: blur(22px);
+  z-index: 0;
+  pointer-events: none;
+  animation: titleGlowBreathe 4.5s ease-in-out infinite;
+}
+@keyframes titleGlowBreathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%       { opacity: 0.95; transform: scale(1.08); }
+}
+
+.hero-title-text {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(120deg, #bbf7d0 0%, #4ade80 45%, #86efac 75%, #d1fae5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 24px rgba(0,0,0,0.25);
 }
 
 .hero-subtitle {

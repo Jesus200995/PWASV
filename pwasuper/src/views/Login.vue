@@ -24,16 +24,12 @@
 
     <!-- ═══ PANEL DERECHO — formulario ═══ -->
     <div class="form-panel">
-
-      <!-- Logo solo en móvil -->
-      <div class="mobile-header">
-        <img src="/images/logosv.png" alt="Sembrando Vida" class="mobile-logo" />
-        <span class="mobile-brand">Sembrando Vida</span>
-      </div>
-
       <div class="form-box">
+
+        <!-- Logo + branding arriba (siempre visible) -->
         <div class="form-head">
-          <h2 class="form-title">Aplicación de Seguimiento</h2>
+          <img src="/images/logosv.png" alt="Sembrando Vida" class="form-logo" />
+          <h2 class="form-title">Aplicación de <span class="title-accent">Seguimiento</span></h2>
           <div class="title-line"></div>
           <p class="form-subtitle">Iniciar sesión</p>
           <p class="form-hint">Ingresa tus credenciales para acceder</p>
@@ -125,8 +121,9 @@
         </div>
       </div>
 
-      <p class="footer-copy">© 2025 Sembrando Vida</p>
-    </div>
+        <p class="footer-copy">© 2025 Sembrando Vida</p>
+      </div><!-- /form-box -->
+    </div><!-- /form-panel -->
 
     <SupportBubbleLogin />
   </div>
@@ -362,7 +359,6 @@ async function login() {
 .form-panel {
   flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
@@ -370,47 +366,48 @@ async function login() {
   min-height: 100vh;
 }
 
-/* Header móvil */
-.mobile-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 28px;
-}
-.mobile-logo { width: 40px; height: 40px; object-fit: contain; }
-.mobile-brand { font-size: 18px; font-weight: 700; color: #15803d; }
-
-/* Caja del formulario */
+/* Caja del formulario — centrada y compacta */
 .form-box {
   width: 100%;
-  max-width: 400px;
+  max-width: 360px;
   animation: up 0.45s ease-out;
 }
 @keyframes up {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.form-head { margin-bottom: 28px; text-align: center; }
+/* ── Cabecera con logo ── */
+.form-head {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.form-logo {
+  width: 88px;
+  height: 88px;
+  object-fit: contain;
+  margin: 0 auto 14px;
+  display: block;
+  filter: drop-shadow(0 4px 12px rgba(21,128,61,0.2));
+}
 
 .form-title {
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
-  background: linear-gradient(90deg, #166534 0%, #15803d 40%, #4ade80 60%, #15803d 80%, #166534 100%);
-  background-size: 250% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: wave 3s ease-in-out infinite;
-  margin: 0 0 10px;
+  color: #111827;
+  margin: 0 0 8px;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
 }
-@keyframes wave {
-  0%,100% { background-position: 0% 50%; }
-  50%      { background-position: 100% 50%; }
+.title-accent {
+  color: #16a34a;
+  font-weight: 800;
 }
 
 .title-line {
-  width: 50px; height: 2px;
+  width: 44px;
+  height: 2.5px;
   background: linear-gradient(90deg, #16a34a, #4ade80, #16a34a);
   border-radius: 99px;
   margin: 0 auto 14px;
@@ -418,18 +415,18 @@ async function login() {
 }
 @keyframes glow {
   from { box-shadow: 0 0 4px rgba(34,197,94,0.3); }
-  to   { box-shadow: 0 0 12px rgba(34,197,94,0.6); }
+  to   { box-shadow: 0 0 10px rgba(34,197,94,0.5); }
 }
 
 .form-subtitle {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: #111827;
   margin: 0 0 4px;
 }
 .form-hint {
-  font-size: 13px;
-  color: #6b7280;
+  font-size: 12.5px;
+  color: #9ca3af;
   margin: 0;
 }
 
@@ -597,24 +594,24 @@ async function login() {
   }
   .form-panel {
     width: 48%;
-    padding: 60px 64px;
+    padding: 48px 56px;
   }
-  .mobile-header { display: none; }
-  .form-box { max-width: 420px; }
-  .form-title { font-size: 22px; }
+  .form-logo  { width: 80px; height: 80px; }
+  .form-title { font-size: 20px; }
 }
 
 @media (min-width: 1440px) {
-  .image-panel { width: 56%; }
-  .form-panel  { width: 44%; padding: 60px 80px; }
+  .image-panel { width: 55%; }
+  .form-panel  { width: 45%; padding: 48px 72px; }
+  .form-logo   { width: 88px; height: 88px; }
 }
 
 /* ════════════════════════════════════════
    TABLET 768–1023px
    ════════════════════════════════════════ */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .form-panel { padding: 60px 80px; }
-  .form-box   { max-width: 440px; }
+  .form-panel { padding: 48px 64px; }
+  .form-box   { max-width: 380px; }
 }
 
 /* ════════════════════════════════════════
@@ -626,10 +623,10 @@ async function login() {
   }
   .form-panel {
     background: transparent;
-    padding: 36px 18px;
+    padding: 32px 18px;
+    align-items: center;
+    justify-content: center;
   }
-  .mobile-header { display: flex; }
-  .mobile-brand  { color: #bbf7d0; }
   .form-box {
     background: rgba(255,255,255,0.97);
     backdrop-filter: blur(20px);
@@ -638,41 +635,27 @@ async function login() {
     padding: 28px 22px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.4);
   }
-  .footer-copy { color: rgba(255,255,255,0.45); margin-top: 18px; }
-
-  /* inputs glassmorphism en móvil */
-  .input-wrap input {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.25);
-    color: #1f2937;
-  }
-  .input-wrap input:focus {
-    background: rgba(255,255,255,0.35);
-    border-color: rgba(76,175,80,0.5);
-  }
+  .footer-copy { color: #9ca3af; }
+  .input-wrap input { font-size: 16px; } /* evita zoom iOS */
 }
 
 @media (max-width: 380px) {
-  .form-panel { padding: 28px 14px; }
+  .form-panel { padding: 24px 14px; }
   .form-box   { padding: 24px 18px; border-radius: 20px; }
+  .form-logo  { width: 72px; height: 72px; }
 }
 
 /* Landscape móvil */
 @media (max-height: 600px) and (orientation: landscape) {
-  .form-panel { padding: 20px 18px; justify-content: flex-start; }
-  .mobile-header { margin-bottom: 16px; }
+  .form-panel { padding: 16px 18px; }
+  .form-logo  { width: 56px; height: 56px; margin-bottom: 8px; }
   .fields { gap: 12px; }
-  .form-head { margin-bottom: 16px; }
-}
-
-/* iOS: evitar zoom en inputs */
-@media (max-width: 767px) {
-  .input-wrap input { font-size: 16px; }
+  .form-head { margin-bottom: 14px; }
+  .submit-btn { margin-top: 14px; }
 }
 
 /* Fallback sin backdrop-filter */
 @supports not (backdrop-filter: blur(20px)) {
-  .form-box { background: rgba(255,255,255,0.96); }
-  .input-wrap input { background: rgba(255,255,255,0.85); }
+  .form-box { background: #fff; }
 }
 </style>

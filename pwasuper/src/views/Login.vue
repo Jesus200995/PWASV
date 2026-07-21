@@ -82,6 +82,9 @@
           <img src="/images/logosv.png" alt="Sembrando Vida" class="brand-logo" />
         </div>
 
+        <!-- Línea divisoria desvanecida -->
+        <div class="brand-divider" aria-hidden="true"></div>
+
         <!-- Encabezado -->
         <div class="form-header">
           <h2 class="form-title" aria-label="App de Seguimiento">
@@ -462,7 +465,7 @@ async function login() {
   z-index: 0;
 }
 
-/* ── TARJETA BLANCA — escala con vh para caber siempre ── */
+/* ── TARJETA LIQUID GLASS — blanco translúcido con blur ── */
 .form-card {
   position: relative;
   z-index: 1;
@@ -471,19 +474,29 @@ async function login() {
   /* La tarjeta nunca supera el espacio disponible */
   max-height: calc(100vh - clamp(20px, 5vh, 72px));
 
-  background: #ffffff;
+  /* Blanco semitransparente + desenfoque de fondo = efecto vidrio líquido */
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+
   border-radius: clamp(14px, 2vw, 28px);
   /* Padding vertical escala con vh: achica al aumentar zoom */
   padding: clamp(14px, 2.8vh, 48px) clamp(18px, 3vw, 44px);
-  border: none;
+
+  /* Borde luminoso sutil — remata el efecto glass */
+  border: 1px solid rgba(255,255,255,0.55);
+  outline: 1px solid rgba(255,255,255,0.15);
+  outline-offset: -1px;
+
   /* Flex para distribuir hijos uniformemente */
   display: flex;
   flex-direction: column;
 
   box-shadow:
-    0 24px 56px rgba(0,0,0,0.38),
-    0 6px 20px rgba(0,0,0,0.22),
-    0 0 0 1px rgba(0,0,0,0.06);
+    0 1px 0 0 rgba(255,255,255,0.6) inset,
+    0 24px 56px rgba(0,0,0,0.32),
+    0 6px 20px rgba(0,0,0,0.18),
+    0 0 0 1px rgba(0,0,0,0.05);
 
   animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1);
 }
@@ -517,6 +530,22 @@ async function login() {
   display: block;
   margin: 0 auto;
   filter: drop-shadow(0 3px 10px rgba(21,128,61,0.20));
+}
+
+/* Línea divisoria desvanecida verde entre logo y título */
+.brand-divider {
+  width: min(70%, 220px);
+  height: 2px;
+  margin: clamp(4px, 1vh, 12px) auto;
+  flex-shrink: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(22,163,74,0.55) 25%,
+    rgba(74,222,128,0.85) 50%,
+    rgba(22,163,74,0.55) 75%,
+    transparent 100%
+  );
 }
 
 /* Encabezado */
@@ -774,6 +803,7 @@ async function login() {
 
   .form-title { font-size: clamp(13px, 4vw, 17px); font-weight: 500; }
   .form-sub   { font-size: clamp(11px, 3.2vw, 13px); }
+  .brand-divider { margin: 3px auto 8px; }
 
   /* Inputs: font-size mínimo 16px evita zoom automático en iOS */
   .inp { font-size: 16px; }

@@ -415,37 +415,38 @@ async function login() {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* NO min-height fijo: el panel crece con el contenido */
   min-height: 100vh;
   padding: 48px 32px;
   position: relative;
-  /* fondo degradado verde para que el glass tenga color que filtrar */
-  background:
-    linear-gradient(145deg, #052e16 0%, #14532d 40%, #166534 70%, #15803d 100%);
-  overflow: hidden;
+  background: linear-gradient(145deg, #052e16 0%, #14532d 40%, #166534 70%, #15803d 100%);
+  /* overflow visible para que la tarjeta no quede recortada en zoom */
+  overflow: visible;
 }
 
-/* Orbes de luz para efecto glass */
+/* Orbes decorativos — pointer-events none, no afectan layout */
 .right-panel::before {
   content: '';
-  position: absolute;
+  position: fixed;  /* fixed para que no sumen al scroll */
   inset: 0;
   background:
-    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(74,222,128,0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 60% at 85% 80%, rgba(21,128,61,0.25) 0%, transparent 55%),
-    radial-gradient(ellipse 40% 40% at 60% 10%, rgba(134,239,172,0.12) 0%, transparent 50%);
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(74,222,128,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 80%, rgba(21,128,61,0.22) 0%, transparent 55%);
   pointer-events: none;
+  z-index: 0;
 }
 
-/* ── TARJETA BLANCA ── */
+/* ── TARJETA BLANCA — totalmente fluida ── */
 .form-card {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 430px;
+  max-width: 440px;
 
   background: #ffffff;
   border-radius: 28px;
-  padding: 48px 44px;
+  /* padding en clamp: se achica en pantallas pequeñas o zoom alto */
+  padding: clamp(28px, 5vw, 52px) clamp(24px, 4.5vw, 48px);
   border: none;
 
   box-shadow:
@@ -453,25 +454,27 @@ async function login() {
     0 8px 24px rgba(0, 0, 0, 0.25),
     0 0 0 1px rgba(0, 0, 0, 0.06);
 
-  animation: cardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(28px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Logo — centrado, grande */
+/* Logo — muy grande, centrado */
 .brand {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 .brand-logo {
-  height: 110px;
+  /* clamp: mínimo 100px, preferible 18vw, máximo 150px */
+  height: clamp(100px, 18vw, 150px);
   width: auto;
+  max-width: 100%;
   object-fit: contain;
   display: block;
   margin: 0 auto;
-  filter: drop-shadow(0 3px 10px rgba(21,128,61,0.18));
+  filter: drop-shadow(0 4px 12px rgba(21,128,61,0.20));
 }
 
 /* Encabezado */
@@ -649,14 +652,27 @@ async function login() {
    DESKTOP ≥ 1024px
    ════════════════════════════════════════ */
 @media (min-width: 1024px) {
+  .root { min-height: 100vh; }
+
   .left-panel {
     display: flex;
     width: 54%;
     flex-shrink: 0;
-    min-height: 100vh;
+    /* panel izquierdo cubre el viewport pero no más */
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
   }
-  .right-panel { width: 46%; padding: 48px 40px; }
-  .form-card { padding: 48px 44px; }
+
+  .right-panel {
+    width: 46%;
+    /* permite scroll si el contenido supera la pantalla (ej. zoom alto) */
+    min-height: 100vh;
+    height: auto;
+    padding: 52px 40px;
+    overflow-y: auto;
+  }
 }
 
 @media (min-width: 1280px) {
@@ -668,32 +684,40 @@ async function login() {
    TABLET 768–1023px
    ════════════════════════════════════════ */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .right-panel { padding: 48px 56px; }
-  .form-card { padding: 44px 40px; }
+  .right-panel {
+    padding: 52px 64px;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+  }
 }
 
 /* ════════════════════════════════════════
    MÓVIL < 768px
    ════════════════════════════════════════ */
 @media (max-width: 767px) {
-  .right-panel { padding: 32px 20px; }
-  .form-card { padding: 36px 24px; border-radius: 24px; }
+  .right-panel {
+    padding: 40px 20px;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+  }
+  .form-card { border-radius: 24px; }
   .inp { font-size: 16px; } /* evita zoom iOS */
 }
 
-@media (max-width: 380px) {
-  .form-card { padding: 28px 18px; border-radius: 20px; }
-  .brand-logo { height: 76px; }
+@media (max-width: 400px) {
+  .right-panel { padding: 32px 14px; }
+  .form-card { border-radius: 20px; }
 }
 
-/* Landscape móvil */
-@media (max-height: 620px) and (orientation: landscape) {
-  .right-panel { padding: 20px 16px; align-items: flex-start; }
-  .form-card { padding: 24px 22px; }
-  .brand { margin-bottom: 16px; }
-  .brand-logo { height: 52px; }
-  .form-header { margin-bottom: 16px; }
+/* Landscape móvil — pantalla baja, permitir scroll */
+@media (max-height: 600px) and (orientation: landscape) {
+  .right-panel {
+    align-items: flex-start;
+    padding: 24px 20px;
+  }
   .form { gap: 12px; }
-  .copy { margin-top: 16px; }
+  .copy { margin-top: 14px; }
 }
 </style>

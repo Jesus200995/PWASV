@@ -31,15 +31,35 @@
         <!-- Stats / pilares -->
         <div class="pillars">
           <div class="pillar">
-            <div class="pillar-num">📍</div>
+            <span class="pillar-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+            </span>
             <div class="pillar-text">Geolocalización<br>en tiempo real</div>
           </div>
           <div class="pillar">
-            <div class="pillar-num">📋</div>
+            <span class="pillar-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </span>
             <div class="pillar-text">Registro de<br>asistencias</div>
           </div>
           <div class="pillar">
-            <div class="pillar-num">📶</div>
+            <span class="pillar-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="1" y1="6" x2="23" y2="6"/>
+                <line x1="1" y1="10" x2="17" y2="10"/>
+                <line x1="1" y1="14" x2="11" y2="14"/>
+                <line x1="1" y1="18" x2="7" y2="18"/>
+              </svg>
+            </span>
             <div class="pillar-text">Modo<br>sin conexión</div>
           </div>
         </div>
@@ -363,7 +383,15 @@ async function login() {
   transition: background 0.2s;
 }
 .pillar:hover { background: rgba(255,255,255,0.12); }
-.pillar-num { font-size: 22px; line-height: 1; }
+.pillar-ico {
+  display: flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; flex-shrink: 0;
+  background: rgba(74,222,128,0.15);
+  border: 1px solid rgba(74,222,128,0.25);
+  border-radius: 10px;
+  color: #4ade80;
+}
+.pillar-ico svg { width: 18px; height: 18px; }
 .pillar-text { font-size: 13px; color: rgba(255,255,255,0.88); font-weight: 500; line-height: 1.5; }
 
 /* Círculos decorativos */
@@ -389,48 +417,73 @@ async function login() {
   justify-content: center;
   min-height: 100vh;
   padding: 48px 32px;
-  background: #fafafa;
   position: relative;
+  /* fondo degradado verde para que el glass tenga color que filtrar */
+  background:
+    linear-gradient(145deg, #052e16 0%, #14532d 40%, #166534 70%, #15803d 100%);
+  overflow: hidden;
 }
 
-/* Fondo sutil */
+/* Orbes de luz para efecto glass */
 .right-panel::before {
   content: '';
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 80% 10%, rgba(220,252,231,0.6) 0%, transparent 50%),
-    radial-gradient(circle at 20% 90%, rgba(187,247,208,0.4) 0%, transparent 45%);
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(74,222,128,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 85% 80%, rgba(21,128,61,0.25) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 60% 10%, rgba(134,239,172,0.12) 0%, transparent 50%);
   pointer-events: none;
 }
 
-/* Tarjeta blanca */
+/* ── LIQUID GLASS CARD ── */
 .form-card {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 420px;
-  background: #fff;
-  border-radius: 24px;
-  padding: 44px 40px;
+  max-width: 430px;
+
+  /* Glass base */
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(28px) saturate(1.6) brightness(1.08);
+  -webkit-backdrop-filter: blur(28px) saturate(1.6) brightness(1.08);
+
+  border-radius: 28px;
+  padding: 48px 44px;
+
+  /* Borde luminoso — efecto líquido */
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  outline: 1px solid rgba(255, 255, 255, 0.07);
+  outline-offset: -1px;
+
+  /* Sombra profunda + brillo interno arriba */
   box-shadow:
-    0 2px 8px rgba(0,0,0,0.04),
-    0 12px 40px rgba(0,0,0,0.08),
-    0 0 0 1px rgba(0,0,0,0.04);
-  animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1);
+    0 2px 0 0 rgba(255,255,255,0.35) inset,          /* highlight top */
+    0 -1px 0 0 rgba(255,255,255,0.08) inset,          /* shine bottom */
+    4px 0 0 0 rgba(255,255,255,0.06) inset,           /* left edge */
+    0 32px 64px rgba(0, 0, 0, 0.45),
+    0 8px 24px rgba(0, 0, 0, 0.30),
+    0 0 0 1px rgba(0, 0, 0, 0.12);
+
+  animation: cardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @keyframes cardIn {
-  from { opacity:0; transform: translateY(24px) scale(0.98); }
-  to   { opacity:1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(28px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
 
-/* Logo */
-.brand { text-align: center; margin-bottom: 28px; }
+/* Logo — centrado, grande */
+.brand {
+  text-align: center;
+  margin-bottom: 24px;
+}
 .brand-logo {
-  height: 72px;
+  height: 92px;
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 3px 10px rgba(21,128,61,0.18));
+  filter:
+    drop-shadow(0 4px 16px rgba(0, 0, 0, 0.35))
+    drop-shadow(0 1px 3px rgba(0, 0, 0, 0.25));
 }
 
 /* Encabezado */
@@ -438,13 +491,14 @@ async function login() {
 .form-title {
   font-size: 22px;
   font-weight: 800;
-  color: #0f172a;
+  color: #fff;
   letter-spacing: -0.5px;
   margin-bottom: 6px;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.3);
 }
 .form-sub {
   font-size: 13.5px;
-  color: #94a3b8;
+  color: rgba(255,255,255,0.6);
 }
 
 /* Error */
@@ -453,15 +507,17 @@ async function login() {
   align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
+  background: rgba(244,63,94,0.15);
+  border: 1px solid rgba(244,63,94,0.35);
   border-left: 3px solid #f43f5e;
   border-radius: 10px;
-  color: #be123c;
+  color: #fda4af;
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 20px;
   line-height: 1.4;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .alert-ico { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
 
@@ -476,7 +532,7 @@ async function login() {
 .label {
   font-size: 13px;
   font-weight: 600;
-  color: #334155;
+  color: rgba(255,255,255,0.88);
   letter-spacing: 0.1px;
 }
 
@@ -485,7 +541,7 @@ async function login() {
 .inp-ico {
   position: absolute;
   left: 14px;
-  color: #94a3b8;
+  color: rgba(255,255,255,0.45);
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -496,19 +552,21 @@ async function login() {
   width: 100%;
   padding: 13px 42px;
   font-size: 14.5px;
-  color: #0f172a;
-  background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
+  color: #fff;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.22);
   border-radius: 12px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   font-family: inherit;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
-.inp::placeholder { color: #cbd5e1; }
+.inp::placeholder { color: rgba(255,255,255,0.38); }
 .inp:focus {
-  background: #fff;
-  border-color: #16a34a;
-  box-shadow: 0 0 0 3.5px rgba(22,163,74,0.12);
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(74,222,128,0.7);
+  box-shadow: 0 0 0 3px rgba(74,222,128,0.18);
 }
 .inp:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -527,10 +585,10 @@ async function login() {
   width: 32px; height: 32px;
   display: flex; align-items: center; justify-content: center;
   background: none; border: none; cursor: pointer;
-  color: #94a3b8; border-radius: 8px;
+  color: rgba(255,255,255,0.45); border-radius: 8px;
   transition: color 0.15s, background 0.15s;
 }
-.eye:hover:not(:disabled) { color: #16a34a; background: rgba(22,163,74,0.06); }
+.eye:hover:not(:disabled) { color: #4ade80; background: rgba(74,222,128,0.08); }
 .eye:disabled { opacity: 0.4; cursor: not-allowed; }
 .eye svg { width: 18px; height: 18px; }
 
@@ -573,10 +631,10 @@ async function login() {
   flex-direction: column;
   gap: 8px;
 }
-.form-links p { font-size: 13px; color: #64748b; }
+.form-links p { font-size: 13px; color: rgba(255,255,255,0.55); }
 
 .flink {
-  color: #16a34a;
+  color: #4ade80;
   font-weight: 600;
   text-decoration: none;
   font-size: 13px;
@@ -587,19 +645,19 @@ async function login() {
   content: '';
   position: absolute; bottom: -1px; left: 0;
   width: 0; height: 1.5px;
-  background: #16a34a;
+  background: #4ade80;
   transition: width 0.2s;
   border-radius: 2px;
 }
-.flink:hover { color: #15803d; }
+.flink:hover { color: #86efac; }
 .flink:hover::after { width: 100%; }
-.flink-sm { font-size: 12.5px; color: #475569; font-weight: 500; }
-.flink-sm:hover { color: #16a34a; }
+.flink-sm { font-size: 12.5px; color: rgba(255,255,255,0.4); font-weight: 500; }
+.flink-sm:hover { color: #4ade80; }
 
 .copy {
   text-align: center;
   font-size: 11px;
-  color: #cbd5e1;
+  color: rgba(255,255,255,0.25);
   margin-top: 28px;
   letter-spacing: 0.2px;
 }
@@ -627,7 +685,7 @@ async function login() {
    TABLET 768–1023px
    ════════════════════════════════════════ */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .right-panel { padding: 48px 56px; background: #f0fdf4; }
+  .right-panel { padding: 48px 56px; }
   .form-card { padding: 44px 40px; }
 }
 
@@ -635,27 +693,14 @@ async function login() {
    MÓVIL < 768px
    ════════════════════════════════════════ */
 @media (max-width: 767px) {
-  .right-panel {
-    background:
-      linear-gradient(160deg, #052e16 0%, #14532d 35%, #166534 70%, #15803d 100%);
-    padding: 32px 16px;
-    align-items: center;
-    justify-content: center;
-  }
-  .right-panel::before { display: none; }
-  .form-card {
-    background: #fff;
-    border-radius: 22px;
-    padding: 32px 22px;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
-  }
-  .copy { color: #94a3b8; }
+  .right-panel { padding: 32px 20px; }
+  .form-card { padding: 36px 24px; border-radius: 24px; }
   .inp { font-size: 16px; } /* evita zoom iOS */
 }
 
 @media (max-width: 380px) {
-  .form-card { padding: 28px 18px; border-radius: 18px; }
-  .brand-logo { height: 60px; }
+  .form-card { padding: 28px 18px; border-radius: 20px; }
+  .brand-logo { height: 76px; }
 }
 
 /* Landscape móvil */

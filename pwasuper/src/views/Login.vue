@@ -499,7 +499,7 @@ async function login() {
   flex-shrink: 0;
 }
 .brand-logo {
-  height: clamp(70px, 14vh, 160px);
+  height: clamp(90px, 18vh, 200px);
   width: auto;
   max-width: 100%;
   object-fit: contain;
@@ -531,21 +531,12 @@ async function login() {
 .title-char {
   display: inline-block;
   color: #16a34a;
-  animation: letterShine 3s ease-in-out infinite;
-  /* La animación se repite cada 3s; el delay escalonado crea el efecto barrido */
+  animation: letterShine 2.4s ease-in-out infinite;
   animation-fill-mode: both;
 }
 @keyframes letterShine {
-  0%, 60%, 100% {
-    color: #16a34a;
-    text-shadow: none;
-  }
-  30% {
-    color: #4ade80;
-    text-shadow:
-      0 0 8px rgba(74,222,128,0.9),
-      0 0 20px rgba(74,222,128,0.5);
-  }
+  0%, 55%, 100% { color: #16a34a; }
+  27%            { color: #bbf7d0; }
 }
 
 .form-sub {

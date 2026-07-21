@@ -493,17 +493,27 @@ async function login() {
 }
 
 /* Logo — grande, se reduce con vh, menos margen inferior */
+/*
+ * El PNG del logo trae espacio en blanco/transparente incorporado
+ * debajo del arte. line-height:0 no puede quitar ESO porque es parte
+ * de la imagen, no un margen CSS. Solución: recortar visualmente con
+ * un contenedor de altura menor + overflow hidden + object-position:top,
+ * mostrando solo la parte superior (donde está el logo real).
+ */
 .brand {
   text-align: center;
-  line-height: 0;       /* elimina espacio inline bajo la imagen */
-  margin-bottom: 4px;
+  line-height: 0;
+  overflow: hidden;
+  height: clamp(96px, 17vh, 182px); /* ~65% de la altura real de la imagen */
+  margin-bottom: 0;
   flex-shrink: 0;
 }
 .brand-logo {
   height: clamp(150px, 26vh, 280px);
   width: auto;
   max-width: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: top;
   display: block;
   margin: 0 auto;
   filter: drop-shadow(0 3px 10px rgba(21,128,61,0.20));
@@ -760,7 +770,7 @@ async function login() {
 
   /* Logo grande en móvil */
   .brand-logo { height: clamp(120px, 32vw, 180px); }
-  .brand { line-height: 0; margin-bottom: 4px; }
+  .brand { height: clamp(78px, 21vw, 118px); margin-bottom: 0; }
 
   .form-title { font-size: clamp(13px, 4vw, 17px); font-weight: 500; }
   .form-sub   { font-size: clamp(11px, 3.2vw, 13px); }

@@ -495,7 +495,7 @@ async function login() {
 /* Logo — grande, se reduce con vh, menos margen inferior */
 .brand {
   text-align: center;
-  margin-bottom: -8px;
+  margin-bottom: -28px;
   flex-shrink: 0;
 }
 .brand-logo {

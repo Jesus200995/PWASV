@@ -6,23 +6,16 @@
       <div class="image-overlay"></div>
 
       <div class="image-content">
-        <div class="brand-mark">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="mark-icon">
-            <defs>
-              <linearGradient id="lgLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#bbf7d0"/>
-                <stop offset="100%" style="stop-color:#4ade80"/>
-              </linearGradient>
-            </defs>
-            <path d="M50 12 C28 22, 16 46, 22 68 C28 86, 44 92, 50 92 C56 92, 72 86, 78 68 C84 46, 72 22, 50 12"
-              fill="none" stroke="url(#lgLeft)" stroke-width="2.5" stroke-linecap="round"/>
-            <path d="M50 18 L50 84" stroke="url(#lgLeft)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-            <path d="M50 30 L36 42 M50 46 L32 58 M50 60 L36 70" stroke="url(#lgLeft)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-            <path d="M50 30 L64 42 M50 46 L68 58 M50 60 L64 70" stroke="url(#lgLeft)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-          </svg>
-        </div>
-
-        <h1 class="hero-title">Sembrando Vida</h1>
+        <!-- Título con animación de luz fluida, letra por letra -->
+        <h1 class="hero-title" aria-label="Sembrando Vida">
+          <span
+            v-for="(char, i) in heroTitleChars"
+            :key="i"
+            class="hero-char"
+            :class="{ 'hero-char-space': char === ' ' }"
+            :style="{ animationDelay: `${i * 0.09}s` }"
+          >{{ char === ' ' ? ' ' : char }}</span>
+        </h1>
         <p class="hero-subtitle">Subsecretaría de Inclusión Productiva<br>y Desarrollo Rural</p>
 
         <div class="hero-divider"></div>
@@ -205,6 +198,8 @@ const loading = ref(false)
 const error = ref('')
 const showPassword = ref(false)
 
+const heroTitleChars = 'Sembrando Vida'.split('')
+
 const login = async () => {
   if (!credentials.username || !credentials.password) {
     error.value = 'Por favor completa todos los campos'
@@ -284,29 +279,49 @@ const login = async () => {
   overflow: hidden;
 }
 
-.brand-mark { margin-bottom: clamp(10px, 2vh, 22px); flex-shrink: 0; }
-.mark-icon {
-  width: clamp(48px, 7.5vh, 72px);
-  height: clamp(48px, 7.5vh, 72px);
-  filter: drop-shadow(0 0 14px rgba(74, 222, 128, 0.55));
-  animation: leafSway 4.5s ease-in-out infinite;
-}
-@keyframes leafSway {
-  0%, 100% { transform: rotate(-3deg); }
-  50%       { transform: rotate(3deg); }
+/*
+ * Título "Sembrando Vida" — animación de luz fluida letra por letra.
+ * Cada <span> hace un recorrido de color + un leve desplazamiento
+ * vertical (efecto ola) con delay escalonado, simulando una onda de
+ * luz que fluye de izquierda a derecha de forma continua.
+ */
+.hero-title {
+  font-size: clamp(26px, 4.8vh, 42px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin: 0 0 clamp(6px, 1.2vh, 10px);
+  flex-shrink: 0;
+  line-height: 1.1;
 }
 
-.hero-title {
-  font-size: clamp(24px, 4.4vh, 38px);
-  font-weight: 700;
-  letter-spacing: -0.8px;
-  margin: 0 0 clamp(6px, 1.2vh, 10px);
-  text-shadow: 0 2px 20px rgba(0,0,0,0.35);
-  background: linear-gradient(135deg, #fff 40%, #bbf7d0);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  flex-shrink: 0;
+.hero-char {
+  display: inline-block;
+  color: #d1fae5;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.35);
+  animation: heroWave 3.2s ease-in-out infinite;
+  animation-fill-mode: both;
+  will-change: transform, color;
+}
+.hero-char-space { width: 0.3em; }
+
+@keyframes heroWave {
+  0%, 100% {
+    color: #d1fae5;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.35);
+    transform: translateY(0);
+  }
+  30% {
+    color: #ffffff;
+    text-shadow:
+      0 2px 16px rgba(0,0,0,0.3),
+      0 0 18px rgba(187,247,208,0.9),
+      0 0 36px rgba(74,222,128,0.5);
+    transform: translateY(-4px);
+  }
+  55% {
+    color: #86efac;
+    transform: translateY(0);
+  }
 }
 
 .hero-subtitle {

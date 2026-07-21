@@ -436,34 +436,22 @@ async function login() {
   pointer-events: none;
 }
 
-/* ── LIQUID GLASS CARD ── */
+/* ── TARJETA BLANCA ── */
 .form-card {
   position: relative;
   z-index: 1;
   width: 100%;
   max-width: 430px;
 
-  /* Glass base */
-  background: rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(28px) saturate(1.6) brightness(1.08);
-  -webkit-backdrop-filter: blur(28px) saturate(1.6) brightness(1.08);
-
+  background: #ffffff;
   border-radius: 28px;
   padding: 48px 44px;
+  border: none;
 
-  /* Borde luminoso — efecto líquido */
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  outline: 1px solid rgba(255, 255, 255, 0.07);
-  outline-offset: -1px;
-
-  /* Sombra profunda + brillo interno arriba */
   box-shadow:
-    0 2px 0 0 rgba(255,255,255,0.35) inset,          /* highlight top */
-    0 -1px 0 0 rgba(255,255,255,0.08) inset,          /* shine bottom */
-    4px 0 0 0 rgba(255,255,255,0.06) inset,           /* left edge */
-    0 32px 64px rgba(0, 0, 0, 0.45),
-    0 8px 24px rgba(0, 0, 0, 0.30),
-    0 0 0 1px rgba(0, 0, 0, 0.12);
+    0 32px 64px rgba(0, 0, 0, 0.40),
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
 
   animation: cardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -475,15 +463,15 @@ async function login() {
 /* Logo — centrado, grande */
 .brand {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 .brand-logo {
-  height: 92px;
+  height: 110px;
   width: auto;
   object-fit: contain;
-  filter:
-    drop-shadow(0 4px 16px rgba(0, 0, 0, 0.35))
-    drop-shadow(0 1px 3px rgba(0, 0, 0, 0.25));
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 3px 10px rgba(21,128,61,0.18));
 }
 
 /* Encabezado */
@@ -491,14 +479,13 @@ async function login() {
 .form-title {
   font-size: 22px;
   font-weight: 800;
-  color: #fff;
+  color: #0f172a;
   letter-spacing: -0.5px;
   margin-bottom: 6px;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.3);
 }
 .form-sub {
   font-size: 13.5px;
-  color: rgba(255,255,255,0.6);
+  color: #94a3b8;
 }
 
 /* Error */
@@ -507,17 +494,15 @@ async function login() {
   align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
-  background: rgba(244,63,94,0.15);
-  border: 1px solid rgba(244,63,94,0.35);
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
   border-left: 3px solid #f43f5e;
   border-radius: 10px;
-  color: #fda4af;
+  color: #be123c;
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 20px;
   line-height: 1.4;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 .alert-ico { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
 
@@ -532,7 +517,7 @@ async function login() {
 .label {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255,255,255,0.88);
+  color: #334155;
   letter-spacing: 0.1px;
 }
 
@@ -541,7 +526,7 @@ async function login() {
 .inp-ico {
   position: absolute;
   left: 14px;
-  color: rgba(255,255,255,0.45);
+  color: #94a3b8;
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -552,21 +537,19 @@ async function login() {
   width: 100%;
   padding: 13px 42px;
   font-size: 14.5px;
-  color: #fff;
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.22);
+  color: #0f172a;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
   border-radius: 12px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   font-family: inherit;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
-.inp::placeholder { color: rgba(255,255,255,0.38); }
+.inp::placeholder { color: #cbd5e1; }
 .inp:focus {
-  background: rgba(255,255,255,0.16);
-  border-color: rgba(74,222,128,0.7);
-  box-shadow: 0 0 0 3px rgba(74,222,128,0.18);
+  background: #fff;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3.5px rgba(22,163,74,0.12);
 }
 .inp:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -585,10 +568,10 @@ async function login() {
   width: 32px; height: 32px;
   display: flex; align-items: center; justify-content: center;
   background: none; border: none; cursor: pointer;
-  color: rgba(255,255,255,0.45); border-radius: 8px;
+  color: #94a3b8; border-radius: 8px;
   transition: color 0.15s, background 0.15s;
 }
-.eye:hover:not(:disabled) { color: #4ade80; background: rgba(74,222,128,0.08); }
+.eye:hover:not(:disabled) { color: #16a34a; background: rgba(22,163,74,0.06); }
 .eye:disabled { opacity: 0.4; cursor: not-allowed; }
 .eye svg { width: 18px; height: 18px; }
 
@@ -631,10 +614,10 @@ async function login() {
   flex-direction: column;
   gap: 8px;
 }
-.form-links p { font-size: 13px; color: rgba(255,255,255,0.55); }
+.form-links p { font-size: 13px; color: #64748b; }
 
 .flink {
-  color: #4ade80;
+  color: #16a34a;
   font-weight: 600;
   text-decoration: none;
   font-size: 13px;
@@ -645,19 +628,19 @@ async function login() {
   content: '';
   position: absolute; bottom: -1px; left: 0;
   width: 0; height: 1.5px;
-  background: #4ade80;
+  background: #16a34a;
   transition: width 0.2s;
   border-radius: 2px;
 }
-.flink:hover { color: #86efac; }
+.flink:hover { color: #15803d; }
 .flink:hover::after { width: 100%; }
-.flink-sm { font-size: 12.5px; color: rgba(255,255,255,0.4); font-weight: 500; }
-.flink-sm:hover { color: #4ade80; }
+.flink-sm { font-size: 12.5px; color: #475569; font-weight: 500; }
+.flink-sm:hover { color: #16a34a; }
 
 .copy {
   text-align: center;
   font-size: 11px;
-  color: rgba(255,255,255,0.25);
+  color: #cbd5e1;
   margin-top: 28px;
   letter-spacing: 0.2px;
 }

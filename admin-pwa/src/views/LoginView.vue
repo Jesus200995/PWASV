@@ -6,21 +6,17 @@
       <div class="image-overlay"></div>
 
       <div class="image-content">
-        <!-- Título con animación de luz fluida, letra por letra -->
-        <h1 class="hero-title" aria-label="Sembrando Vida">
-          <span
-            v-for="(char, i) in heroTitleChars"
-            :key="i"
-            class="hero-char"
-            :class="{ 'hero-char-space': char === ' ' }"
-            :style="{ animationDelay: `${i * 0.09}s` }"
-          >{{ char === ' ' ? ' ' : char }}</span>
-        </h1>
+        <!-- Marca desvanecida, pequeña: identifica el programa -->
+        <p class="hero-brand">Sembrando Vida</p>
+
+        <!-- Título principal del panel: más grande que la marca -->
+        <h1 class="hero-title">Administrador</h1>
+
         <p class="hero-subtitle">Subsecretaría de Inclusión Productiva<br>y Desarrollo Rural</p>
 
         <div class="hero-divider"></div>
 
-        <p class="hero-tagline">Panel de Administración<br>App de Seguimiento</p>
+        <p class="hero-tagline">App de Seguimiento</p>
 
         <div class="hero-stats">
           <div class="stat">
@@ -61,27 +57,6 @@
     <!-- ═══ PANEL DERECHO — formulario ═══ -->
     <main class="form-panel">
       <div class="form-box">
-
-        <!-- Logo + rol, siempre visible -->
-        <div class="brand-row">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="brand-row-icon">
-            <defs>
-              <linearGradient id="lgRight" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#15803d"/>
-                <stop offset="100%" style="stop-color:#4ade80"/>
-              </linearGradient>
-            </defs>
-            <path d="M50 12 C28 22, 16 46, 22 68 C28 86, 44 92, 50 92 C56 92, 72 86, 78 68 C84 46, 72 22, 50 12"
-              fill="none" stroke="url(#lgRight)" stroke-width="2.5" stroke-linecap="round"/>
-            <path d="M50 18 L50 84" stroke="url(#lgRight)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-            <path d="M50 30 L36 42 M50 46 L32 58 M50 60 L36 70" stroke="url(#lgRight)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-            <path d="M50 30 L64 42 M50 46 L68 58 M50 60 L64 70" stroke="url(#lgRight)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-          </svg>
-          <div class="brand-row-text">
-            <span class="brand-row-name">Sembrando Vida</span>
-            <span class="brand-row-role">Administrador · App de Seguimiento</span>
-          </div>
-        </div>
 
         <!-- Encabezado del formulario -->
         <div class="form-header">
@@ -198,8 +173,6 @@ const loading = ref(false)
 const error = ref('')
 const showPassword = ref(false)
 
-const heroTitleChars = 'Sembrando Vida'.split('')
-
 const login = async () => {
   if (!credentials.username || !credentials.password) {
     error.value = 'Por favor completa todos los campos'
@@ -279,49 +252,30 @@ const login = async () => {
   overflow: hidden;
 }
 
-/*
- * Título "Sembrando Vida" — animación de luz fluida letra por letra.
- * Cada <span> hace un recorrido de color + un leve desplazamiento
- * vertical (efecto ola) con delay escalonado, simulando una onda de
- * luz que fluye de izquierda a derecha de forma continua.
- */
+/* Marca "Sembrando Vida" — pequeña, desvanecida, estática (sin animación) */
+.hero-brand {
+  font-size: clamp(12px, 1.7vh, 15px);
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin: 0 0 clamp(4px, 1vh, 10px);
+  flex-shrink: 0;
+  background: linear-gradient(90deg, rgba(187,247,208,0.55) 0%, rgba(74,222,128,0.85) 50%, rgba(187,247,208,0.55) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Título principal "Administrador" — más grande que la marca */
 .hero-title {
-  font-size: clamp(26px, 4.8vh, 42px);
+  font-size: clamp(30px, 5.6vh, 48px);
   font-weight: 800;
-  letter-spacing: -1px;
+  letter-spacing: -1.2px;
   margin: 0 0 clamp(6px, 1.2vh, 10px);
   flex-shrink: 0;
-  line-height: 1.1;
-}
-
-.hero-char {
-  display: inline-block;
-  color: #d1fae5;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.35);
-  animation: heroWave 3.2s ease-in-out infinite;
-  animation-fill-mode: both;
-  will-change: transform, color;
-}
-.hero-char-space { width: 0.3em; }
-
-@keyframes heroWave {
-  0%, 100% {
-    color: #d1fae5;
-    text-shadow: 0 2px 16px rgba(0,0,0,0.35);
-    transform: translateY(0);
-  }
-  30% {
-    color: #ffffff;
-    text-shadow:
-      0 2px 16px rgba(0,0,0,0.3),
-      0 0 18px rgba(187,247,208,0.9),
-      0 0 36px rgba(74,222,128,0.5);
-    transform: translateY(-4px);
-  }
-  55% {
-    color: #86efac;
-    transform: translateY(0);
-  }
+  line-height: 1.05;
+  color: #fff;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.35);
 }
 
 .hero-subtitle {
@@ -424,7 +378,7 @@ const login = async () => {
    PANEL DERECHO — formulario, sin scroll
    ════════════════════════════════════════ */
 /*
- * Fondo "canvas fluido": tres manchas radiales verdes que se
+ * Fondo "canvas fluido": dos manchas radiales verdes que se
  * desplazan y respiran en bucle, evocando hojas/campo en movimiento
  * sin ser literales — un fondo vivo y moderno detrás de la tarjeta.
  */
@@ -508,33 +462,6 @@ const login = async () => {
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Fila de marca — logo + nombre + rol, siempre visible arriba del form */
-.brand-row {
-  display: flex;
-  align-items: center;
-  gap: clamp(8px, 1.4vw, 12px);
-  margin-bottom: clamp(14px, 3vh, 30px);
-  flex-shrink: 0;
-}
-.brand-row-icon {
-  width: clamp(30px, 4.5vh, 40px);
-  height: clamp(30px, 4.5vh, 40px);
-  flex-shrink: 0;
-}
-.brand-row-text { display: flex; flex-direction: column; line-height: 1.25; }
-.brand-row-name {
-  font-size: clamp(13px, 1.9vh, 16px);
-  font-weight: 700;
-  color: #f0fdf4;
-  letter-spacing: -0.3px;
-}
-.brand-row-role {
-  font-size: clamp(10px, 1.3vh, 12px);
-  font-weight: 500;
-  color: #a7d9b8;
-  letter-spacing: 0.1px;
 }
 
 .form-header {
@@ -756,7 +683,6 @@ const login = async () => {
 
 /* Landscape móvil */
 @media (max-height: 560px) and (orientation: landscape) {
-  .brand-row { margin-bottom: 10px; }
   .form-header { margin-bottom: 12px; }
   .login-form { gap: 10px; }
   .footer-copy { margin-top: 12px; }

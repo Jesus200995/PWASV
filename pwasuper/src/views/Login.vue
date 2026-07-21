@@ -499,7 +499,7 @@ async function login() {
   flex-shrink: 0;
 }
 .brand-logo {
-  height: clamp(108px, 21vh, 220px);
+  height: clamp(150px, 26vh, 280px);
   width: auto;
   max-width: 100%;
   object-fit: contain;
@@ -758,8 +758,8 @@ async function login() {
     max-width: 380px;
   }
 
-  /* Logo más contenido en móvil */
-  .brand-logo { height: clamp(72px, 18vw, 110px); }
+  /* Logo grande en móvil */
+  .brand-logo { height: clamp(120px, 32vw, 180px); }
   .brand { margin-bottom: -4px; }
 
   /* Título más grande en proporción de pantalla chica */
